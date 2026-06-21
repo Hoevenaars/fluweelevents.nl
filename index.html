@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fluweel Events &middot; Binnenkort</title>
+  <meta name="description" content="Fluweel Events. Er wordt iets moois gemaakt. Binnenkort meer." />
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#FAF5EF; --bg-soft:#F3EAE0; --ink:#2A1322; --muted:#7A5E6E;
+      --line:#E3D5C9; --accent:#C81E63; --accent-dp:#5B2A4E; --gold:#B8975A;
+      --font-display:'Newsreader',Georgia,serif; --font-body:'Inter',system-ui,sans-serif;
+    }
+    *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+    body { background:var(--bg); color:var(--ink); font-family:var(--font-body); font-weight:300; line-height:1.7; -webkit-font-smoothing:antialiased; min-height:100vh; display:flex; flex-direction:column; overflow-x:hidden; position:relative; }
+    a { color:inherit; }
+
+    .blob { position:fixed; border-radius:50%; filter:blur(70px); opacity:0.5; z-index:0; pointer-events:none; }
+    .blob.b1 { width:520px; height:520px; background:#F3B9D2; top:-160px; right:-120px; animation:drift1 16s ease-in-out infinite alternate; }
+    .blob.b2 { width:420px; height:420px; background:#D9C2E8; bottom:-180px; left:-100px; animation:drift2 19s ease-in-out infinite alternate; }
+    @keyframes drift1 { to { transform:translate(-40px,50px) scale(1.1); } }
+    @keyframes drift2 { to { transform:translate(50px,-30px) scale(1.08); } }
+
+    header { position:relative; z-index:1; padding:1.6rem 1.8rem; }
+    .brand { font-family:var(--font-display); font-weight:500; font-size:1.35rem; text-decoration:none; }
+    .brand em { color:var(--accent); font-style:normal; }
+
+    main { position:relative; z-index:1; flex:1; display:flex; align-items:center; justify-content:center; padding:2rem 1.8rem 4rem; }
+    .card { max-width:560px; width:100%; text-align:center; }
+    .eyebrow { font-size:0.78rem; letter-spacing:0.34em; text-transform:uppercase; color:var(--accent); margin-bottom:1.8rem; }
+    h1 { font-family:var(--font-display); font-weight:400; font-size:clamp(2.4rem,7vw,3.8rem); line-height:1.1; letter-spacing:-0.01em; margin-bottom:1.4rem; }
+    h1 .mark { font-weight:600; color:var(--accent-dp); position:relative; white-space:nowrap; }
+    h1 .mark::after { content:""; position:absolute; left:0; right:0; bottom:0.04em; height:0.16em; background:var(--accent); opacity:0.4; transform:scaleX(0); transform-origin:left; animation:draw 0.9s 0.7s ease forwards; }
+    @keyframes draw { to { transform:scaleX(1); } }
+    .sub { font-size:1.1rem; color:var(--muted); max-width:42ch; margin:0 auto 2.8rem; }
+
+    .gate { max-width:380px; margin:0 auto; }
+    .gate label { display:block; font-size:0.8rem; letter-spacing:0.05em; color:var(--muted); margin-bottom:0.7rem; }
+    .field { display:flex; gap:0.6rem; }
+    .field input {
+      flex:1; font-family:var(--font-body); font-size:1rem; color:var(--ink);
+      background:#fff; border:1px solid var(--line); border-radius:100px;
+      padding:0.85rem 1.3rem; outline:none; transition:border-color 0.25s, box-shadow 0.25s;
+    }
+    .field input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(200,30,99,0.12); }
+    .field button {
+      flex:none; font-family:var(--font-body); font-weight:500; font-size:0.95rem;
+      background:var(--accent); color:#fff; border:0; border-radius:100px;
+      padding:0 1.5rem; cursor:pointer; transition:transform 0.2s, box-shadow 0.2s;
+    }
+    .field button:hover { transform:translateY(-2px); box-shadow:0 10px 24px rgba(200,30,99,0.28); }
+    .msg { min-height:1.4rem; margin-top:0.9rem; font-size:0.88rem; color:var(--accent); opacity:0; transition:opacity 0.2s; }
+    .msg.show { opacity:1; }
+    .gate.shake { animation:shake 0.4s; }
+    @keyframes shake { 0%,100%{transform:translateX(0);} 20%{transform:translateX(-8px);} 40%{transform:translateX(8px);} 60%{transform:translateX(-5px);} 80%{transform:translateX(5px);} }
+
+    footer { position:relative; z-index:1; padding:1.8rem; text-align:center; font-size:0.8rem; color:var(--muted); }
+    footer a { color:var(--accent); text-decoration:none; }
+
+    :focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+    @media (prefers-reduced-motion:reduce) { * { animation:none !important; } }
+  </style>
+</head>
+<body>
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+
+  <header><a class="brand" href="#">Fluweel<em>.</em></a></header>
+
+  <main>
+    <div class="card">
+      <p class="eyebrow">Binnenkort</p>
+      <h1>Er wordt iets <span class="mark">moois</span> gemaakt.</h1>
+      <p class="sub">Fluweel komt eraan. Belevenissen voor merken, tot in het kleinste detail. Heb je een toegangscode? Dan mag je vast een kijkje nemen.</p>
+
+      <div class="gate" id="gate">
+        <label for="code">Toegangscode</label>
+        <div class="field">
+          <input id="code" type="text" autocomplete="off" placeholder="Vul je code in" aria-label="Toegangscode" />
+          <button id="enter" type="button">Bekijk</button>
+        </div>
+        <p class="msg" id="msg">Deze code klopt nog niet. Probeer het opnieuw.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer>&copy; 2026 Fluweel Events &middot; <a href="mailto:hallo@fluweelevents.nl">hallo@fluweelevents.nl</a></footer>
+
+  <script>
+    /* ====== TOEGANGSCODE — pas deze hier aan ====== */
+    const TOEGANGSCODE = "FLUWEEL26";
+    /* ============================================== */
+
+    const input = document.getElementById('code');
+    const gate  = document.getElementById('gate');
+    const msg   = document.getElementById('msg');
+
+    function probeer() {
+      const waarde = input.value.trim().toUpperCase();
+      if (waarde === TOEGANGSCODE.toUpperCase()) {
+        sessionStorage.setItem('fluweel_toegang', 'open');
+        location.href = 'preview.html';
+      } else {
+        msg.classList.add('show');
+        gate.classList.remove('shake');
+        void gate.offsetWidth;
+        gate.classList.add('shake');
+        input.select();
+      }
+    }
+    document.getElementById('enter').addEventListener('click', probeer);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') probeer(); });
+    input.addEventListener('input', () => msg.classList.remove('show'));
+  </script>
+</body>
+</html>
