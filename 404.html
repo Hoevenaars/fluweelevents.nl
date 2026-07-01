@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#FAF5EF" />
+  <meta name="robots" content="noindex" />
+  <title>Pagina niet gevonden &middot; Fluweel Events</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root { color-scheme: only light;
+      --bg:#FAF5EF; --ink:#2A1322; --muted:#7A5E6E; --accent:#C81E63; --accent-dp:#5B2A4E;
+      --font-display:'Newsreader',Georgia,serif; --font-body:'Inter',system-ui,sans-serif; }
+    *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+    body { background:var(--bg); color:var(--ink); font-family:var(--font-body); font-weight:300; line-height:1.7; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:2rem; overflow-x:hidden; position:relative; }
+    .blob { position:fixed; border-radius:50%; filter:blur(70px); opacity:.5; z-index:0; pointer-events:none; }
+    .b1 { width:520px; height:520px; background:#F3B9D2; top:-160px; right:-120px; animation:d1 16s ease-in-out infinite alternate; }
+    .b2 { width:420px; height:420px; background:#D9C2E8; bottom:-180px; left:-100px; animation:d2 19s ease-in-out infinite alternate; }
+    @keyframes d1 { to { transform:translate(-40px,50px) scale(1.1); } }
+    @keyframes d2 { to { transform:translate(50px,-30px) scale(1.08); } }
+    .card { position:relative; z-index:1; max-width:520px; }
+    .code { font-size:.78rem; letter-spacing:.34em; text-transform:uppercase; color:var(--accent); margin-bottom:1.6rem; }
+    h1 { font-family:var(--font-display); font-weight:400; font-size:clamp(2.2rem,7vw,3.4rem); line-height:1.12; margin-bottom:1.2rem; }
+    h1 em { font-weight:600; font-style:normal; color:var(--accent-dp); }
+    p { color:var(--muted); margin-bottom:2.4rem; }
+    .cta { display:inline-flex; align-items:center; gap:.6rem; background:var(--accent); color:#fff; font-weight:500; font-size:.95rem; text-decoration:none; padding:.95rem 1.7rem; border-radius:100px; transition:transform .25s, box-shadow .25s; }
+    .cta:hover { transform:translateY(-2px); box-shadow:0 12px 30px rgba(200,30,99,.28); }
+    @media (prefers-reduced-motion:reduce){ *{animation:none!important} }
+  </style>
+</head>
+<body>
+  <div class="blob b1"></div><div class="blob b2"></div>
+  <div class="card">
+    <p class="code">404</p>
+    <h1>Deze pagina is <em>verdwenen</em>.</h1>
+    <p>Net als de beste verrassingen: hier was even iets, en nu niet meer. Laten we je terugbrengen naar waar het gebeurt.</p>
+    <a class="cta" href="/">Naar de startpagina
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+  </div>
+</body>
+</html>
