@@ -1,436 +1,614 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <script>if(sessionStorage.getItem("fluweel_toegang")!=="open"){location.replace("index.html");}</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="color-scheme" content="light" />
   <meta name="theme-color" content="#FAF5EF" />
-  <title>Fluweel Events</title>
-  <meta name="description" content="Fluweel Events. Meer dan een evenement, een herinnering. We vertalen jouw merk naar een avond die mensen blijven navertellen." />
+  <!-- ====== KERN SEO ====== -->
+  <title>Fluweel Events | Zakelijke evenementen die blijven hangen</title>
+  <meta name="description" content="Fluweel Events ontwerpt en organiseert verfijnde zakelijke evenementen, van productlancering tot galadiner. Persoonlijk, creatief en tot in het kleinste detail verzorgd. Plan een gesprek." />
+  <meta name="author" content="Fluweel Events" />
+  <meta name="robots" content="noindex, nofollow" /> <!-- TIJDELIJK: haal deze regel weg bij de echte lancering, vervang door de regel in het commentaar eronder -->
+  <!-- <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" /> -->
+  <link rel="canonical" href="https://fluweelevents.nl/" />
+  <link rel="alternate" hreflang="nl-nl" href="https://fluweelevents.nl/" />
+  <link rel="alternate" hreflang="x-default" href="https://fluweelevents.nl/" />
+
+  <!-- ====== OPEN GRAPH ====== -->
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="nl_NL" />
+  <meta property="og:site_name" content="Fluweel Events" />
+  <meta property="og:title" content="Fluweel Events | Zakelijke evenementen die blijven hangen" />
+  <meta property="og:description" content="Verfijnde zakelijke evenementen, van productlancering tot galadiner. Persoonlijk, creatief en tot in het kleinste detail verzorgd." />
+  <meta property="og:url" content="https://fluweelevents.nl/" />
+  <meta property="og:image" content="https://fluweelevents.nl/og-image.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Fluweel Events, belevenissen voor merken" />
+
+  <!-- ====== TWITTER / X ====== -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Fluweel Events | Zakelijke evenementen die blijven hangen" />
+  <meta name="twitter:description" content="Verfijnde zakelijke evenementen, persoonlijk en tot in het kleinste detail verzorgd." />
+  <meta name="twitter:image" content="https://fluweelevents.nl/og-image.jpg" />
+
+  <link rel="manifest" href="/site.webmanifest" />
+
+  <!-- ====== STRUCTURED DATA: organisatie ====== -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "@id": "https://fluweelevents.nl/#organisatie",
+    "name": "Fluweel Events",
+    "description": "Creatief evenementenbureau voor verfijnde zakelijke evenementen, van concept tot uitvoering.",
+    "url": "https://fluweelevents.nl/",
+    "email": "hallo@fluweelevents.nl",
+    "image": "https://fluweelevents.nl/og-image.jpg",
+    "priceRange": "$$$",
+    "areaServed": { "@type": "Country", "name": "Nederland" },
+    "address": { "@type": "PostalAddress", "addressCountry": "NL" },
+    "slogan": "Meer dan een evenement. Een herinnering.",
+    "knowsAbout": ["Productlanceringen", "Galadiners", "Relatiebijeenkomsten", "Kickoffs", "Jubilea"],
+    "makesOffer": {
+      "@type": "Offer",
+      "itemOffered": { "@type": "Service", "name": "Organisatie van zakelijke evenementen", "serviceType": "Eventmanagement" }
+    }
+  }
+  </script>
+
+  <!-- ====== STRUCTURED DATA: website ====== -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Fluweel Events",
+    "url": "https://fluweelevents.nl/",
+    "inLanguage": "nl-NL"
+  }
+  </script>
+
+  <!-- ====== STRUCTURED DATA: veelgestelde vragen ====== -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      { "@type": "Question", "name": "Hoe ver van tevoren kun je het best beginnen?", "acceptedAnswer": { "@type": "Answer", "text": "Voor een uitgewerkt concept werkt Fluweel het liefst met enkele maanden voorbereiding. Is de agenda krapper? Vertel het gerust, vaak kan er meer dan je denkt." } },
+      { "@type": "Question", "name": "Verzorgt Fluweel ook de locatie en de leveranciers?", "acceptedAnswer": { "@type": "Answer", "text": "Ja. Fluweel verzorgt het volledige plaatje: locatie, techniek, catering en styling. Jij hebt één vast aanspreekpunt dat alles op elkaar afstemt." } },
+      { "@type": "Question", "name": "Werkt Fluweel door heel Nederland?", "acceptedAnswer": { "@type": "Answer", "text": "Zeker. Fluweel organiseert op de plek die het beste bij jouw verhaal past, waar dat ook is." } },
+      { "@type": "Question", "name": "Kan Fluweel een bestaand idee uitvoeren?", "acceptedAnswer": { "@type": "Answer", "text": "Heel graag. Ligt er al een richting, een moodboard of een Pinterest-bord? Fluweel bouwt daarop voort en maakt het samen met jou compleet." } },
+      { "@type": "Question", "name": "Wat mag een evenement kosten?", "acceptedAnswer": { "@type": "Answer", "text": "Elk event van Fluweel is maatwerk, dus de investering hangt af van jouw wensen. In een kort gesprek weet je precies waar je aan toe bent." } }
+    ]
+  }
+  </script>
+  <link rel="icon" href="favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
-    :root { color-scheme: only light; }
-    /* ====== DESIGN TOKENS ====== */
+    /* ====== MERKTOKENS, exact volgens brandbook hoofdstuk 6 en 7 ====== */
     :root {
-      --bg:        #FAF5EF;
-      --bg-soft:   #F3EAE0;
-      --ink:       #2A1322;
-      --muted:     #7A5E6E;
-      --line:      #E3D5C9;
-      --accent:    #C81E63;
-      --accent-dp: #5B2A4E;
-      --gold:      #B8975A;
-      --font-display: 'Newsreader', Georgia, serif;
-      --font-body:    'Inter', system-ui, sans-serif;
-      --maxw: 1120px;
+      color-scheme: only light;
+      --ivoor:#FAF5EF; --vlak:#F3EAE0; --inkt:#2A1322; --aubergine:#5B2A4E;
+      --fuchsia:#C81E63; --champagne:#B8975A; --mauve:#7A5E6E; --lijn:#E3D5C9;
+      --roze:#F3B9D2; --lila:#D9C2E8;
+      --serif:'Newsreader',Georgia,serif; --sans:'Inter',system-ui,sans-serif;
+      --maxw:1120px; --radius:4px;
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-weight: 300; line-height: 1.7; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-    a { color: inherit; }
-    img { max-width: 100%; display: block; }
-    .wrap { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 1.8rem; }
+    *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+    html { scroll-behavior:smooth; }
+    body {
+      background:var(--ivoor); color:var(--inkt);
+      font-family:var(--sans); font-weight:400; font-size:1.0625rem; line-height:1.65;
+      -webkit-font-smoothing:antialiased; overflow-x:hidden;
+    }
+    a { color:inherit; }
+    .wrap { width:100%; max-width:var(--maxw); margin:0 auto; padding:0 1.7rem; }
 
-    /* reveal on scroll */
-    .reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.7s ease, transform 0.7s ease; }
-    .reveal.in { opacity: 1; transform: none; }
+    /* Zachte kleurvlekken: merkelement, altijd geblurd en subtiel (brandbook 8.4) */
+    .veld { position:absolute; border-radius:50%; filter:blur(80px); opacity:.38; pointer-events:none; z-index:0; }
+    .veld.roze { width:520px; height:520px; background:var(--roze); top:-180px; right:-140px; animation:zweef1 24s ease-in-out infinite alternate; }
+    .veld.lila { width:430px; height:430px; background:var(--lila); bottom:-200px; left:-120px; animation:zweef2 28s ease-in-out infinite alternate; }
+    @keyframes zweef1 { to { transform:translate(-36px,44px) scale(1.07); } }
+    @keyframes zweef2 { to { transform:translate(42px,-28px) scale(1.05); } }
+
+    .reveal { opacity:0; transform:translateY(18px); transition:opacity .8s ease, transform .8s ease; }
+    .reveal.in { opacity:1; transform:none; }
 
     /* ====== HEADER ====== */
-    .site-header { position: sticky; top: 0; z-index: 80; padding: 1.05rem 0; background: rgba(250,245,239,0.82); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
-    .site-header .wrap { display: flex; align-items: center; justify-content: space-between; }
-    .brand { font-family: var(--font-display); font-weight: 500; font-size: 1.35rem; letter-spacing: 0.01em; text-decoration: none; }
-    .brand em { color: var(--accent); font-style: normal; }
-    nav.desktop { display: flex; gap: 1.7rem; font-size: 0.88rem; color: var(--muted); align-items: center; }
-    nav.desktop a { text-decoration: none; transition: color 0.25s; }
-    nav.desktop a:hover { color: var(--ink); }
-    .nav-cta { color: #fff !important; background: var(--accent); padding: 0.5rem 1.1rem; border-radius: 100px; transition: transform 0.2s, box-shadow 0.2s; }
-    .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(200,30,99,0.28); }
-    .burger { display: none; background: none; border: 0; cursor: pointer; color: var(--ink); padding: 6px; }
-    .mobile-menu { position: fixed; inset: 0; z-index: 90; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.6rem; font-family: var(--font-display); font-size: 1.8rem; transform: translateY(-100%); transition: transform 0.4s ease; }
-    .mobile-menu.open { transform: none; }
-    .mobile-menu a { text-decoration: none; }
-    .mobile-menu .close { position: absolute; top: 1.4rem; right: 1.6rem; background: none; border: 0; font-size: 2rem; color: var(--ink); cursor: pointer; }
+    .kop {
+      position:sticky; top:0; z-index:80; padding:1.05rem 0;
+      background:rgba(250,245,239,.85); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--lijn);
+    }
+    .kop .wrap { display:flex; align-items:center; justify-content:space-between; }
+    .merk { font-family:var(--serif); font-weight:500; font-size:1.4rem; text-decoration:none; }
+    .merk em { color:var(--fuchsia); font-style:normal; }
+    nav.groot { display:flex; gap:1.8rem; align-items:center; font-size:.9rem; color:var(--mauve); }
+    nav.groot a { text-decoration:none; transition:color .3s; }
+    nav.groot a:hover { color:var(--inkt); }
+    .nav-cta {
+      color:var(--inkt) !important; border:1px solid var(--inkt);
+      padding:.5rem 1.05rem; border-radius:var(--radius);
+      transition:color .3s, border-color .3s;
+    }
+    .nav-cta:hover { color:var(--fuchsia) !important; border-color:var(--fuchsia); }
+    .burger { display:none; background:none; border:0; cursor:pointer; color:var(--inkt); padding:6px; }
+    .mobiel {
+      position:fixed; inset:0; z-index:90; background:var(--ivoor);
+      display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:1.5rem;
+      padding:0 2.2rem; font-family:var(--serif); font-size:1.9rem;
+      transform:translateY(-100%); transition:transform .45s ease;
+    }
+    .mobiel.open { transform:none; }
+    .mobiel a { text-decoration:none; }
+    .mobiel .sluit { position:absolute; top:1.3rem; right:1.6rem; background:none; border:0; font-size:2rem; color:var(--inkt); cursor:pointer; }
+
+    /* ====== KNOPPEN: rechthoekig, kleurwissel in plaats van zweven ====== */
+    .cta {
+      display:inline-flex; align-items:center; gap:.65rem;
+      background:var(--fuchsia); color:#fff;
+      font-family:var(--sans); font-weight:500; font-size:.95rem;
+      text-decoration:none; padding:.95rem 1.6rem; border-radius:var(--radius);
+      transition:background .3s;
+    }
+    .cta:hover { background:var(--aubergine); }
+    .cta svg { transition:transform .3s; }
+    .cta:hover svg { transform:translateX(4px); }
+    .stil {
+      display:inline-flex; align-items:center; gap:.5rem;
+      color:var(--inkt); text-decoration:none; font-size:.95rem;
+      border-bottom:1px solid var(--lijn); padding-bottom:2px;
+      transition:border-color .3s, color .3s;
+    }
+    .stil:hover { color:var(--aubergine); border-color:var(--aubergine); }
 
     /* ====== HERO ====== */
-    .hero { position: relative; padding: 4.5rem 0 5.5rem; overflow: hidden; }
-    .blob { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.5; z-index: 0; pointer-events: none; }
-    .blob.b1 { width: 460px; height: 460px; background: #F3B9D2; top: -120px; right: -80px; animation: drift1 16s ease-in-out infinite alternate; }
-    .blob.b2 { width: 380px; height: 380px; background: #D9C2E8; bottom: -140px; left: -60px; animation: drift2 19s ease-in-out infinite alternate; }
-    @keyframes drift1 { to { transform: translate(-40px, 50px) scale(1.1); } }
-    @keyframes drift2 { to { transform: translate(50px, -30px) scale(1.08); } }
-    .hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 3.5rem; align-items: center; }
-    .eyebrow { font-size: 0.78rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.6rem; }
-    .hero h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(2.6rem, 5.4vw, 4.3rem); line-height: 1.08; letter-spacing: -0.01em; margin-bottom: 1.6rem; }
-    .hero h1 .mark { position: relative; font-weight: 600; color: var(--accent-dp); white-space: nowrap; }
-    .hero h1 .mark::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0.04em; height: 0.18em; background: var(--accent); opacity: 0.4; transform: scaleX(0); transform-origin: left; animation: draw 0.9s 0.8s ease forwards; }
-    @keyframes draw { to { transform: scaleX(1); } }
-    .hero p.lead { font-size: 1.18rem; color: var(--muted); max-width: 44ch; margin-bottom: 2.4rem; }
-    .hero-actions { display: flex; gap: 1.1rem; align-items: center; flex-wrap: wrap; }
-    .cta { display: inline-flex; align-items: center; gap: 0.6rem; background: var(--accent); color: #fff; font-weight: 500; font-size: 0.95rem; text-decoration: none; padding: 0.95rem 1.7rem; border-radius: 100px; transition: transform 0.25s, box-shadow 0.25s; }
-    .cta:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(200,30,99,0.28); }
-    .cta svg { transition: transform 0.25s; }
-    .cta:hover svg { transform: translateX(3px); }
-    .cta-ghost { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--ink); text-decoration: none; font-size: 0.95rem; border-bottom: 1px solid var(--ink); padding-bottom: 2px; transition: color 0.25s, border-color 0.25s; }
-    .cta-ghost:hover { color: var(--accent); border-color: var(--accent); }
-    .hero-media { position: relative; aspect-ratio: 4 / 5; border-radius: 18px; overflow: hidden; background: linear-gradient(150deg, var(--accent-dp), #7E1F4C 72%); box-shadow: 0 34px 60px -26px rgba(91,42,78,0.5); animation: float 7s ease-in-out infinite; }
-    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-    .hero-media .play { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; color: #fff; cursor: pointer; }
-    .hero-media .circle { width: 78px; height: 78px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.7); display: flex; align-items: center; justify-content: center; transition: transform 0.3s, background 0.3s; }
-    .hero-media:hover .circle { transform: scale(1.09); background: rgba(255,255,255,0.14); }
-    .hero-media .play span.cap { font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.85; }
+    .hero { position:relative; padding:4.6rem 0 5.4rem; overflow:hidden; }
+    .hero-grid { position:relative; z-index:1; display:grid; grid-template-columns:1.08fr .92fr; gap:3.6rem; align-items:center; }
+    .eyebrow {
+      font-family:var(--sans); font-weight:500; font-size:.8rem;
+      letter-spacing:.17em; text-transform:uppercase; color:var(--fuchsia);
+      margin-bottom:1.5rem;
+    }
+    h1 {
+      font-family:var(--serif); font-weight:500;
+      font-size:clamp(2.7rem,5.6vw,4rem); line-height:1.08; letter-spacing:-.01em;
+      margin-bottom:1.5rem;
+    }
+    h1 .accent { position:relative; color:var(--aubergine); white-space:nowrap; }
+    h1 .accent::after {
+      content:""; position:absolute; left:0; right:0; bottom:.05em; height:.14em;
+      background:var(--fuchsia); opacity:.35;
+      transform:scaleX(0); transform-origin:left; animation:streep 1s .8s ease forwards;
+    }
+    @keyframes streep { to { transform:scaleX(1); } }
+    .hero p.intro { font-size:1.13rem; color:var(--mauve); max-width:46ch; margin-bottom:2.5rem; }
+    .hero-acties { display:flex; gap:1.3rem; align-items:center; flex-wrap:wrap; }
+    .hero-media {
+      position:relative; aspect-ratio:4/5; border-radius:8px; overflow:hidden;
+      background:linear-gradient(155deg, var(--aubergine), #7E1F4C 75%);
+      animation:adem 9s ease-in-out infinite;
+    }
+    @keyframes adem { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-9px)} }
+    .hero-media .speel {
+      position:absolute; inset:0; display:flex; flex-direction:column;
+      align-items:center; justify-content:center; gap:1rem; color:var(--ivoor);
+    }
+    .hero-media .ring {
+      width:76px; height:76px; border-radius:50%;
+      border:1.5px solid rgba(250,245,239,.65);
+      display:flex; align-items:center; justify-content:center;
+      transition:background .35s;
+    }
+    .hero-media:hover .ring { background:rgba(250,245,239,.14); }
+    .hero-media .onderschrift { font-family:var(--serif); font-style:italic; font-size:1rem; opacity:.85; }
 
-    /* ====== SECTIE BASIS ====== */
-    .section { padding: 6rem 0; }
-    .section.alt { background: var(--bg-soft); }
-    .label { font-size: 0.74rem; letter-spacing: 0.26em; text-transform: uppercase; color: var(--accent); margin-bottom: 1rem; }
-    .section h2 { font-family: var(--font-display); font-weight: 400; font-size: clamp(2rem, 4.4vw, 3rem); line-height: 1.12; letter-spacing: -0.01em; margin-bottom: 1rem; }
-    .section .intro { color: var(--muted); max-width: 56ch; margin-bottom: 3.4rem; font-size: 1.05rem; }
+    /* ====== SECTIES ====== */
+    .sectie { padding:5.8rem 0; }
+    .sectie.zacht { background:var(--vlak); }
+    .label {
+      font-family:var(--sans); font-weight:500; font-size:.78rem;
+      letter-spacing:.17em; text-transform:uppercase; color:var(--fuchsia);
+      margin-bottom:1rem;
+    }
+    h2 {
+      font-family:var(--serif); font-weight:500;
+      font-size:clamp(2rem,4.2vw,2.55rem); line-height:1.14; letter-spacing:-.01em;
+      margin-bottom:1rem; color:var(--inkt);
+    }
+    .inleiding { color:var(--mauve); max-width:56ch; margin-bottom:3rem; }
 
-    .statement { text-align: center; }
-    .statement p { font-family: var(--font-display); font-weight: 300; font-style: italic; font-size: clamp(1.7rem, 4vw, 2.7rem); line-height: 1.3; max-width: 24ch; margin: 0 auto; }
-    .statement p .hl { color: var(--accent); font-style: normal; }
-    .statement .sign { margin-top: 2rem; color: var(--muted); font-size: 0.98rem; font-family: var(--font-body); }
+    /* Citaat, exact brandbook 7.2: Newsreader cursief, aubergine, fuchsia lijn links */
+    .citaat { max-width:820px; }
+    .citaat p {
+      font-family:var(--serif); font-style:italic; font-weight:400;
+      font-size:clamp(1.5rem,3.4vw,1.9rem); line-height:1.4; color:var(--aubergine);
+      border-left:3px solid var(--fuchsia); padding-left:1.6rem;
+    }
+    .citaat .naschrift { margin-top:1.4rem; padding-left:1.75rem; font-size:.9rem; color:var(--mauve); }
 
-    /* Over ons */
-    .about-row { display: grid; grid-template-columns: 1fr 1fr; gap: 3.4rem; align-items: center; }
-    .about-text p { color: var(--muted); max-width: 46ch; margin-bottom: 1rem; }
-    .about-text p strong { color: var(--ink); font-weight: 500; }
-    .about-photo { aspect-ratio: 5 / 6; border-radius: 16px; background: linear-gradient(150deg, var(--bg-soft), #E7D2C4); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; }
+    /* Verhaal */
+    .verhaal-grid { display:grid; grid-template-columns:1.1fr .9fr; gap:3.4rem; align-items:center; }
+    .verhaal-tekst p { color:var(--inkt); max-width:52ch; margin-bottom:1.05rem; }
+    .verhaal-tekst p.gedempt { color:var(--mauve); }
+    .verhaal-foto {
+      aspect-ratio:5/6; border-radius:8px;
+      background:linear-gradient(160deg, var(--vlak), #E9D8CB);
+      border:1px solid var(--lijn);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .verhaal-foto span { font-family:var(--serif); font-style:italic; color:var(--mauve); }
 
-    /* Hoe het werkt (interactief) */
-    .phases { display: grid; gap: 0; }
-    .phase { border-top: 1px solid var(--line); cursor: pointer; }
-    .phase:last-child { border-bottom: 1px solid var(--line); }
-    .phase-head { display: grid; grid-template-columns: 64px 1fr 32px; gap: 1.4rem; align-items: center; padding: 1.6rem 0; }
-    .phase .ph-num { font-family: var(--font-display); font-style: italic; color: var(--gold); font-size: 1.5rem; }
-    .phase h3 { font-family: var(--font-display); font-weight: 500; font-size: 1.5rem; }
-    .phase .chev { transition: transform 0.3s; color: var(--accent); justify-self: end; }
-    .phase.open .chev { transform: rotate(180deg); }
-    .phase-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
-    .phase-body p { color: var(--muted); padding: 0 0 1.6rem calc(64px + 1.4rem); max-width: 60ch; }
+    /* Werkwijze: vier fases, redactionele accordion */
+    .fases { border-top:1px solid var(--lijn); }
+    .fase { border-bottom:1px solid var(--lijn); cursor:pointer; }
+    .fase-kop { display:grid; grid-template-columns:56px 1fr 28px; gap:1.3rem; align-items:baseline; padding:1.55rem 0; }
+    .fase-nr { font-family:var(--sans); font-size:.82rem; color:var(--mauve); letter-spacing:.06em; }
+    .fase h3 { font-family:var(--serif); font-weight:500; font-size:1.5rem; color:var(--aubergine); }
+    .fase h3::after { content:"."; color:var(--fuchsia); opacity:0; transition:opacity .3s; }
+    .fase.open h3::after { opacity:1; }
+    .fase .plus { justify-self:end; color:var(--aubergine); font-size:1.35rem; line-height:1; transition:transform .35s; font-weight:300; }
+    .fase.open .plus { transform:rotate(45deg); }
+    .fase-tekst { max-height:0; overflow:hidden; transition:max-height .4s ease; }
+    .fase-tekst p { color:var(--mauve); padding:0 0 1.6rem calc(56px + 1.3rem); max-width:58ch; }
 
-    /* Events */
-    .events { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
-    .event { background: var(--bg); padding: 2rem 1.8rem; transition: background 0.3s; }
-    .section.alt .event { background: var(--bg-soft); }
-    .event:hover { background: #fff; }
-    .event h3 { font-family: var(--font-display); font-weight: 500; font-size: 1.4rem; margin-bottom: 0.4rem; }
-    .event p { color: var(--muted); font-size: 0.92rem; }
+    /* Events: redactionele lijst */
+    .events { border-top:1px solid var(--lijn); }
+    .event { display:grid; grid-template-columns:56px 1fr; gap:1.3rem; align-items:baseline; padding:1.5rem 0; border-bottom:1px solid var(--lijn); transition:background .3s; }
+    .event:hover { background:var(--ivoor); }
+    .sectie:not(.zacht) .event:hover { background:var(--vlak); }
+    .event .nr { font-family:var(--sans); font-size:.82rem; color:var(--mauve); letter-spacing:.06em; }
+    .event h3 { font-family:var(--serif); font-weight:500; font-size:1.45rem; margin-bottom:.25rem; }
+    .event p { color:var(--mauve); font-size:.97rem; max-width:52ch; }
+    .persoonlijk {
+      margin-top:2.6rem; background:var(--ivoor); border:1px solid var(--lijn); border-radius:8px;
+      padding:1.9rem 2rem; display:flex; flex-wrap:wrap; gap:1rem 2rem; align-items:center; justify-content:space-between;
+    }
+    .persoonlijk p { max-width:56ch; color:var(--inkt); }
+    .persoonlijk p em { font-family:var(--serif); color:var(--aubergine); }
+    .persoonlijk a { flex:none; }
 
-    /* Werk */
-    .cases { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.6rem; }
-    .case { border-radius: 16px; overflow: hidden; background: var(--bg); border: 1px solid var(--line); transition: transform 0.25s ease, box-shadow 0.25s ease; transform-style: preserve-3d; }
-    .case:hover { box-shadow: 0 26px 44px -28px rgba(91,42,78,0.5); }
-    .case .thumb { aspect-ratio: 4 / 3; background: linear-gradient(150deg, var(--accent-dp), var(--accent)); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.85); font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; }
-    .case .body { padding: 1.4rem 1.6rem; }
-    .case h3 { font-family: var(--font-display); font-weight: 500; font-size: 1.3rem; margin-bottom: 0.3rem; }
-    .case p { color: var(--muted); font-size: 0.9rem; }
+    /* Werk: asymmetrisch */
+    .werk-grid { display:grid; grid-template-columns:1.35fr 1fr; grid-template-rows:1fr 1fr; gap:1.4rem; }
+    .project { position:relative; border-radius:8px; overflow:hidden; border:1px solid var(--lijn); background:var(--ivoor); display:flex; flex-direction:column; }
+    .project.groot { grid-row:span 2; }
+    .project .beeld {
+      flex:1; min-height:180px; position:relative;
+      background:linear-gradient(160deg, var(--aubergine), #7E1F4C 80%);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .project.groot .beeld { min-height:340px; }
+    .project .beeld::after {
+      content:""; position:absolute; inset:12px;
+      border:1px solid rgba(184,151,90,.45); border-radius:5px; pointer-events:none;
+    }
+    .project .beeld span { font-family:var(--serif); font-style:italic; color:rgba(250,245,239,.85); }
+    .project .tekst { padding:1.3rem 1.5rem; }
+    .project h3 { font-family:var(--serif); font-weight:500; font-size:1.3rem; margin-bottom:.25rem; }
+    .project p { color:var(--mauve); font-size:.94rem; }
+    .project { transition:border-color .3s; }
+    .project:hover { border-color:var(--aubergine); }
 
-    /* Reviews carrousel */
-    .carousel { position: relative; overflow: hidden; }
-    .track { display: flex; transition: transform 0.6s cubic-bezier(.4,0,.2,1); }
-    .slide { min-width: 100%; padding: 0.4rem; }
-    .review { background: var(--bg); border: 1px solid var(--line); border-radius: 18px; padding: 2.6rem 2.4rem; text-align: center; max-width: 720px; margin: 0 auto; }
-    .section.alt .review { background: #fff; }
-    .review .stars { color: var(--gold); letter-spacing: 0.25em; margin-bottom: 1.2rem; }
-    .review blockquote { font-family: var(--font-display); font-weight: 300; font-style: italic; font-size: clamp(1.3rem, 2.6vw, 1.7rem); line-height: 1.45; margin-bottom: 1.4rem; }
-    .review .who { color: var(--muted); font-size: 0.92rem; }
-    .dots { display: flex; gap: 0.55rem; justify-content: center; margin-top: 2rem; }
-    .dot { width: 9px; height: 9px; border-radius: 50%; border: 0; background: var(--line); cursor: pointer; padding: 0; transition: background 0.25s, transform 0.25s; }
-    .dot.active { background: var(--accent); transform: scale(1.25); }
+    /* Stemmen: carrousel */
+    .stemmen { position:relative; overflow:hidden; max-width:860px; margin:0 auto; }
+    .baan { display:flex; transition:transform .65s cubic-bezier(.4,0,.2,1); }
+    .stem { min-width:100%; padding:0 .3rem; }
+    .stem blockquote {
+      font-family:var(--serif); font-style:italic; font-weight:400;
+      font-size:clamp(1.35rem,3vw,1.7rem); line-height:1.45; color:var(--aubergine);
+      border-left:3px solid var(--fuchsia); padding-left:1.6rem; margin-bottom:1.2rem;
+    }
+    .stem .wie { padding-left:1.75rem; font-size:.9rem; color:var(--mauve); }
+    .bolletjes { display:flex; gap:.6rem; margin-top:2.2rem; padding-left:1.75rem; }
+    .bol { width:22px; height:3px; border-radius:2px; border:0; background:var(--lijn); cursor:pointer; padding:0; transition:background .3s; }
+    .bol.actief { background:var(--fuchsia); }
 
-    /* FAQ */
-    .faq { max-width: 760px; }
-    .faq-item { border-top: 1px solid var(--line); }
-    .faq:last-child { border-bottom: 1px solid var(--line); }
-    .faq-q { width: 100%; text-align: left; background: none; border: 0; cursor: pointer; padding: 1.4rem 2rem 1.4rem 0; font-family: var(--font-display); font-size: 1.2rem; color: var(--ink); position: relative; }
-    .faq-q::after { content: "+"; position: absolute; right: 0; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 1.4rem; transition: transform 0.3s; }
-    .faq-item.open .faq-q::after { transform: translateY(-50%) rotate(45deg); }
-    .faq-a { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
-    .faq-a p { color: var(--muted); padding-bottom: 1.4rem; max-width: 64ch; }
+    /* Vragen */
+    .vragen { max-width:780px; border-top:1px solid var(--lijn); }
+    .vraag { border-bottom:1px solid var(--lijn); }
+    .vraag button {
+      width:100%; text-align:left; background:none; border:0; cursor:pointer;
+      padding:1.4rem 2.2rem 1.4rem 0; font-family:var(--serif); font-weight:500;
+      font-size:1.2rem; color:var(--inkt); position:relative;
+    }
+    .vraag button::after {
+      content:"+"; position:absolute; right:.2rem; top:50%; transform:translateY(-50%);
+      color:var(--fuchsia); font-size:1.4rem; font-weight:300; transition:transform .35s;
+    }
+    .vraag.open button::after { transform:translateY(-50%) rotate(45deg); }
+    .antwoord { max-height:0; overflow:hidden; transition:max-height .35s ease; }
+    .antwoord p { color:var(--mauve); padding-bottom:1.4rem; max-width:62ch; }
 
     /* Contact */
-    .closing { text-align: center; }
-    .closing h2 { font-family: var(--font-display); font-weight: 400; font-size: clamp(2.1rem, 5vw, 3.3rem); line-height: 1.12; margin-bottom: 1.2rem; }
-    .closing p { color: var(--muted); max-width: 46ch; margin: 0 auto 2.4rem; }
-    .phone { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.9rem, 5vw, 2.9rem); color: var(--accent); text-decoration: none; display: inline-block; margin-bottom: 1rem; transition: color 0.25s; }
-    .phone:hover { color: var(--accent-dp); }
-    .closing .or { color: var(--muted); font-size: 0.95rem; }
-    .closing .or a { color: var(--ink); }
-
-    .site-footer { border-top: 1px solid var(--line); padding: 2.4rem 0; font-size: 0.82rem; color: var(--muted); }
-    .site-footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.6rem; }
-    .site-footer a { color: var(--accent); text-decoration: none; }
-
-    :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-
-    /* ====== RESPONSIEF ====== */
-    @media (max-width: 860px) {
-      .hero-grid, .about-row { grid-template-columns: 1fr; gap: 2.4rem; }
-      .hero-media { aspect-ratio: 16 / 10; }
-      nav.desktop { display: none; }
-      .burger { display: inline-flex; }
-      .section { padding: 4.2rem 0; }
-      .phase-body p { padding-left: 0; }
+    .slot { text-align:left; }
+    .slot h2 { font-size:clamp(2.1rem,4.6vw,3rem); max-width:16ch; }
+    .slot .uitnodiging { color:var(--mauve); max-width:46ch; margin-bottom:2.3rem; }
+    .telefoon {
+      font-family:var(--serif); font-weight:500; font-size:clamp(1.7rem,4.6vw,2.5rem);
+      color:var(--aubergine); text-decoration:none; display:inline-block; margin-bottom:.8rem;
+      transition:color .3s;
     }
-    @media (prefers-reduced-motion: reduce) {
-      * { animation: none !important; transition: none !important; }
-      .reveal { opacity: 1; transform: none; }
+    .telefoon:hover { color:var(--fuchsia); }
+    .slot .of { color:var(--mauve); font-size:.95rem; }
+    .slot .of a { color:var(--inkt); text-decoration-color:var(--lijn); }
+    .slot .of a:hover { text-decoration-color:var(--fuchsia); }
+
+    /* Voet */
+    .voet { border-top:1px solid var(--lijn); padding:2.2rem 0; font-size:.85rem; color:var(--mauve); }
+    .voet .wrap { display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:.7rem; }
+    .voet .tagline { font-family:var(--serif); font-style:italic; color:var(--aubergine); }
+    .voet a { color:var(--mauve); text-decoration:none; }
+    .voet a:hover { color:var(--inkt); }
+
+    :focus-visible { outline:2px solid var(--fuchsia); outline-offset:3px; }
+
+    @media (max-width:860px) {
+      .hero-grid, .verhaal-grid { grid-template-columns:1fr; gap:2.4rem; }
+      .hero-media { aspect-ratio:16/10; }
+      .werk-grid { grid-template-columns:1fr; grid-template-rows:auto; }
+      .project.groot { grid-row:auto; }
+      nav.groot { display:none; }
+      .burger { display:inline-flex; }
+      .sectie { padding:4.2rem 0; }
+      .fase-tekst p { padding-left:0; }
+      .event { grid-template-columns:1fr; gap:.3rem; }
+    }
+    @media (prefers-reduced-motion:reduce) {
+      * { animation:none !important; transition:none !important; }
+      .reveal { opacity:1; transform:none; }
     }
   </style>
 </head>
 <body>
 
-  <header class="site-header">
+  <header class="kop">
     <div class="wrap">
-      <a class="brand" href="#top">Fluweel<em>.</em></a>
-      <nav class="desktop">
+      <a class="merk" href="#boven">Fluweel<em>.</em></a>
+      <nav class="groot">
         <a href="#verhaal">Het verhaal</a>
         <a href="#werkwijze">Werkwijze</a>
         <a href="#events">Events</a>
         <a href="#werk">Werk</a>
-        <a href="#faq">Vragen</a>
-        <a class="nav-cta" href="#contact">Bel ons</a>
+        <a href="#vragen">Vragen</a>
+        <a class="nav-cta" href="#contact">Plan een gesprek</a>
       </nav>
       <button class="burger" aria-label="Menu openen" id="burger">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
       </button>
     </div>
   </header>
 
-  <div class="mobile-menu" id="mobileMenu">
-    <button class="close" aria-label="Menu sluiten" id="closeMenu">&times;</button>
+  <div class="mobiel" id="mobiel">
+    <button class="sluit" aria-label="Menu sluiten" id="sluit">&times;</button>
     <a href="#verhaal">Het verhaal</a>
     <a href="#werkwijze">Werkwijze</a>
     <a href="#events">Events</a>
     <a href="#werk">Werk</a>
-    <a href="#faq">Vragen</a>
-    <a href="#contact" style="color:var(--accent)">Bel ons</a>
+    <a href="#vragen">Vragen</a>
+    <a href="#contact" style="color:var(--fuchsia)">Plan een gesprek</a>
   </div>
 
-  <main id="top" class="hero">
-    <div class="blob b1"></div>
-    <div class="blob b2"></div>
+  <!-- ====== HERO ====== -->
+  <main id="boven" class="hero">
+    <div class="veld roze"></div>
+    <div class="veld lila"></div>
     <div class="wrap">
       <div class="hero-grid">
         <div>
           <p class="eyebrow">Belevenissen voor merken</p>
-          <h1>Meer dan een evenement. Een <span class="mark">herinnering</span>.</h1>
-          <p class="lead">Fluweel vertaalt jouw merk en je verhaal naar een avond die je gasten blijven navertellen. Persoonlijk bedacht, verrassend uitgevoerd, tot in het kleinste detail verzorgd.</p>
-          <div class="hero-actions">
-            <a class="cta" href="#contact">Plan een gesprek <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
-            <a class="cta-ghost" href="#werk">Bekijk ons werk</a>
+          <h1>Meer dan een evenement. Een <span class="accent">herinnering</span>.</h1>
+          <p class="intro">Fluweel vertaalt jouw merk en je verhaal naar een moment dat gasten blijven navertellen. Persoonlijk bedacht, verrassend uitgevoerd en tot in het kleinste detail verzorgd.</p>
+          <div class="hero-acties">
+            <a class="cta" href="#contact">Plan een gesprek
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+            <a class="stil" href="#werk">Bekijk het werk</a>
           </div>
         </div>
         <div class="hero-media">
-          <div class="play">
-            <span class="circle"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-            <span class="cap">Sfeervideo volgt</span>
+          <div class="speel">
+            <span class="ring"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+            <span class="onderschrift">sfeervideo volgt</span>
           </div>
         </div>
       </div>
     </div>
   </main>
 
-  <section class="section alt">
-    <div class="wrap statement reveal">
-      <p>Wij verbeelden een gevoel en bouwen het na, <span class="hl">tot in het kleinste detail</span>.</p>
-      <p class="sign">Elk concept ontstaat bij jouw merk en jouw verhaal.</p>
+  <!-- ====== STATEMENT ====== -->
+  <section class="sectie zacht">
+    <div class="wrap citaat reveal">
+      <p>Fluweel verbeeldt een gevoel en bouwt het na, tot in het kleinste detail.</p>
+      <div class="naschrift">Elk concept ontstaat bij jouw merk en jouw verhaal.</div>
     </div>
   </section>
 
-  <section class="section" id="verhaal">
-    <div class="wrap about-row">
-      <div class="about-text reveal">
+  <!-- ====== HET VERHAAL ====== -->
+  <section class="sectie" id="verhaal">
+    <div class="wrap verhaal-grid">
+      <div class="verhaal-tekst reveal">
         <p class="label">Het verhaal achter Fluweel</p>
-        <h2 style="font-family:var(--font-display);font-weight:400;font-size:clamp(2rem,4.4vw,3rem);line-height:1.12;margin-bottom:1.2rem">Wij geloven dat een avond pas raakt als alles klopt</h2>
-        <p>Fluweel ontstond vanuit een liefde voor het detail. De juiste muziek op het juiste moment, een smaak die verrast, een binnenkomst die mensen even stil maakt. Dat zijn de momenten waar wij voor leven.</p>
-        <p>Wij vertalen de <strong>branding en het concept van jouw merk</strong> naar een beleving die je gasten voelen en onthouden. Van het eerste idee tot de laatste gast werk je met een klein, creatief team en een vast gezicht dat je leert kennen.</p>
-        <p>Wij organiseren een herinnering. En dat doen we persoonlijk.</p>
+        <h2>Een moment raakt pas als alles klopt</h2>
+        <p>Fluweel ontstond vanuit een liefde voor het detail. De juiste muziek op het juiste moment, een dessert waar nog dagen over wordt gepraat, een binnenkomst die gasten heel even stil maakt. Voor die momenten leeft Fluweel.</p>
+        <p>Fluweel vertaalt de identiteit van jouw merk naar een beleving die gasten voelen en onthouden. Van het eerste idee tot de laatste gast werk je samen met een klein, creatief team en een vast gezicht dat je leert kennen.</p>
+        <p class="gedempt">Fluweel organiseert een herinnering. En dat gebeurt persoonlijk, bij de koffie begint het al.</p>
       </div>
-      <div class="about-photo reveal">Teamfoto volgt</div>
+      <div class="verhaal-foto reveal"><span>portret volgt</span></div>
     </div>
   </section>
 
-  <section class="section alt" id="werkwijze">
+  <!-- ====== WERKWIJZE ====== -->
+  <section class="sectie zacht" id="werkwijze">
     <div class="wrap">
       <p class="label reveal">Werkwijze</p>
       <h2 class="reveal">Van merk naar beleving, in vier fases</h2>
-      <p class="intro reveal">Vier heldere stappen, van de eerste kennismaking tot de avond zelf. Je weet altijd waar we staan en wat de volgende stap is. Tik een fase aan om te lezen wat we doen.</p>
-      <div class="phases reveal" id="phases">
-        <div class="phase open">
-          <div class="phase-head"><span class="ph-num">i.</span><h3>Verkennen</h3><span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></span></div>
-          <div class="phase-body"><p>We beginnen met een goed gesprek. Wat wil je bereiken, voor wie organiseer je dit, en wat moeten mensen voelen als ze naar huis gaan? We duiken in je merk, je doel en je verhaal, zodat alles wat volgt daarop rust.</p></div>
+      <p class="inleiding reveal">Een vaste route met alle ruimte voor het verrassende. Je weet altijd waar het project staat en wat de volgende stap is. Tik een fase aan en lees wat er gebeurt.</p>
+      <div class="fases reveal" id="fases">
+        <div class="fase open">
+          <div class="fase-kop"><span class="fase-nr">01</span><h3>Verkennen</h3><span class="plus">+</span></div>
+          <div class="fase-tekst"><p>Het begint met een goed gesprek. Wat wil je bereiken, voor wie organiseer je dit, en wat moeten gasten voelen als ze naar huis gaan? Fluweel duikt in je merk, je doel en je verhaal, zodat alles wat volgt daarop rust.</p></div>
         </div>
-        <div class="phase">
-          <div class="phase-head"><span class="ph-num">ii.</span><h3>Verbeelden</h3><span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></span></div>
-          <div class="phase-body"><p>We komen terug met een concept dat alleen bij jou past, inclusief een heldere planning en een transparante begroting. Hoe origineler het idee, hoe enthousiaster wij worden. Ruimte voor het gedurfde zit standaard in ons voorstel.</p></div>
+        <div class="fase">
+          <div class="fase-kop"><span class="fase-nr">02</span><h3>Verbeelden</h3><span class="plus">+</span></div>
+          <div class="fase-tekst"><p>Fluweel komt terug met een concept dat alleen bij jou past, inclusief een heldere planning en een transparante begroting. Hoe origineler het idee, hoe enthousiaster Fluweel wordt. Ruimte voor het gedurfde zit standaard in elk voorstel.</p></div>
         </div>
-        <div class="phase">
-          <div class="phase-head"><span class="ph-num">iii.</span><h3>Verzorgen</h3><span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></span></div>
-          <div class="phase-body"><p>Locatie, techniek, catering, styling, gastenmanagement en het draaiboek. Wij houden alle touwtjes in handen en stemmen elk onderdeel op elkaar af, zodat jij overzicht houdt en rustig kunt toewerken naar de dag.</p></div>
+        <div class="fase">
+          <div class="fase-kop"><span class="fase-nr">03</span><h3>Verzorgen</h3><span class="plus">+</span></div>
+          <div class="fase-tekst"><p>Locatie, techniek, catering, styling, gasten en draaiboek: alles wordt op elkaar afgestemd. Fluweel houdt de touwtjes in handen, jij houdt overzicht en rust in de aanloop naar de dag.</p></div>
         </div>
-        <div class="phase">
-          <div class="phase-head"><span class="ph-num">iv.</span><h3>Verrassen</h3><span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></span></div>
-          <div class="phase-body"><p>Op de dag staan wij paraat op de achtergrond, zodat alles op de voorgrond moeiteloos lijkt te gaan. En we voegen dat ene moment toe dat niemand verwacht. Want dat is wat mensen later het eerst navertellen.</p></div>
+        <div class="fase">
+          <div class="fase-kop"><span class="fase-nr">04</span><h3>Verrassen</h3><span class="plus">+</span></div>
+          <div class="fase-tekst"><p>Op de dag zelf staat Fluweel paraat op de achtergrond, met dat ene moment dat niemand zag aankomen. Dat is wat gasten later als eerste navertellen.</p></div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="section" id="events">
+  <!-- ====== EVENTS ====== -->
+  <section class="sectie" id="events">
     <div class="wrap">
       <p class="label reveal">Events</p>
-      <h2 class="reveal">Waar we ons thuis voelen</h2>
-      <p class="intro reveal">Elk evenement is anders. In deze vormen komen we het sterkst tot ons recht.</p>
+      <h2 class="reveal">Waar Fluweel zich thuis voelt</h2>
+      <p class="inleiding reveal">Elk evenement is anders. In deze vormen komt Fluweel het sterkst tot zijn recht.</p>
       <div class="events reveal">
-        <div class="event"><h3>Productlanceringen</h3><p>Een merk dat de wereld in gaat, met een avond die blijft hangen.</p></div>
-        <div class="event"><h3>Gala en diners</h3><p>Verfijning aan tafel, sfeer tot in elk glas.</p></div>
-        <div class="event"><h3>Relatiebijeenkomsten</h3><p>Tijd en aandacht voor de mensen die ertoe doen.</p></div>
-        <div class="event"><h3>Kickoffs</h3><p>Een team dat samen begint, met energie die blijft.</p></div>
+        <div class="event"><span class="nr">01</span><div><h3>Productlanceringen en merkactivaties</h3><p>Een merk dat de wereld in gaat, gedragen door een moment dat blijft hangen.</p></div></div>
+        <div class="event"><span class="nr">02</span><div><h3>Gala's en exclusieve diners</h3><p>Kaarslicht, verfijning aan tafel en een zaal die glinstert.</p></div></div>
+        <div class="event"><span class="nr">03</span><div><h3>Relatiebijeenkomsten en klantendagen</h3><p>Tijd en aandacht voor de mensen die ertoe doen.</p></div></div>
+        <div class="event"><span class="nr">04</span><div><h3>Kickoffs en jubilea</h3><p>Een mijlpaal vieren met energie die nog weken voelbaar is.</p></div></div>
+      </div>
+      <div class="persoonlijk reveal">
+        <p>Ook een <em>persoonlijke mijlpaal</em> verdient een herinnering. Voor een bruiloft, een jubileum of een verjaardag met allure denkt Fluweel net zo graag met je mee.</p>
+        <a class="stil" href="#contact">Vertel erover</a>
       </div>
     </div>
   </section>
 
-  <section class="section alt" id="werk">
+  <!-- ====== WERK ====== -->
+  <section class="sectie zacht" id="werk">
     <div class="wrap">
       <p class="label reveal">Werk</p>
-      <h2 class="reveal">Een greep uit onze belevenissen</h2>
-      <p class="intro reveal">Hier komen jullie eigen events met beeld. Voor nu een indruk van het soort werk dat we maken.</p>
-      <div class="cases reveal" id="cases">
-        <article class="case"><div class="thumb">Foto volgt</div><div class="body"><h3>Lancering</h3><p>Een merk geïntroduceerd met een avond vol verwondering.</p></div></article>
-        <article class="case"><div class="thumb">Foto volgt</div><div class="body"><h3>Galadiner</h3><p>Driehonderd gasten, één avond om te onthouden.</p></div></article>
-        <article class="case"><div class="thumb">Foto volgt</div><div class="body"><h3>Relatiedag</h3><p>Een dag die relaties verdiepte en deuren opende.</p></div></article>
+      <h2 class="reveal">Een greep uit de belevenissen</h2>
+      <p class="inleiding reveal">Hier verschijnen de eerste projecten met beeld. Een voorproefje van het soort momenten dat Fluweel maakt.</p>
+      <div class="werk-grid reveal">
+        <article class="project groot"><div class="beeld"><span>foto volgt</span></div><div class="tekst"><h3>Lancering</h3><p>Een merk geïntroduceerd met een moment vol verwondering.</p></div></article>
+        <article class="project"><div class="beeld"><span>foto volgt</span></div><div class="tekst"><h3>Galadiner</h3><p>Driehonderd gasten, één moment om te onthouden.</p></div></article>
+        <article class="project"><div class="beeld"><span>foto volgt</span></div><div class="tekst"><h3>Relatiedag</h3><p>Een dag die relaties verdiepte en deuren opende.</p></div></article>
       </div>
     </div>
   </section>
 
-  <section class="section">
+  <!-- ====== STEMMEN ====== -->
+  <section class="sectie">
     <div class="wrap">
-      <p class="label reveal" style="text-align:center">Wat klanten zeggen</p>
-      <h2 class="reveal" style="text-align:center;margin-bottom:3rem">Het gevoel blijft hangen</h2>
-      <div class="carousel reveal" id="carousel">
-        <div class="track" id="track">
-          <div class="slide"><figure class="review"><div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><blockquote>Onze gasten praten er weken later nog over. Precies het gevoel waar we op hoopten.</blockquote><figcaption class="who">Naam klant &middot; bedrijf</figcaption></figure></div>
-          <div class="slide"><figure class="review"><div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><blockquote>Alles tot in de puntjes geregeld. Wij konden volledig in het moment zijn.</blockquote><figcaption class="who">Naam klant &middot; bedrijf</figcaption></figure></div>
-          <div class="slide"><figure class="review"><div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><blockquote>Ze vertaalden ons merk naar een avond die echt van ons was. Knap gedaan.</blockquote><figcaption class="who">Naam klant &middot; bedrijf</figcaption></figure></div>
-          <div class="slide"><figure class="review"><div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><blockquote>De aandacht voor detail viel iedereen op. Een avond met klasse.</blockquote><figcaption class="who">Naam klant &middot; bedrijf</figcaption></figure></div>
-          <div class="slide"><figure class="review"><div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><blockquote>Persoonlijk, creatief en betrouwbaar. We boeken zeker opnieuw.</blockquote><figcaption class="who">Naam klant &middot; bedrijf</figcaption></figure></div>
-          <div class="slide"><figure class="review"><div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><blockquote>Van eerste idee tot laatste gast voelde het in vertrouwde handen.</blockquote><figcaption class="who">Naam klant &middot; bedrijf</figcaption></figure></div>
+      <p class="label reveal">Wat opdrachtgevers zeggen</p>
+      <h2 class="reveal" style="margin-bottom:2.8rem">Het gevoel blijft hangen</h2>
+      <div class="stemmen reveal" id="stemmen">
+        <div class="baan" id="baan">
+          <div class="stem"><blockquote>Onze gasten praten er weken later nog over. Precies het gevoel waar we op hoopten.</blockquote><div class="wie">Naam klant &middot; bedrijf</div></div>
+          <div class="stem"><blockquote>Alles klopte, tot de servetten aan toe. Wij konden alleen maar genieten.</blockquote><div class="wie">Naam klant &middot; bedrijf</div></div>
+          <div class="stem"><blockquote>Fluweel vertaalde ons merk naar een moment dat echt van ons was.</blockquote><div class="wie">Naam klant &middot; bedrijf</div></div>
+          <div class="stem"><blockquote>De verrassing halverwege het diner, daar praat het hele kantoor nog over.</blockquote><div class="wie">Naam klant &middot; bedrijf</div></div>
+          <div class="stem"><blockquote>Persoonlijk, creatief en tot in de puntjes verzorgd. Volgend jaar weer.</blockquote><div class="wie">Naam klant &middot; bedrijf</div></div>
+          <div class="stem"><blockquote>Van het eerste gesprek tot de laatste gast voelde het vertrouwd.</blockquote><div class="wie">Naam klant &middot; bedrijf</div></div>
         </div>
-        <div class="dots" id="dots"></div>
+        <div class="bolletjes" id="bolletjes"></div>
       </div>
     </div>
   </section>
 
-  <section class="section alt" id="faq">
+  <!-- ====== VRAGEN ====== -->
+  <section class="sectie zacht" id="vragen">
     <div class="wrap">
       <p class="label reveal">Veelgestelde vragen</p>
-      <h2 class="reveal" style="margin-bottom:2.6rem">Goed om te weten</h2>
-      <div class="faq reveal" id="faq">
-        <div class="faq-item open"><button class="faq-q">Hoe ver van tevoren kunnen we het best beginnen?</button><div class="faq-a"><p>Voor een uitgewerkt concept werken we het liefst met enkele maanden voorbereiding. Heb je het krapper? Vertel het ons, vaak kan er meer dan je denkt.</p></div></div>
-        <div class="faq-item"><button class="faq-q">Verzorgen jullie ook de locatie en de leveranciers?</button><div class="faq-a"><p>Ja. We regelen het volledige plaatje, van locatie en techniek tot catering en styling. Je hebt aan ons één aanspreekpunt.</p></div></div>
-        <div class="faq-item"><button class="faq-q">Werken jullie door heel Nederland?</button><div class="faq-a"><p>Zeker. We organiseren events op de plek die het beste bij jouw verhaal past, waar dat ook is.</p></div></div>
-        <div class="faq-item"><button class="faq-q">Kunnen jullie een bestaand idee uitvoeren?</button><div class="faq-a"><p>Heel graag. Heb je al een richting in je hoofd, dan bouwen we daarop voort en maken we het samen compleet.</p></div></div>
-        <div class="faq-item"><button class="faq-q">Wat mag een evenement kosten?</button><div class="faq-a"><p>Dat verschilt per wens en omvang. In ons voorstel werken we met een transparante begroting, zodat je altijd weet waar je aan toe bent.</p></div></div>
+      <h2 class="reveal" style="margin-bottom:2.4rem">Goed om te weten</h2>
+      <div class="vragen reveal" id="faq">
+        <div class="vraag open"><button>Hoe ver van tevoren kun je het best beginnen?</button><div class="antwoord"><p>Voor een uitgewerkt concept werkt Fluweel het liefst met enkele maanden voorbereiding. Is de agenda krapper? Vertel het gerust, vaak kan er meer dan je denkt.</p></div></div>
+        <div class="vraag"><button>Verzorgt Fluweel ook de locatie en de leveranciers?</button><div class="antwoord"><p>Ja. Fluweel verzorgt het volledige plaatje: locatie, techniek, catering en styling. Jij hebt één vast aanspreekpunt dat alles op elkaar afstemt.</p></div></div>
+        <div class="vraag"><button>Werkt Fluweel door heel Nederland?</button><div class="antwoord"><p>Zeker. Fluweel organiseert op de plek die het beste bij jouw verhaal past, waar dat ook is.</p></div></div>
+        <div class="vraag"><button>Kan Fluweel een bestaand idee uitvoeren?</button><div class="antwoord"><p>Heel graag. Ligt er al een richting, een moodboard of een Pinterest-bord? Fluweel bouwt daarop voort en maakt het samen met jou compleet.</p></div></div>
+        <div class="vraag"><button>Wat mag een evenement kosten?</button><div class="antwoord"><p>Elk event van Fluweel is maatwerk, dus de investering hangt af van jouw wensen. In een kort gesprek weet je precies waar je aan toe bent.</p></div></div>
       </div>
     </div>
   </section>
 
-  <!-- RUIMTE OM UIT TE BOUWEN: voeg hier later secties toe -->
-
-  <section class="section" id="contact">
-    <div class="wrap closing reveal">
+  <!-- ====== CONTACT ====== -->
+  <section class="sectie" id="contact">
+    <div class="wrap slot reveal">
+      <p class="label">Contact</p>
       <h2>Het mooiste begint met een goed gesprek</h2>
-      <p>Vertel ons over jouw moment. We denken graag met je mee, vrijblijvend en met alle aandacht.</p>
-      <a class="phone" href="tel:+31000000000">+31 (0)00 000 0000</a>
-      <p class="or">of mail naar <a href="mailto:hallo@fluweelevents.nl">hallo@fluweelevents.nl</a></p>
+      <p class="uitnodiging">Vertel over jouw moment. Fluweel denkt graag met je mee, vrijblijvend en met alle aandacht. De koffie staat klaar.</p>
+      <a class="telefoon" href="tel:+31000000000">+31 (0)00 000 0000</a>
+      <p class="of">of mail naar <a href="mailto:hallo@fluweelevents.nl">hallo@fluweelevents.nl</a></p>
     </div>
   </section>
 
-  <footer class="site-footer">
+  <!-- ====== VOET ====== -->
+  <footer class="voet">
     <div class="wrap">
       <span>&copy; 2026 Fluweel Events</span>
-      <span><a href="mailto:hallo@fluweelevents.nl">hallo@fluweelevents.nl</a> &middot; fluweelevents.nl</span>
+      <span class="tagline">Meer dan een evenement. Een herinnering.</span>
+      <span><a href="mailto:hallo@fluweelevents.nl">hallo@fluweelevents.nl</a></span>
     </div>
   </footer>
 
   <script>
-    const $ = (s, r=document) => r.querySelector(s);
-    const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+    const $ = (s,r=document)=>r.querySelector(s);
+    const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
 
     // Mobiel menu
-    const mm = $('#mobileMenu');
-    $('#burger').addEventListener('click', () => mm.classList.add('open'));
-    $('#closeMenu').addEventListener('click', () => mm.classList.remove('open'));
-    $$('#mobileMenu a').forEach(a => a.addEventListener('click', () => mm.classList.remove('open')));
+    $('#burger').addEventListener('click',()=>$('#mobiel').classList.add('open'));
+    $('#sluit').addEventListener('click',()=>$('#mobiel').classList.remove('open'));
+    $$('#mobiel a').forEach(a=>a.addEventListener('click',()=>$('#mobiel').classList.remove('open')));
 
-    // Scroll reveal
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
-    }, { threshold: 0.15 });
-    $$('.reveal').forEach(el => io.observe(el));
+    // Zachte reveal bij scrollen
+    const io = new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.14});
+    $$('.reveal').forEach(el=>io.observe(el));
 
-    // Werkwijze accordion
-    $$('#phases .phase').forEach(p => {
-      p.addEventListener('click', () => {
-        const open = p.classList.contains('open');
-        $$('#phases .phase').forEach(x => { x.classList.remove('open'); x.querySelector('.phase-body').style.maxHeight = null; });
-        if (!open) { p.classList.add('open'); const b = p.querySelector('.phase-body'); b.style.maxHeight = b.scrollHeight + 'px'; }
+    // Fases
+    $$('#fases .fase').forEach(f=>{
+      f.addEventListener('click',()=>{
+        const open=f.classList.contains('open');
+        $$('#fases .fase').forEach(x=>{x.classList.remove('open');x.querySelector('.fase-tekst').style.maxHeight=null;});
+        if(!open){f.classList.add('open');const t=f.querySelector('.fase-tekst');t.style.maxHeight=t.scrollHeight+'px';}
       });
     });
-    const firstPhase = $('#phases .phase.open .phase-body'); if (firstPhase) firstPhase.style.maxHeight = firstPhase.scrollHeight + 'px';
+    const f0=$('#fases .fase.open .fase-tekst'); if(f0) f0.style.maxHeight=f0.scrollHeight+'px';
 
-    // FAQ accordion
-    $$('#faq .faq-item').forEach(it => {
-      it.querySelector('.faq-q').addEventListener('click', () => {
-        const open = it.classList.contains('open');
-        $$('#faq .faq-item').forEach(x => { x.classList.remove('open'); x.querySelector('.faq-a').style.maxHeight = null; });
-        if (!open) { it.classList.add('open'); const a = it.querySelector('.faq-a'); a.style.maxHeight = a.scrollHeight + 'px'; }
+    // Vragen
+    $$('#faq .vraag').forEach(v=>{
+      v.querySelector('button').addEventListener('click',()=>{
+        const open=v.classList.contains('open');
+        $$('#faq .vraag').forEach(x=>{x.classList.remove('open');x.querySelector('.antwoord').style.maxHeight=null;});
+        if(!open){v.classList.add('open');const a=v.querySelector('.antwoord');a.style.maxHeight=a.scrollHeight+'px';}
       });
     });
-    const firstFaq = $('#faq .faq-item.open .faq-a'); if (firstFaq) firstFaq.style.maxHeight = firstFaq.scrollHeight + 'px';
+    const v0=$('#faq .vraag.open .antwoord'); if(v0) v0.style.maxHeight=v0.scrollHeight+'px';
 
-    // Reviews carrousel
-    const track = $('#track');
-    const slides = $$('#track .slide');
-    const dotsWrap = $('#dots');
-    let idx = 0, timer;
-    slides.forEach((_, i) => {
-      const d = document.createElement('button');
-      d.className = 'dot' + (i === 0 ? ' active' : '');
-      d.setAttribute('aria-label', 'Review ' + (i+1));
-      d.addEventListener('click', () => { go(i); reset(); });
-      dotsWrap.appendChild(d);
+    // Stemmen-carrousel
+    const baan=$('#baan'), stemmen=$$('#baan .stem'), bWrap=$('#bolletjes');
+    let idx=0, timer;
+    stemmen.forEach((_,i)=>{
+      const b=document.createElement('button'); b.className='bol'+(i===0?' actief':'');
+      b.setAttribute('aria-label','Stem '+(i+1));
+      b.addEventListener('click',()=>{ga(i);herstart();});
+      bWrap.appendChild(b);
     });
-    const dots = $$('#dots .dot');
-    function go(i) { idx = (i + slides.length) % slides.length; track.style.transform = 'translateX(' + (-idx * 100) + '%)'; dots.forEach((d,j) => d.classList.toggle('active', j === idx)); }
-    function next() { go(idx + 1); }
-    function start() { timer = setInterval(next, 5000); }
-    function reset() { clearInterval(timer); start(); }
-    const car = $('#carousel');
-    car.addEventListener('mouseenter', () => clearInterval(timer));
-    car.addEventListener('mouseleave', start);
-    let sx = null;
-    car.addEventListener('touchstart', e => sx = e.touches[0].clientX, {passive:true});
-    car.addEventListener('touchend', e => { if (sx === null) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 40) { dx < 0 ? next() : go(idx-1); reset(); } sx = null; }, {passive:true});
+    const bollen=$$('#bolletjes .bol');
+    function ga(i){idx=(i+stemmen.length)%stemmen.length;baan.style.transform='translateX('+(-idx*100)+'%)';bollen.forEach((b,j)=>b.classList.toggle('actief',j===idx));}
+    function verder(){ga(idx+1);}
+    function start(){timer=setInterval(verder,5200);}
+    function herstart(){clearInterval(timer);start();}
+    const sw=$('#stemmen');
+    sw.addEventListener('mouseenter',()=>clearInterval(timer));
+    sw.addEventListener('mouseleave',start);
+    let sx=null;
+    sw.addEventListener('touchstart',e=>sx=e.touches[0].clientX,{passive:true});
+    sw.addEventListener('touchend',e=>{if(sx===null)return;const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>40){dx<0?verder():ga(idx-1);herstart();}sx=null;},{passive:true});
     start();
-
-    // Speelse tilt op cases (alleen muis)
-    if (window.matchMedia('(hover: hover)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      $$('#cases .case').forEach(c => {
-        c.addEventListener('pointermove', e => {
-          const r = c.getBoundingClientRect();
-          const px = (e.clientX - r.left) / r.width - 0.5;
-          const py = (e.clientY - r.top) / r.height - 0.5;
-          c.style.transform = 'perspective(800px) rotateY(' + (px * 5) + 'deg) rotateX(' + (-py * 5) + 'deg) translateY(-4px)';
-        });
-        c.addEventListener('pointerleave', () => c.style.transform = '');
-      });
-    }
   </script>
 </body>
 </html>
