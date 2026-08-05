@@ -1,14 +1,88 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <script>if(sessionStorage.getItem("fluweel_toegang")!=="open"){location.replace("index.html");}</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="robots" content="noindex" />
   <meta name="color-scheme" content="light" />
   <meta name="theme-color" content="#FAF5EF" />
-  <title>Fluweel Events</title>
-  <meta name="description" content="Fluweel Events. Meer dan een evenement. Een herinnering." />
+  <!-- ====== KERN SEO ====== -->
+  <title>Fluweel Events | Zakelijke evenementen die blijven hangen</title>
+  <meta name="description" content="Fluweel Events ontwerpt en organiseert verfijnde zakelijke evenementen, van productlancering tot galadiner. Persoonlijk, creatief en tot in het kleinste detail verzorgd. Plan een gesprek." />
+  <meta name="author" content="Fluweel Events" />
+  <meta name="robots" content="noindex, nofollow" /> <!-- TIJDELIJK: haal deze regel weg bij de echte lancering, vervang door de regel in het commentaar eronder -->
+  <!-- <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" /> -->
+  <link rel="canonical" href="https://fluweelevents.nl/" />
+  <link rel="alternate" hreflang="nl-nl" href="https://fluweelevents.nl/" />
+  <link rel="alternate" hreflang="x-default" href="https://fluweelevents.nl/" />
+
+  <!-- ====== OPEN GRAPH ====== -->
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="nl_NL" />
+  <meta property="og:site_name" content="Fluweel Events" />
+  <meta property="og:title" content="Fluweel Events | Zakelijke evenementen die blijven hangen" />
+  <meta property="og:description" content="Verfijnde zakelijke evenementen, van productlancering tot galadiner. Persoonlijk, creatief en tot in het kleinste detail verzorgd." />
+  <meta property="og:url" content="https://fluweelevents.nl/" />
+  <meta property="og:image" content="https://fluweelevents.nl/og-image.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Fluweel Events, belevenissen voor merken" />
+
+  <!-- ====== TWITTER / X ====== -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Fluweel Events | Zakelijke evenementen die blijven hangen" />
+  <meta name="twitter:description" content="Verfijnde zakelijke evenementen, persoonlijk en tot in het kleinste detail verzorgd." />
+  <meta name="twitter:image" content="https://fluweelevents.nl/og-image.jpg" />
+
+  <link rel="manifest" href="/site.webmanifest" />
+
+  <!-- ====== STRUCTURED DATA: organisatie ====== -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "@id": "https://fluweelevents.nl/#organisatie",
+    "name": "Fluweel Events",
+    "description": "Creatief evenementenbureau voor verfijnde zakelijke evenementen, van concept tot uitvoering.",
+    "url": "https://fluweelevents.nl/",
+    "email": "contact@fluweelevents.nl",
+    "image": "https://fluweelevents.nl/og-image.jpg",
+    "priceRange": "$$$",
+    "areaServed": { "@type": "Country", "name": "Nederland" },
+    "address": { "@type": "PostalAddress", "addressCountry": "NL" },
+    "slogan": "Meer dan een evenement. Een herinnering.",
+    "knowsAbout": ["Productlanceringen", "Galadiners", "Relatiebijeenkomsten", "Kickoffs", "Jubilea"],
+    "makesOffer": {
+      "@type": "Offer",
+      "itemOffered": { "@type": "Service", "name": "Organisatie van zakelijke evenementen", "serviceType": "Eventmanagement" }
+    }
+  }
+  </script>
+
+  <!-- ====== STRUCTURED DATA: website ====== -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Fluweel Events",
+    "url": "https://fluweelevents.nl/",
+    "inLanguage": "nl-NL"
+  }
+  </script>
+
+  <!-- ====== STRUCTURED DATA: veelgestelde vragen ====== -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      { "@type": "Question", "name": "Hoe ver van tevoren kun je het best beginnen?", "acceptedAnswer": { "@type": "Answer", "text": "Voor een uitgewerkt concept werkt Fluweel het liefst met enkele maanden voorbereiding. Is de agenda krapper? Vertel het gerust, vaak kan er meer dan je denkt." } },
+      { "@type": "Question", "name": "Verzorgt Fluweel ook de locatie en de leveranciers?", "acceptedAnswer": { "@type": "Answer", "text": "Ja. Fluweel verzorgt het volledige plaatje: locatie, techniek, catering en styling. Jij hebt één vast aanspreekpunt dat alles op elkaar afstemt." } },
+      { "@type": "Question", "name": "Werkt Fluweel door heel Nederland?", "acceptedAnswer": { "@type": "Answer", "text": "Zeker. Fluweel organiseert op de plek die het beste bij jouw verhaal past, waar dat ook is." } },
+      { "@type": "Question", "name": "Kan Fluweel een bestaand idee uitvoeren?", "acceptedAnswer": { "@type": "Answer", "text": "Heel graag. Ligt er al een richting, een moodboard of een Pinterest-bord? Fluweel bouwt daarop voort en maakt het samen met jou compleet." } },
+      { "@type": "Question", "name": "Wat mag een evenement kosten?", "acceptedAnswer": { "@type": "Answer", "text": "Elk event van Fluweel is maatwerk, dus de investering hangt af van jouw wensen. In een kort gesprek weet je precies waar je aan toe bent." } }
+    ]
+  }
+  </script>
   <link rel="icon" href="favicon.ico" sizes="any" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
