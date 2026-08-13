@@ -192,20 +192,11 @@
       position:relative; aspect-ratio:4/5; border-radius:8px; overflow:hidden;
       background:linear-gradient(155deg, var(--aubergine), #7E1F4C 75%);
       animation:adem 9s ease-in-out infinite;
+      box-shadow:0 34px 60px -26px rgba(91,42,78,0.45);
     }
     @keyframes adem { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-9px)} }
-    .hero-media .speel {
-      position:absolute; inset:0; display:flex; flex-direction:column;
-      align-items:center; justify-content:center; gap:1rem; color:var(--ivoor);
-    }
-    .hero-media .ring {
-      width:76px; height:76px; border-radius:50%;
-      border:1.5px solid rgba(250,245,239,.65);
-      display:flex; align-items:center; justify-content:center;
-      transition:background .35s;
-    }
-    .hero-media:hover .ring { background:rgba(250,245,239,.14); }
-    .hero-media .onderschrift { font-family:var(--serif); font-style:italic; font-size:1rem; opacity:.85; }
+    .hero-foto { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity 1.2s ease; }
+    .hero-foto.actief { opacity:1; }
 
     /* ====== SECTIES ====== */
     .sectie { padding:5.8rem 0; }
@@ -277,16 +268,17 @@
     .project { position:relative; border-radius:8px; overflow:hidden; border:1px solid var(--lijn); background:var(--ivoor); display:flex; flex-direction:column; }
     .project.groot { grid-row:span 2; }
     .project .beeld {
-      flex:1; min-height:180px; position:relative;
+      flex:1; min-height:180px; position:relative; overflow:hidden;
       background:linear-gradient(160deg, var(--aubergine), #7E1F4C 80%);
       display:flex; align-items:center; justify-content:center;
     }
     .project.groot .beeld { min-height:340px; }
+    .project .beeld img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
     .project .beeld::after {
-      content:""; position:absolute; inset:12px;
+      content:""; position:absolute; inset:12px; z-index:1;
       border:1px solid rgba(184,151,90,.45); border-radius:5px; pointer-events:none;
     }
-    .project .beeld span { font-family:var(--serif); font-style:italic; color:rgba(250,245,239,.85); }
+    .project .beeld span { font-family:var(--serif); font-style:italic; color:rgba(250,245,239,.85); position:relative; z-index:1; }
     .project .tekst { padding:1.3rem 1.5rem; }
     .project h3 { font-family:var(--serif); font-weight:500; font-size:1.3rem; margin-bottom:.25rem; }
     .project p { color:var(--mauve); font-size:.94rem; }
@@ -428,11 +420,12 @@
             <a class="stil" href="#werk">Bekijk het werk</a>
           </div>
         </div>
-        <div class="hero-media">
-          <div class="speel">
-            <span class="ring"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-            <span class="onderschrift">sfeervideo volgt</span>
-          </div>
+        <div class="hero-media" id="heromedia">
+          <img class="hero-foto actief" src="foto/fluweel-tafel-sfeer.jpg" alt="Feestelijk gedekte lange tafel met kaarslicht, druiven en bloemen bij een evenement van Fluweel">
+          <img class="hero-foto" src="foto/fluweel-wijn-inschenken.jpg" alt="Wijn wordt ingeschonken tijdens een diner van Fluweel Events">
+          <img class="hero-foto" src="foto/fluweel-kaarslicht-gasten.jpg" alt="Twee brandende kaarsen op de voorgrond met gasten aan een lange tafel op de achtergrond">
+          <img class="hero-foto" src="foto/fluweel-proost-moment.jpg" alt="Gasten proosten lachend met glazen champagne tijdens een Fluweel evenement">
+          <img class="hero-foto" src="foto/fluweel-saxofoniste.jpg" alt="Saxofoniste treedt op tijdens een avond van Fluweel Events">
         </div>
       </div>
     </div>
@@ -513,9 +506,9 @@
       <h2 class="reveal">Een greep uit de belevenissen</h2>
       <p class="inleiding reveal">Hier verschijnen de eerste projecten met beeld. Een voorproefje van het soort momenten dat Fluweel maakt.</p>
       <div class="werk-grid reveal">
-        <article class="project groot"><div class="beeld"><span>foto volgt</span></div><div class="tekst"><h3>Lancering</h3><p>Een merk geïntroduceerd met een moment vol verwondering.</p></div></article>
-        <article class="project"><div class="beeld"><span>foto volgt</span></div><div class="tekst"><h3>Galadiner</h3><p>Driehonderd gasten, één moment om te onthouden.</p></div></article>
-        <article class="project"><div class="beeld"><span>foto volgt</span></div><div class="tekst"><h3>Relatiedag</h3><p>Een dag die relaties verdiepte en deuren opende.</p></div></article>
+        <article class="project groot"><div class="beeld"><img src="foto/fluweel-tafel-sfeer.jpg" alt="Feestelijk gedekte lange tafel met kaarslicht, druiven en bloemen bij een evenement van Fluweel" loading="lazy"></div><div class="tekst"><h3>Een moment dat klopt</h3><p>Sfeer, styling en licht die samen een verhaal vertellen.</p></div></article>
+        <article class="project"><div class="beeld"><span>foto volgt</span></div><div class="tekst"><h3>Het detail maakt het verschil</h3><p>De zorg die niemand ziet, maar iedereen voelt.</p></div></article>
+        <article class="project"><div class="beeld"><img src="foto/fluweel-proost-moment.jpg" alt="Gasten proosten lachend met glazen champagne tijdens een Fluweel evenement" loading="lazy"></div><div class="tekst"><h3>Het moment dat blijft hangen</h3><p>Waar gasten na afloop nog over napraten.</p></div></article>
       </div>
     </div>
   </section>
@@ -686,6 +679,17 @@
           knop.disabled = false;
         }
       });
+    }
+
+    // Hero-fotolus
+    const heroFotos = $$('#heromedia .hero-foto');
+    if (heroFotos.length > 1 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      let heroIdx = 0;
+      setInterval(() => {
+        heroFotos[heroIdx].classList.remove('actief');
+        heroIdx = (heroIdx + 1) % heroFotos.length;
+        heroFotos[heroIdx].classList.add('actief');
+      }, 4200);
     }
   </script>
   <script defer src="/_vercel/insights/script.js"></script>
