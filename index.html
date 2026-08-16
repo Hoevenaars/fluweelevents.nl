@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="color-scheme" content="light" />
-  <meta name="theme-color" content="#FAF5EF" />
+  <meta name="theme-color" content="#2A1322" />
   <title>Fluweel Events &middot; Binnenkort</title>
-  <meta name="description" content="Fluweel Events. Er wordt iets moois gemaakt. Binnenkort meer." />
+  <meta name="description" content="Fluweel Events. Meer dan een evenement. Een herinnering. Binnenkort meer." />
   <meta name="robots" content="noindex" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -14,63 +14,79 @@
   <style>
     :root { color-scheme: only light; }
     :root {
-      --bg:#FAF5EF; --bg-soft:#F3EAE0; --ink:#2A1322; --muted:#7A5E6E;
-      --line:#E3D5C9; --accent:#C81E63; --accent-dp:#5B2A4E; --gold:#B8975A;
+      --bg:#FAF5EF; --ink:#2A1322; --muted:#7A5E6E;
+      --line:#E3D5C9; --accent:#C81E63; --accent-dp:#5B2A4E;
       --font-display:'Newsreader',Georgia,serif; --font-body:'Inter',system-ui,sans-serif;
     }
     *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
-    body { background:var(--bg); color:var(--ink); font-family:var(--font-body); font-weight:300; line-height:1.7; -webkit-font-smoothing:antialiased; min-height:100vh; display:flex; flex-direction:column; overflow-x:hidden; position:relative; }
+    body {
+      color:#FAF5EF; font-family:var(--font-body); font-weight:300; line-height:1.7;
+      -webkit-font-smoothing:antialiased; min-height:100vh; display:flex; flex-direction:column;
+      overflow-x:hidden; position:relative;
+    }
     a { color:inherit; }
+    .achtergrond { position:fixed; inset:0; z-index:0; }
+    .achtergrond img {
+      width:100%; height:100%; object-fit:cover;
+      opacity:0; transition:opacity 1.4s ease;
+    }
+    .achtergrond img.actief { opacity:1; }
+    .sluier {
+      position:fixed; inset:0; z-index:1;
+      background:
+        linear-gradient(180deg, rgba(42,19,34,.45) 0%, rgba(42,19,34,.55) 45%, rgba(42,19,34,.78) 100%),
+        linear-gradient(90deg, rgba(42,19,34,.5) 0%, transparent 70%);
+    }
 
-    .blob { position:fixed; border-radius:50%; filter:blur(70px); opacity:0.5; z-index:0; pointer-events:none; }
-    .blob.b1 { width:520px; height:520px; background:#F3B9D2; top:-160px; right:-120px; animation:drift1 16s ease-in-out infinite alternate; }
-    .blob.b2 { width:420px; height:420px; background:#D9C2E8; bottom:-180px; left:-100px; animation:drift2 19s ease-in-out infinite alternate; }
-    @keyframes drift1 { to { transform:translate(-40px,50px) scale(1.1); } }
-    @keyframes drift2 { to { transform:translate(50px,-30px) scale(1.08); } }
-
-    header { position:relative; z-index:1; padding:1.6rem 1.8rem; }
+    header { position:relative; z-index:2; padding:1.6rem 1.8rem; }
     .brand { font-family:var(--font-display); font-weight:500; font-size:1.35rem; text-decoration:none; }
     .brand em { color:var(--accent); font-style:normal; }
 
-    main { position:relative; z-index:1; flex:1; display:flex; align-items:center; justify-content:center; padding:2rem 1.8rem 4rem; }
-    .card { max-width:560px; width:100%; text-align:center; }
-    .eyebrow { font-size:0.78rem; letter-spacing:0.34em; text-transform:uppercase; color:var(--accent); margin-bottom:1.8rem; }
-    h1 { font-family:var(--font-display); font-weight:400; font-size:clamp(2.4rem,7vw,3.8rem); line-height:1.1; letter-spacing:-0.01em; margin-bottom:1.4rem; }
-    h1 .mark { font-weight:600; color:var(--accent-dp); position:relative; white-space:nowrap; }
-    h1 .mark::after { content:""; position:absolute; left:0; right:0; bottom:0.04em; height:0.16em; background:var(--accent); opacity:0.4; transform:scaleX(0); transform-origin:left; animation:draw 0.9s 0.7s ease forwards; }
-    @keyframes draw { to { transform:scaleX(1); } }
-    .sub { font-size:1.1rem; color:var(--muted); max-width:42ch; margin:0 auto 2.8rem; }
+    main { position:relative; z-index:2; flex:1; display:flex; align-items:flex-end; padding:2rem 1.8rem 4rem; }
+    .card { max-width:560px; width:100%; }
+    .eyebrow { font-size:0.78rem; letter-spacing:0.34em; text-transform:uppercase; color:var(--accent); margin-bottom:1.4rem; }
+    h1 {
+      font-family:var(--font-display); font-weight:400;
+      font-size:clamp(2.4rem,7vw,3.6rem); line-height:1.08; letter-spacing:-0.01em; margin-bottom:1.2rem;
+    }
+    h1 .mark { font-weight:600; font-style:italic; color:#fff; }
+    .sub { font-size:1.05rem; color:rgba(250,245,239,.78); max-width:42ch; margin:0 0 2.4rem; }
 
-    .gate { max-width:380px; margin:0 auto; }
-    .gate label { display:block; font-size:0.8rem; letter-spacing:0.05em; color:var(--muted); margin-bottom:0.7rem; }
+    .gate { max-width:400px; }
+    .gate label { display:block; font-size:0.8rem; letter-spacing:0.05em; color:rgba(250,245,239,.65); margin-bottom:0.7rem; }
     .field { display:flex; gap:0.6rem; }
     .field input {
       flex:1; font-family:var(--font-body); font-size:1rem; color:var(--ink);
-      background:#fff; border:1px solid var(--line); border-radius:100px;
-      padding:0.85rem 1.3rem; outline:none; transition:border-color 0.25s, box-shadow 0.25s;
+      background:rgba(250,245,239,.95); border:1px solid transparent; border-radius:4px;
+      padding:0.85rem 1.15rem; outline:none; transition:border-color 0.25s, box-shadow 0.25s;
     }
-    .field input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(200,30,99,0.12); }
+    .field input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(200,30,99,0.22); }
     .field button {
       flex:none; font-family:var(--font-body); font-weight:500; font-size:0.95rem;
-      background:var(--accent); color:#fff; border:0; border-radius:100px;
-      padding:0 1.5rem; cursor:pointer; transition:transform 0.2s, box-shadow 0.2s;
+      background:var(--accent); color:#fff; border:0; border-radius:4px;
+      padding:0 1.4rem; cursor:pointer; transition:background 0.25s;
     }
-    .field button:hover { transform:translateY(-2px); box-shadow:0 10px 24px rgba(200,30,99,0.28); }
-    .msg { min-height:1.4rem; margin-top:0.9rem; font-size:0.88rem; color:var(--accent); opacity:0; transition:opacity 0.2s; }
+    .field button:hover { background:var(--accent-dp); }
+    .msg { min-height:1.4rem; margin-top:0.9rem; font-size:0.88rem; color:#F3B9D2; opacity:0; transition:opacity 0.2s; }
     .msg.show { opacity:1; }
     .gate.shake { animation:shake 0.4s; }
     @keyframes shake { 0%,100%{transform:translateX(0);} 20%{transform:translateX(-8px);} 40%{transform:translateX(8px);} 60%{transform:translateX(-5px);} 80%{transform:translateX(5px);} }
 
-    footer { position:relative; z-index:1; padding:1.8rem; text-align:center; font-size:0.8rem; color:var(--muted); }
-    footer a { color:var(--accent); text-decoration:none; }
+    footer { position:relative; z-index:2; padding:1.8rem; font-size:0.8rem; color:rgba(250,245,239,.55); }
+    footer a { color:rgba(250,245,239,.85); text-decoration:none; }
+    footer a:hover { color:#fff; }
 
     :focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
     @media (prefers-reduced-motion:reduce) { * { animation:none !important; } }
   </style>
 </head>
 <body>
-  <div class="blob b1"></div>
-  <div class="blob b2"></div>
+  <div class="achtergrond" id="bg" aria-hidden="true">
+    <img class="actief" src="foto/fluweel-tafel-sfeer.jpg" alt="">
+    <img src="foto/fluweel-proost-moment.jpg" alt="">
+    <img src="foto/fluweel-kaarslicht-gasten.jpg" alt="">
+  </div>
+  <div class="sluier"></div>
 
   <header><a class="brand" href="#">Fluweel<em>.</em></a></header>
 
@@ -78,7 +94,7 @@
     <div class="card">
       <p class="eyebrow">Binnenkort</p>
       <h1>Er wordt iets <span class="mark">moois</span> gemaakt.</h1>
-      <p class="sub">Fluweel komt eraan. Belevenissen voor merken, tot in het kleinste detail. Heb je een toegangscode? Dan mag je vast een kijkje nemen.</p>
+      <p class="sub">Fluweel komt eraan. Zakelijke belevenissen die blijven hangen — tot in het kleinste detail. Heb je een toegangscode? Neem alvast een kijkje.</p>
 
       <div class="gate" id="gate">
         <label for="code">Toegangscode</label>
@@ -94,9 +110,7 @@
   <footer>&copy; 2026 Fluweel Events &middot; <a href="mailto:contact@fluweelevents.nl">contact@fluweelevents.nl</a></footer>
 
   <script>
-    /* ====== TOEGANGSCODE — pas deze hier aan ====== */
     const TOEGANGSCODE = "FLUWEEL26";
-    /* ============================================== */
 
     const input = document.getElementById('code');
     const gate  = document.getElementById('gate');
@@ -118,6 +132,16 @@
     document.getElementById('enter').addEventListener('click', probeer);
     input.addEventListener('keydown', e => { if (e.key === 'Enter') probeer(); });
     input.addEventListener('input', () => msg.classList.remove('show'));
+
+    const fotos = Array.from(document.querySelectorAll('#bg img'));
+    if (fotos.length > 1 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      let i = 0;
+      setInterval(() => {
+        fotos[i].classList.remove('actief');
+        i = (i + 1) % fotos.length;
+        fotos[i].classList.add('actief');
+      }, 5000);
+    }
   </script>
 </body>
 </html>
