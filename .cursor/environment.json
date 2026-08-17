@@ -1,0 +1,17 @@
+{
+  "name": "Fluweel Events (static site + /api/contact)",
+  "install": "node --version",
+  "terminals": [
+    {
+      "name": "dev-server",
+      "command": "node .cursor/dev-server.mjs",
+      "description": "Serves the static site and the /api/contact serverless function on http://localhost:3000. The access code on index.html is FLUWEEL26. In dev the Resend email API is mocked so the contact form succeeds without a RESEND_API_KEY; set RESEND_API_KEY to call the real Resend API."
+    }
+  ],
+  "ports": [
+    {
+      "name": "web",
+      "port": 3000
+    }
+  ]
+}
