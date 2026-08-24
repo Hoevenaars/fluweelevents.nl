@@ -1,0 +1,294 @@
+const FASES = [
+  { id: "nieuw", label: "Nieuw" }, { id: "contact", label: "In contact" },
+  { id: "offerte", label: "Offerte" }, { id: "gewonnen", label: "Gewonnen" }, { id: "verloren", label: "Verloren" },
+];
+
+const NAV = [
+  { id: "dashboard", label: "Dashboard" },
+  { id: "leads", label: "Aanvragen" },
+  { id: "quotes", label: "Offertes" },
+  { id: "invoices", label: "Facturen" },
+  { id: "projects", label: "Projecten" },
+  { id: "campaigns", label: "Campagnes" },
+  { id: "templates", label: "Templates" },
+  { id: "website", label: "Website" },
+  { id: "integrations", label: "Integraties" },
+];
+
+const state = { view: "dashboard", leads: [], quotes: [], invoices: [], projects: [], tasks: [], campaigns: [], templates: [], analytics: null, team: [], activeLead: null };
+
+const $ = (s, r = document) => r.querySelector(s);
+const loginView = $("#login-view");
+const appView = $("#app-view");
+const main = $("#main");
+const detail = $("#detail");
+const detailPaneel = $("#detail-paneel");
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, { headers: { "Content-Type": "application/json" }, ...opts });
+  const json = await res.json().catch(() => ({}));
+  if (res.status === 401) { showLogin(); throw new Error("Niet ingelogd"); }
+  return { res, json };
+}
+
+function esc(s) { return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
+function fmt(iso) { return iso ? new Intl.DateTimeFormat("nl-NL",{dateStyle:"medium",timeStyle:"short"}).format(new Date(iso)) : "—"; }
+function fase(id) { return FASES.find(f=>f.id===id)?.label || id; }
+
+function showLogin() { loginView.hidden = false; appView.hidden = true; detail.classList.remove("open"); }
+function showApp(email) { loginView.hidden = true; appView.hidden = false; $("#account").textContent = email; renderNav(); renderView(); }
+
+function renderNav() {
+  $("#nav").innerHTML = NAV.map(n => `<button type="button" class="nav-item ${state.view===n.id?"actief":""}" data-view="${n.id}">${n.label}</button>`).join("");
+  $("#nav").querySelectorAll(".nav-item").forEach(b => b.onclick = () => { state.view = b.dataset.view; renderNav(); renderView(); });
+}
+
+async function loadAll() {
+  const [leads, quotes, invoices, projects, tasks, campaigns, templates, analytics, team] = await Promise.all([
+    api("/api/leads"), api("/api/quotes"), api("/api/invoices"), api("/api/projects"),
+    api("/api/tasks"), api("/api/campaigns"), api("/api/content/templates"), api("/api/analytics"), api("/api/leads?team=1"),
+  ]);
+  state.leads = leads.json.leads || [];
+  state.quotes = quotes.json.quotes || [];
+  state.invoices = invoices.json.invoices || [];
+  state.projects = projects.json.projects || [];
+  state.tasks = tasks.json.tasks || [];
+  state.campaigns = campaigns.json.campaigns || [];
+  state.templates = templates.json.templates || [];
+  state.analytics = analytics.json.analytics;
+  state.team = team.json.team || [];
+}
+
+function renderView() {
+  const renderers = { dashboard: renderDashboard, leads: renderLeads, quotes: renderQuotes, invoices: renderInvoices, projects: renderProjects, campaigns: renderCampaigns, templates: renderTemplates, website: renderWebsite, integrations: renderIntegrations };
+  main.innerHTML = `<div class="page-kop"><h1>${NAV.find(n=>n.id===state.view)?.label}</h1></div>`;
+  renderers[state.view]?.();
+}
+
+function renderDashboard() {
+  const a = state.analytics || {};
+  const vandaag = state.tasks.filter(t => t.deadline && t.deadline <= new Date().toISOString().slice(0,10) && !t.voltooid);
+  main.innerHTML += `
+    <div class="grid-4">
+      <div class="kaart-stat"><span>Aanvragen</span><strong>${a.leads?.totaal||0}</strong></div>
+      <div class="kaart-stat"><span>Conversie</span><strong>${a.leads?.conversie||0}%</strong></div>
+      <div class="kaart-stat"><span>Pipeline offertes</span><strong>€ ${(a.quotes?.waarde||0).toFixed(0)}</strong></div>
+      <div class="kaart-stat"><span>Omzet betaald</span><strong>€ ${(a.invoices?.betaald||0).toFixed(0)}</strong></div>
+    </div>
+    <div class="panel"><h2>Vandaag te doen (${vandaag.length})</h2>
+      ${vandaag.length ? vandaag.map(t=>`<p>☐ <strong>${esc(t.titel)}</strong> <span class="tag">${t.deadline}</span></p>`).join("") : "<p class='leeg'>Geen open taken voor vandaag.</p>"}
+    </div>
+    <div class="panel"><h2>Pipeline</h2>
+      ${FASES.map(f=>`<p><span class="tag">${f.label}</span> ${state.leads.filter(l=>l.status===f.id).length} aanvragen</p>`).join("")}
+    </div>`;
+}
+
+function renderLeads() {
+  main.innerHTML += `<div class="board">${FASES.map(f=>{
+    const items = state.leads.filter(l=>l.status===f.id);
+    return `<section class="kolom"><div class="kolom-kop"><h3>${f.label} (${items.length})</h3></div><div class="kolom-lijst">${
+      items.map(l=>`<button type="button" class="kaart-lead ${l.gelezen?"":"ongelezen"}" data-id="${l.id}"><strong>${esc(l.naam)}</strong><small>${fmt(l.ontvangenOp)}</small></button>`).join("") || "<p class='leeg'>Leeg</p>"
+    }</div></section>`;
+  }).join("")}</div>`;
+  main.querySelectorAll(".kaart-lead").forEach(b => b.onclick = () => openLeadDetail(b.dataset.id));
+}
+
+async function openLeadDetail(id) {
+  state.activeLead = id;
+  const lead = state.leads.find(l=>l.id===id);
+  const { json } = await api(`/api/activities?leadId=${id}`);
+  const { json: tj } = await api(`/api/tasks?leadId=${id}`);
+  detailPaneel.innerHTML = `
+    <button type="button" class="detail-x" id="detail-x">&times;</button>
+    <p class="tag">${fase(lead.status)}</p>
+    <h2 style="font-family:var(--serif);margin:.3rem 0 1rem">${esc(lead.naam)}</h2>
+    <p><a href="mailto:${esc(lead.email)}">${esc(lead.email)}</a> ${lead.telefoon?`· ${esc(lead.telefoon)}`:""}</p>
+    ${lead.bedrijf?`<p>${esc(lead.bedrijf)}</p>`:""}
+    <div class="form-grid" style="margin:1rem 0">
+      <label>Toegewezen aan</label>
+      <select id="assign-select"><option value="">—</option>${state.team.map(e=>`<option value="${esc(e)}" ${lead.toegewezenAan===e?"selected":""}>${esc(e)}</option>`).join("")}</select>
+    </div>
+    <div class="panel"><strong>Aanvraag</strong><p style="margin-top:.5rem;white-space:pre-wrap">${esc(lead.bericht)}</p></div>
+    <div class="form-grid"><label>Notities</label><textarea id="lead-notities" rows="3">${esc(lead.notities)}</textarea></div>
+    <div class="btn-groep">
+      <button class="btn btn-primair" id="save-lead">Opslaan</button>
+      <button class="btn" id="mail-lead">E-mail</button>
+      <button class="btn" id="tpl-bevestiging">Bevestiging</button>
+      <button class="btn" id="tpl-followup">Follow-up</button>
+      <button class="btn btn-primair" id="new-quote">Offerte maken</button>
+      ${lead.telefoon?`<a class="btn" href="https://wa.me/${lead.telefoon.replace(/\D/g,"")}" target="_blank">WhatsApp</a>`:""}
+    </div>
+    <div class="panel"><h2>Fase</h2><div class="btn-groep">${FASES.map(f=>`<button class="btn fase-btn" data-status="${f.id}">${f.label}</button>`).join("")}</div></div>
+    <div class="panel"><h2>Taken</h2>
+      <div class="form-grid"><input id="task-titel" placeholder="Nieuwe taak"><input id="task-deadline" type="date"><button class="btn" id="add-task">Taak toevoegen</button></div>
+      ${(tj.tasks||[]).map(t=>`<p>${t.voltooid?"☑":"☐"} ${esc(t.titel)} <span class="tag">${t.deadline||""}</span></p>`).join("")}
+    </div>
+    <div class="panel"><h2>Tijdlijn</h2><div class="timeline">${(json.activities||[]).map(a=>`<div class="timeline-item"><strong>${esc(a.titel)}</strong><p>${fmt(a.aangemaaktOp)} · ${esc(a.omschrijving)}</p></div>`).join("")||"<p class='leeg'>Nog geen activiteiten</p>"}</div></div>`;
+  detail.classList.add("open");
+  $("#detail-x").onclick = closeDetail;
+  $("#detail-sluit")?.addEventListener("click", closeDetail);
+  $("#save-lead").onclick = async () => {
+    await api("/api/leads", { method:"PATCH", body: JSON.stringify({ id, notities: $("#lead-notities").value, toegewezenAan: $("#assign-select").value||null }) });
+    await refresh(); openLeadDetail(id);
+  };
+  detailPaneel.querySelectorAll(".fase-btn").forEach(btn => btn.onclick = async () => {
+    await api("/api/leads", { method:"PATCH", body: JSON.stringify({ id, status: btn.dataset.status }) });
+    await refresh(); openLeadDetail(id);
+  });
+  $("#mail-lead").onclick = () => location.href = `mailto:${lead.email}?subject=${encodeURIComponent("Fluweel Events · "+lead.naam)}`;
+  $("#tpl-bevestiging").onclick = () => sendTemplate("bevestiging", id);
+  $("#tpl-followup").onclick = () => sendTemplate("followup", id);
+  $("#new-quote").onclick = () => createQuoteForLead(lead);
+  $("#add-task").onclick = async () => {
+    await api("/api/tasks", { method:"POST", body: JSON.stringify({ leadId:id, titel:$("#task-titel").value, deadline:$("#task-deadline").value||null }) });
+    openLeadDetail(id);
+  };
+  if (!lead.gelezen) api("/api/leads", { method:"PATCH", body: JSON.stringify({ id, gelezen:true }) });
+}
+
+async function sendTemplate(slug, leadId) {
+  await api("/api/send-email", { method:"POST", body: JSON.stringify({ templateSlug: slug, leadId }) });
+  alert("E-mail verstuurd (of gelogd in dev).");
+}
+
+async function createQuoteForLead(lead) {
+  const regels = [{ omschrijving:"Concept & organisatie event", aantal:1, prijs:2500 }];
+  await api("/api/quotes", { method:"POST", body: JSON.stringify({
+    leadId: lead.id, klantNaam: lead.naam, klantEmail: lead.email, klantBedrijf: lead.bedrijf,
+    regels, geldigTot: new Date(Date.now()+30*86400000).toISOString().slice(0,10),
+  })});
+  await refresh();
+  state.view = "quotes"; renderNav(); renderView();
+  closeDetail();
+}
+
+function closeDetail() { detail.classList.remove("open"); state.activeLead = null; }
+
+function renderQuotes() {
+  main.innerHTML += `<table class="tabel"><thead><tr><th>Nr</th><th>Klant</th><th>Status</th><th>Totaal</th><th>Acties</th></tr></thead><tbody>
+    ${state.quotes.map(q=>`<tr><td>${esc(q.nummer)}</td><td>${esc(q.klantNaam)}</td><td><span class="tag">${q.status}</span></td><td>€ ${q.totaal.toFixed(2)}</td><td class="btn-groep">
+      <a class="btn" href="/api/quotes/pdf?id=${q.id}" target="_blank">PDF</a>
+      <button class="btn btn-primair send-quote" data-id="${q.id}">Versturen</button>
+    </td></tr>`).join("")||"<tr><td colspan='5' class='leeg'>Nog geen offertes</td></tr>"}
+  </tbody></table>`;
+  main.querySelectorAll(".send-quote").forEach(b => b.onclick = async () => {
+    const { json } = await api("/api/quotes/send", { method:"POST", body: JSON.stringify({ id: b.dataset.id }) });
+    alert(`Offerte verstuurd.\nKlantportaal: ${json.portalUrl||"—"}`);
+    await refresh(); renderView();
+  });
+}
+
+function renderInvoices() {
+  main.innerHTML += `<table class="tabel"><thead><tr><th>Nr</th><th>Klant</th><th>Status</th><th>Totaal</th><th>Acties</th></tr></thead><tbody>
+    ${state.invoices.map(i=>`<tr><td>${esc(i.nummer)}</td><td>${esc(i.klantNaam)}</td><td><span class="tag">${i.status}</span></td><td>€ ${i.totaal.toFixed(2)}</td><td class="btn-groep">
+      <a class="btn" href="/api/invoices/pdf?id=${i.id}" target="_blank">PDF</a>
+      <a class="btn" href="/api/invoices/moneybird?id=${i.id}" target="_blank">Moneybird</a>
+      <button class="btn mark-paid" data-id="${i.id}">Betaald</button>
+    </td></tr>`).join("")||"<tr><td colspan='5' class='leeg'>Nog geen facturen</td></tr>"}
+  </tbody></table>
+  <div class="panel"><h2>Factuur van offerte</h2><div class="form-grid"><select id="quote-pick">${state.quotes.map(q=>`<option value="${q.id}">${esc(q.nummer)} — ${esc(q.klantNaam)}</option>`).join("")}</select><button class="btn btn-primair" id="mk-invoice">Factuur aanmaken</button></div></div>`;
+  $("#mk-invoice")?.addEventListener("click", async () => { await api("/api/invoices", { method:"POST", body: JSON.stringify({ quoteId: $("#quote-pick").value }) }); await refresh(); renderView(); });
+  main.querySelectorAll(".mark-paid").forEach(b => b.onclick = async () => { await api("/api/invoices", { method:"PATCH", body: JSON.stringify({ id:b.dataset.id, status:"betaald" }) }); await refresh(); renderView(); });
+}
+
+function renderProjects() {
+  main.innerHTML += state.projects.map(p=>`
+    <div class="panel"><h2>${esc(p.naam)} <span class="tag">${p.status}</span></h2>
+      <p>${esc(p.klantNaam)} · ${p.eventDatum||"Datum n.t.b."} · ${p.locatie||"Locatie n.t.b."}</p>
+      <div class="form-grid"><label>Draaiboek</label><textarea class="draaiboek" data-id="${p.id}" rows="4">${esc(p.draaiboek)}</textarea>
+      <label>Moodboard URL (één per regel)</label><textarea class="mood" data-id="${p.id}" rows="3">${(p.moodboardUrls||[]).join("\n")}</textarea>
+      <button class="btn save-project" data-id="${p.id}">Opslaan</button></div>
+    </div>`).join("") || "<p class='leeg'>Nog geen projecten. Worden automatisch aangemaakt bij fase 'Gewonnen'.</p>";
+  main.querySelectorAll(".save-project").forEach(b => b.onclick = async () => {
+    const id = b.dataset.id;
+    const panel = b.closest(".panel");
+    await api("/api/projects", { method:"PATCH", body: JSON.stringify({
+      id, draaiboek: panel.querySelector(".draaiboek").value,
+      moodboardUrls: panel.querySelector(".mood").value.split("\n").map(s=>s.trim()).filter(Boolean),
+    })});
+    await refresh(); renderView();
+  });
+}
+
+function renderCampaigns() {
+  main.innerHTML += `
+    <div class="panel"><h2>Nieuwe campagne</h2>
+      <div class="form-grid">
+        <input id="c-naam" placeholder="Naam campagne">
+        <input id="c-onderwerp" placeholder="Onderwerp">
+        <textarea id="c-inhoud" rows="4" placeholder="Beste {{naam}}, ..."></textarea>
+        <select id="c-filter"><option value="">Alle leads</option>${FASES.map(f=>`<option value="${f.id}">Fase: ${f.label}</option>`).join("")}</select>
+        <input id="c-dagen" type="number" placeholder="Min. dagen oud (optioneel)">
+        <button class="btn btn-primair" id="c-create">Campagne aanmaken</button>
+      </div>
+    </div>
+    <div class="panel"><h2>Campagnes</h2>${state.campaigns.map(c=>`<p><strong>${esc(c.naam)}</strong> <span class="tag">${c.status||"concept"}</span>
+      <button class="btn send-c" data-id="${c.id}">Versturen</button></p>`).join("")||"<p class='leeg'>Geen campagnes</p>"}</div>`;
+  $("#c-create")?.addEventListener("click", async () => {
+    const { json } = await api("/api/campaigns", { method:"POST", body: JSON.stringify({
+      naam: $("#c-naam").value, onderwerp: $("#c-onderwerp").value, inhoud: $("#c-inhoud").value,
+      filterStatus: $("#c-filter").value||null, filterDagenOud: Number($("#c-dagen").value)||null,
+    })});
+    alert(`Campagne aangemaakt voor ${json.ontvangers} ontvangers.`);
+    await refresh(); renderView();
+  });
+  main.querySelectorAll(".send-c").forEach(b => b.onclick = async () => {
+    const { json } = await api("/api/campaigns/send", { method:"POST", body: JSON.stringify({ id: b.dataset.id }) });
+    alert(`${json.verzonden} e-mails verstuurd.`);
+    await refresh(); renderView();
+  });
+}
+
+function renderTemplates() {
+  main.innerHTML += state.templates.map(t=>`
+    <div class="panel"><h2>${esc(t.naam)} <span class="tag">${t.slug}</span></h2>
+      <p><strong>${esc(t.onderwerp)}</strong></p>
+      <pre style="white-space:pre-wrap;font-size:.85rem;color:var(--mauve);margin-top:.5rem">${esc(t.inhoud)}</pre>
+    </div>`).join("");
+}
+
+async function renderWebsite() {
+  const { json } = await api("/api/content/website");
+  const s = json.sections || {};
+  main.innerHTML += Object.entries(s).map(([k,v])=>`
+    <div class="form-grid panel"><label>${esc(k)}</label><textarea class="web-field" data-key="${esc(k)}" rows="2">${esc(v)}</textarea></div>`).join("");
+  main.innerHTML += `<button class="btn btn-primair" id="save-web">Website opslaan</button>`;
+  $("#save-web").onclick = async () => {
+    for (const el of main.querySelectorAll(".web-field")) {
+      await api("/api/content/website", { method:"PATCH", body: JSON.stringify({ sleutel: el.dataset.key, waarde: el.value }) });
+    }
+    alert("Opgeslagen.");
+  };
+}
+
+function renderIntegrations() {
+  const base = location.origin;
+  main.innerHTML += `
+    <div class="panel"><h2>Koppelingen</h2>
+      <p><strong>Google Calendar</strong> — <a href="/api/tasks/ics" target="_blank">Taken exporteren (.ics)</a></p>
+      <p><strong>Typeform webhook</strong> — POST naar <code>${base}/api/webhooks/typeform</code></p>
+      <p><strong>Moneybird</strong> — export via factuur → Moneybird JSON</p>
+      <p><strong>WhatsApp</strong> — via lead-detail (wa.me link)</p>
+      <p><strong>DocuSign</strong> — binnenkort beschikbaar</p>
+      <p><strong>Klantportaal</strong> — ${base}/portal/</p>
+    </div>`;
+}
+
+async function refresh() { await loadAll(); }
+
+$("#loginform").addEventListener("submit", async e => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target));
+  const { res, json } = await api("/api/auth/login", { method:"POST", body: JSON.stringify(data) });
+  if (res.ok) { showApp(json.email); await refresh(); }
+  else $("#login-melding").textContent = json.error || "Inloggen mislukt.";
+});
+
+$("#uitloggen").onclick = async () => { await api("/api/auth/logout", { method:"POST" }); showLogin(); };
+$("#detail-sluit")?.addEventListener("click", closeDetail);
+
+(async () => {
+  const { res, json } = await api("/api/auth/me");
+  if (res.ok) { showApp(json.email); await refresh(); }
+  else showLogin();
+})();

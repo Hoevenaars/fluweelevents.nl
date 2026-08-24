@@ -4,7 +4,9 @@
 // RESEND_API_KEY staat als omgevingsvariabele in de Vercel-projectinstellingen,
 // nooit hier in de code.
 
-import { addSubmission } from "../lib/store.js";
+import { addLead } from "../lib/crm.js";
+import { getTemplate } from "../lib/crm.js";
+import { sendTemplateEmail } from "../lib/email.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -48,7 +50,11 @@ export default async function handler(req, res) {
     }
 
     try {
-      await addSubmission({ naam, email, telefoon, bericht, bron: "website" });
+      const lead = await addLead({ naam, email, telefoon, bericht, bron: "website" });
+      const template = await getTemplate("bevestiging");
+      if (template) {
+        await sendTemplateEmail({ template, to: email, vars: { naam, email } });
+      }
     } catch (storeErr) {
       console.error("Opslaan contactformulier mislukt:", storeErr);
     }

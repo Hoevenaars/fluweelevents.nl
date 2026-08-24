@@ -8,7 +8,9 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { extname, join, normalize, dirname } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
+import { resolveApiHandler } from "../lib/api-routes.js";
+import contactHandler from "../api/contact.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
@@ -35,22 +37,9 @@ const MIME = {
   ".txt": "text/plain; charset=utf-8",
 };
 
-const API_ROUTES = {
-  "POST /api/contact": "api/contact.js",
-  "POST /api/auth/login": "api/auth/login.js",
-  "POST /api/auth/logout": "api/auth/logout.js",
-  "GET /api/auth/me": "api/auth/me.js",
-  "GET /api/submissions": "api/submissions.js",
-  "PATCH /api/submissions": "api/submissions.js",
-};
-
-const handlerCache = new Map();
-
-async function loadHandler(relativePath) {
-  if (handlerCache.has(relativePath)) return handlerCache.get(relativePath);
-  const mod = await import(pathToFileURL(join(ROOT, relativePath)).href);
-  handlerCache.set(relativePath, mod.default);
-  return mod.default;
+function resolveDevApiHandler(method, pathname) {
+  if (method === "POST" && pathname === "/api/contact") return contactHandler;
+  return resolveApiHandler(method, pathname);
 }
 
 if (MOCK_RESEND) {
@@ -101,7 +90,7 @@ function makeVercelRes(res) {
   return res;
 }
 
-async function handleApi(req, res, relativePath) {
+async function handleApi(req, res, handler) {
   const raw = await readBody(req);
   const contentType = req.headers["content-type"] || "";
   if (contentType.includes("application/json")) {
@@ -113,8 +102,8 @@ async function handleApi(req, res, relativePath) {
   } else {
     req.body = raw;
   }
+  req.url = req.url || "/";
   makeVercelRes(res);
-  const handler = await loadHandler(relativePath);
   await handler(req, res);
 }
 
@@ -122,6 +111,7 @@ async function serveStatic(req, res, pathname) {
   let rel = decodeURIComponent(pathname);
   if (rel === "/") rel = "/index.html";
   if (rel === "/admin" || rel === "/admin/") rel = "/admin/index.html";
+  if (rel === "/portal" || rel === "/portal/") rel = "/portal/index.html";
 
   let filePath = normalize(join(ROOT, rel));
   if (!filePath.startsWith(ROOT)) {
@@ -151,12 +141,11 @@ async function serveStatic(req, res, pathname) {
 
 const server = createServer(async (req, res) => {
   const { pathname } = new URL(req.url, `http://${req.headers.host}`);
-  const routeKey = `${req.method} ${pathname}`;
 
   try {
-    const apiPath = API_ROUTES[routeKey];
-    if (apiPath) {
-      return await handleApi(req, res, apiPath);
+    const apiHandler = resolveDevApiHandler(req.method, pathname);
+    if (apiHandler) {
+      return await handleApi(req, res, apiHandler);
     }
     return await serveStatic(req, res, pathname);
   } catch (err) {
@@ -172,7 +161,7 @@ server.listen(PORT, async () => {
 
   console.log(`[dev] Fluweel Events dev server on http://localhost:${PORT}`);
   console.log(`[dev] Access code (index.html gate): FLUWEEL26  ->  /preview.html`);
-  console.log(`[dev] Admin login: http://localhost:${PORT}/admin/login.html`);
+  console.log(`[dev] Admin werkomgeving: http://localhost:${PORT}/admin/`);
   console.log(`[dev] Opslag: ${getStorageMode()} · Auth: ${getAuthMode()}`);
   if (getAuthMode() === "legacy") {
     console.log(`[dev] Admin credentials: ${process.env.ADMIN_EMAIL} / ${process.env.ADMIN_PASSWORD}`);

@@ -1,0 +1,96 @@
+:root {
+  --ivoor:#FAF5EF; --vlak:#F3EAE0; --inkt:#2A1322; --aubergine:#5B2A4E;
+  --fuchsia:#C81E63; --mauve:#7A5E6E; --lijn:#E3D5C9;
+  --serif:'Newsreader',Georgia,serif; --sans:'Inter',system-ui,sans-serif;
+  --sidebar:240px;
+}
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--sans); color:var(--inkt); background:var(--ivoor); min-height:100svh; }
+.merk { font-family:var(--serif); font-weight:500; font-size:1.3rem; }
+.merk em { color:var(--fuchsia); font-style:normal; }
+
+.login-view { min-height:100svh; display:flex; align-items:center; justify-content:center; padding:2rem; }
+.login-kaart { width:100%; max-width:420px; background:#fff; border:1px solid var(--lijn); border-radius:8px; padding:2rem; }
+.login-sub { color:var(--mauve); margin:.4rem 0 1.4rem; }
+#loginform { display:flex; flex-direction:column; gap:.7rem; }
+#loginform label { font-size:.85rem; color:var(--mauve); }
+#loginform input { font:inherit; padding:.75rem 1rem; border:1px solid var(--lijn); border-radius:6px; background:var(--ivoor); }
+#loginform button { margin-top:.4rem; font:inherit; font-weight:500; background:var(--fuchsia); color:#fff; border:0; border-radius:6px; padding:.85rem; cursor:pointer; }
+.melding { color:var(--fuchsia); font-size:.9rem; min-height:1.2rem; }
+
+.app { display:grid; grid-template-columns:var(--sidebar) 1fr; min-height:100svh; }
+.sidebar { background:#fff; border-right:1px solid var(--lijn); padding:1.2rem 1rem; display:flex; flex-direction:column; gap:1.5rem; position:sticky; top:0; height:100svh; }
+.sidebar nav { display:flex; flex-direction:column; gap:.25rem; flex:1; }
+.nav-item {
+  text-align:left; font:inherit; font-size:.9rem; padding:.55rem .75rem; border:0; border-radius:6px;
+  background:transparent; color:var(--mauve); cursor:pointer;
+}
+.nav-item.actief, .nav-item:hover { background:var(--vlak); color:var(--inkt); }
+.sidebar-foot { border-top:1px solid var(--lijn); padding-top:1rem; display:flex; flex-direction:column; gap:.5rem; }
+.account { font-size:.8rem; color:var(--mauve); word-break:break-all; }
+.knop-licht { font:inherit; font-size:.85rem; background:#fff; border:1px solid var(--lijn); border-radius:6px; padding:.45rem .8rem; cursor:pointer; }
+
+.main { padding:1.4rem 1.6rem 2rem; overflow:auto; }
+.page-kop { margin-bottom:1.2rem; }
+.page-kop h1 { font-family:var(--serif); font-size:1.65rem; font-weight:500; }
+.page-kop p { color:var(--mauve); font-size:.92rem; margin-top:.25rem; }
+
+.grid-4 { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:.75rem; margin-bottom:1.2rem; }
+.kaart-stat { background:#fff; border:1px solid var(--lijn); border-radius:8px; padding:.9rem 1rem; }
+.kaart-stat span { font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:var(--mauve); }
+.kaart-stat strong { display:block; font-family:var(--serif); font-size:1.6rem; color:var(--aubergine); margin-top:.15rem; }
+
+.panel { background:#fff; border:1px solid var(--lijn); border-radius:8px; padding:1rem 1.1rem; margin-bottom:1rem; }
+.panel h2 { font-family:var(--serif); font-size:1.1rem; margin-bottom:.75rem; }
+
+.board { display:grid; grid-template-columns:repeat(5,minmax(180px,1fr)); gap:.65rem; overflow:auto; }
+.kolom { background:var(--vlak); border:1px solid var(--lijn); border-radius:8px; min-height:280px; }
+.kolom-kop { padding:.75rem; border-bottom:1px solid var(--lijn); }
+.kolom-kop h3 { font-family:var(--serif); font-size:.95rem; }
+.kolom-lijst { padding:.55rem; display:flex; flex-direction:column; gap:.45rem; }
+.kaart-lead {
+  background:#fff; border:1px solid var(--lijn); border-radius:6px; padding:.7rem; cursor:pointer; text-align:left; width:100%;
+}
+.kaart-lead.ongelezen { border-left:3px solid var(--fuchsia); }
+.kaart-lead strong { font-family:var(--serif); font-size:.92rem; display:block; }
+.kaart-lead small { color:var(--mauve); font-size:.75rem; }
+
+.tabel { width:100%; border-collapse:collapse; font-size:.9rem; }
+.tabel th, .tabel td { text-align:left; padding:.55rem .4rem; border-bottom:1px solid var(--lijn); }
+.tabel th { color:var(--mauve); font-weight:500; font-size:.78rem; text-transform:uppercase; }
+
+.form-grid { display:grid; gap:.65rem; max-width:520px; }
+.form-grid label { font-size:.85rem; color:var(--mauve); }
+.form-grid input, .form-grid textarea, .form-grid select {
+  font:inherit; padding:.65rem .8rem; border:1px solid var(--lijn); border-radius:6px; width:100%;
+}
+.btn {
+  font:inherit; font-size:.88rem; border-radius:6px; padding:.55rem 1rem; cursor:pointer; border:1px solid var(--lijn); background:#fff;
+}
+.btn-primair { background:var(--fuchsia); border-color:var(--fuchsia); color:#fff; }
+.btn-primair:hover { background:var(--aubergine); border-color:var(--aubergine); }
+.btn-groep { display:flex; flex-wrap:wrap; gap:.45rem; margin-top:.5rem; }
+
+.detail { position:fixed; inset:0; z-index:100; pointer-events:none; }
+.detail.open { pointer-events:auto; }
+.detail-backdrop { position:absolute; inset:0; background:rgba(42,19,34,.35); opacity:0; transition:.2s; }
+.detail.open .detail-backdrop { opacity:1; }
+.detail-paneel {
+  position:absolute; top:0; right:0; width:min(520px,100%); height:100%; background:#fff;
+  border-left:1px solid var(--lijn); transform:translateX(100%); transition:.3s; overflow:auto; padding:1.2rem;
+}
+.detail.open .detail-paneel { transform:none; }
+.detail-x { float:right; background:none; border:0; font-size:1.6rem; cursor:pointer; color:var(--mauve); }
+.timeline { border-left:2px solid var(--lijn); margin:.5rem 0 1rem .5rem; padding-left:1rem; }
+.timeline-item { margin-bottom:.75rem; }
+.timeline-item strong { font-size:.88rem; }
+.timeline-item p { font-size:.82rem; color:var(--mauve); }
+
+.tag { display:inline-block; font-size:.72rem; padding:.15rem .5rem; border-radius:999px; background:var(--vlak); color:var(--aubergine); }
+.leeg { color:var(--mauve); text-align:center; padding:2rem; }
+
+@media (max-width:900px) {
+  .app { grid-template-columns:1fr; }
+  .sidebar { height:auto; position:relative; }
+  .board { grid-template-columns:1fr; }
+}
