@@ -8,7 +8,9 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { extname, join, normalize, dirname } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
+import { resolveApiHandler } from "../lib/api-routes.js";
+import contactHandler from "../api/contact.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
@@ -35,58 +37,9 @@ const MIME = {
   ".txt": "text/plain; charset=utf-8",
 };
 
-function resolveApiHandler(method, pathname) {
-  const routes = [
-    ["POST", "/api/contact", "api/contact.js"],
-    ["POST", "/api/auth/login", "api/auth/login.js"],
-    ["POST", "/api/auth/logout", "api/auth/logout.js"],
-    ["GET", "/api/auth/me", "api/auth/me.js"],
-    ["GET", "/api/submissions", "api/submissions.js"],
-    ["PATCH", "/api/submissions", "api/submissions.js"],
-    ["GET", "/api/phases", "api/phases.js"],
-    ["GET", "/api/leads", "api/leads.js"],
-    ["PATCH", "/api/leads", "api/leads.js"],
-    ["GET", "/api/activities", "api/activities.js"],
-    ["POST", "/api/activities", "api/activities.js"],
-    ["GET", "/api/tasks", "api/tasks.js"],
-    ["POST", "/api/tasks", "api/tasks.js"],
-    ["PATCH", "/api/tasks", "api/tasks.js"],
-    ["GET", "/api/tasks/ics", "api/tasks.js"],
-    ["GET", "/api/quotes", "api/quotes.js"],
-    ["POST", "/api/quotes", "api/quotes.js"],
-    ["PATCH", "/api/quotes", "api/quotes.js"],
-    ["GET", "/api/quotes/pdf", "api/quotes.js"],
-    ["POST", "/api/quotes/send", "api/quotes.js"],
-    ["GET", "/api/invoices", "api/invoices.js"],
-    ["POST", "/api/invoices", "api/invoices.js"],
-    ["PATCH", "/api/invoices", "api/invoices.js"],
-    ["GET", "/api/invoices/pdf", "api/invoices.js"],
-    ["GET", "/api/invoices/moneybird", "api/invoices.js"],
-    ["GET", "/api/projects", "api/projects.js"],
-    ["PATCH", "/api/projects", "api/projects.js"],
-    ["GET", "/api/campaigns", "api/campaigns.js"],
-    ["POST", "/api/campaigns", "api/campaigns.js"],
-    ["POST", "/api/campaigns/send", "api/campaigns.js"],
-    ["GET", "/api/analytics", "api/analytics.js"],
-    ["GET", "/api/content/templates", "api/content.js"],
-    ["GET", "/api/content/website", "api/content.js"],
-    ["PATCH", "/api/content/website", "api/content.js"],
-    ["POST", "/api/send-email", "api/send-email.js"],
-    ["POST", "/api/webhooks/typeform", "api/webhooks/typeform.js"],
-    ["GET", "/api/portal/quote", "api/portal/quote.js"],
-    ["POST", "/api/portal/quote", "api/portal/quote.js"],
-  ];
-  const hit = routes.find(([m, p]) => m === method && p === pathname);
-  return hit ? hit[2] : null;
-}
-
-const handlerCache = new Map();
-
-async function loadHandler(relativePath) {
-  if (handlerCache.has(relativePath)) return handlerCache.get(relativePath);
-  const mod = await import(pathToFileURL(join(ROOT, relativePath)).href);
-  handlerCache.set(relativePath, mod.default);
-  return mod.default;
+function resolveDevApiHandler(method, pathname) {
+  if (method === "POST" && pathname === "/api/contact") return contactHandler;
+  return resolveApiHandler(method, pathname);
 }
 
 if (MOCK_RESEND) {
@@ -137,7 +90,7 @@ function makeVercelRes(res) {
   return res;
 }
 
-async function handleApi(req, res, relativePath) {
+async function handleApi(req, res, handler) {
   const raw = await readBody(req);
   const contentType = req.headers["content-type"] || "";
   if (contentType.includes("application/json")) {
@@ -151,7 +104,6 @@ async function handleApi(req, res, relativePath) {
   }
   req.url = req.url || "/";
   makeVercelRes(res);
-  const handler = await loadHandler(relativePath);
   await handler(req, res);
 }
 
@@ -191,9 +143,9 @@ const server = createServer(async (req, res) => {
   const { pathname } = new URL(req.url, `http://${req.headers.host}`);
 
   try {
-    const apiPath = resolveApiHandler(req.method, pathname);
-    if (apiPath) {
-      return await handleApi(req, res, apiPath);
+    const apiHandler = resolveDevApiHandler(req.method, pathname);
+    if (apiHandler) {
+      return await handleApi(req, res, apiHandler);
     }
     return await serveStatic(req, res, pathname);
   } catch (err) {
