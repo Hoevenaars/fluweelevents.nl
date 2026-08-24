@@ -35,14 +35,50 @@ const MIME = {
   ".txt": "text/plain; charset=utf-8",
 };
 
-const API_ROUTES = {
-  "POST /api/contact": "api/contact.js",
-  "POST /api/auth/login": "api/auth/login.js",
-  "POST /api/auth/logout": "api/auth/logout.js",
-  "GET /api/auth/me": "api/auth/me.js",
-  "GET /api/submissions": "api/submissions.js",
-  "PATCH /api/submissions": "api/submissions.js",
-};
+function resolveApiHandler(method, pathname) {
+  const routes = [
+    ["POST", "/api/contact", "api/contact.js"],
+    ["POST", "/api/auth/login", "api/auth/login.js"],
+    ["POST", "/api/auth/logout", "api/auth/logout.js"],
+    ["GET", "/api/auth/me", "api/auth/me.js"],
+    ["GET", "/api/submissions", "api/submissions.js"],
+    ["PATCH", "/api/submissions", "api/submissions.js"],
+    ["GET", "/api/phases", "api/phases.js"],
+    ["GET", "/api/leads", "api/leads.js"],
+    ["PATCH", "/api/leads", "api/leads.js"],
+    ["GET", "/api/activities", "api/activities.js"],
+    ["POST", "/api/activities", "api/activities.js"],
+    ["GET", "/api/tasks", "api/tasks.js"],
+    ["POST", "/api/tasks", "api/tasks.js"],
+    ["PATCH", "/api/tasks", "api/tasks.js"],
+    ["GET", "/api/tasks/ics", "api/tasks.js"],
+    ["GET", "/api/quotes", "api/quotes.js"],
+    ["POST", "/api/quotes", "api/quotes.js"],
+    ["PATCH", "/api/quotes", "api/quotes.js"],
+    ["GET", "/api/quotes/pdf", "api/quotes.js"],
+    ["POST", "/api/quotes/send", "api/quotes.js"],
+    ["GET", "/api/invoices", "api/invoices.js"],
+    ["POST", "/api/invoices", "api/invoices.js"],
+    ["PATCH", "/api/invoices", "api/invoices.js"],
+    ["GET", "/api/invoices/pdf", "api/invoices.js"],
+    ["GET", "/api/invoices/moneybird", "api/invoices.js"],
+    ["GET", "/api/projects", "api/projects.js"],
+    ["PATCH", "/api/projects", "api/projects.js"],
+    ["GET", "/api/campaigns", "api/campaigns.js"],
+    ["POST", "/api/campaigns", "api/campaigns.js"],
+    ["POST", "/api/campaigns/send", "api/campaigns.js"],
+    ["GET", "/api/analytics", "api/analytics.js"],
+    ["GET", "/api/content/templates", "api/content.js"],
+    ["GET", "/api/content/website", "api/content.js"],
+    ["PATCH", "/api/content/website", "api/content.js"],
+    ["POST", "/api/send-email", "api/send-email.js"],
+    ["POST", "/api/webhooks/typeform", "api/webhooks/typeform.js"],
+    ["GET", "/api/portal/quote", "api/portal/quote.js"],
+    ["POST", "/api/portal/quote", "api/portal/quote.js"],
+  ];
+  const hit = routes.find(([m, p]) => m === method && p === pathname);
+  return hit ? hit[2] : null;
+}
 
 const handlerCache = new Map();
 
@@ -113,6 +149,7 @@ async function handleApi(req, res, relativePath) {
   } else {
     req.body = raw;
   }
+  req.url = req.url || "/";
   makeVercelRes(res);
   const handler = await loadHandler(relativePath);
   await handler(req, res);
@@ -122,6 +159,7 @@ async function serveStatic(req, res, pathname) {
   let rel = decodeURIComponent(pathname);
   if (rel === "/") rel = "/index.html";
   if (rel === "/admin" || rel === "/admin/") rel = "/admin/index.html";
+  if (rel === "/portal" || rel === "/portal/") rel = "/portal/index.html";
 
   let filePath = normalize(join(ROOT, rel));
   if (!filePath.startsWith(ROOT)) {
@@ -151,10 +189,9 @@ async function serveStatic(req, res, pathname) {
 
 const server = createServer(async (req, res) => {
   const { pathname } = new URL(req.url, `http://${req.headers.host}`);
-  const routeKey = `${req.method} ${pathname}`;
 
   try {
-    const apiPath = API_ROUTES[routeKey];
+    const apiPath = resolveApiHandler(req.method, pathname);
     if (apiPath) {
       return await handleApi(req, res, apiPath);
     }
@@ -172,7 +209,7 @@ server.listen(PORT, async () => {
 
   console.log(`[dev] Fluweel Events dev server on http://localhost:${PORT}`);
   console.log(`[dev] Access code (index.html gate): FLUWEEL26  ->  /preview.html`);
-  console.log(`[dev] Admin login: http://localhost:${PORT}/admin/login.html`);
+  console.log(`[dev] Admin werkomgeving: http://localhost:${PORT}/admin/`);
   console.log(`[dev] Opslag: ${getStorageMode()} · Auth: ${getAuthMode()}`);
   if (getAuthMode() === "legacy") {
     console.log(`[dev] Admin credentials: ${process.env.ADMIN_EMAIL} / ${process.env.ADMIN_PASSWORD}`);

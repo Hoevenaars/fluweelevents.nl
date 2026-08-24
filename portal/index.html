@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fluweel · Klantportaal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@500&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root { --ivoor:#FAF5EF; --inkt:#2A1322; --fuchsia:#C81E63; --mauve:#7A5E6E; --lijn:#E3D5C9; }
+    body { font-family:Inter,sans-serif; background:var(--ivoor); color:var(--inkt); min-height:100svh; padding:2rem 1.2rem; }
+    .wrap { max-width:560px; margin:0 auto; background:#fff; border:1px solid var(--lijn); border-radius:8px; padding:2rem; }
+    h1 { font-family:Newsreader,serif; font-weight:500; margin-bottom:.5rem; }
+    .sub { color:var(--mauve); margin-bottom:1.5rem; }
+    table { width:100%; border-collapse:collapse; margin:1rem 0; }
+    td,th { text-align:left; padding:.5rem 0; border-bottom:1px solid var(--lijn); }
+    .totaal { font-family:Newsreader,serif; font-size:1.4rem; color:var(--fuchsia); margin:1rem 0; }
+    .btn { font:inherit; padding:.7rem 1.2rem; border-radius:6px; border:0; cursor:pointer; margin-right:.5rem; }
+    .primair { background:var(--fuchsia); color:#fff; }
+    .sec { background:#fff; border:1px solid var(--lijn); }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="app">
+    <h1>Fluweel<em style="color:var(--fuchsia);font-style:normal">.</em></h1>
+    <p class="sub">Je offerte</p>
+    <div id="content">Laden...</div>
+  </div>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const token = params.get('token');
+    if (!token) document.getElementById('content').innerHTML = '<p>Geen geldige link. Neem contact op met Fluweel Events.</p>';
+    else fetch('/api/portal/quote?token=' + encodeURIComponent(token)).then(r=>r.json()).then(d => {
+      if (!d.ok) { document.getElementById('content').innerHTML = '<p>Offerte niet gevonden.</p>'; return; }
+      const q = d.quote;
+      document.getElementById('content').innerHTML = `
+        <p><strong>${q.nummer}</strong> · Status: ${q.status}</p>
+        <table><thead><tr><th>Omschrijving</th><th>Aantal</th><th>Prijs</th></tr></thead>
+        <tbody>${(q.regels||[]).map(r=>`<tr><td>${r.omschrijving}</td><td>${r.aantal}</td><td>€ ${r.prijs.toFixed(2)}</td></tr>`).join('')}</tbody></table>
+        <p class="totaal">Totaal: € ${q.totaal.toFixed(2)}</p>
+        ${q.geldigTot?`<p>Geldig tot: ${q.geldigTot}</p>`:''}
+        ${q.status==='verstuurd'?`<button class="btn primair" id="ok">Accepteren</button><button class="btn sec" id="no">Afwijzen</button>`:''}
+      `;
+      document.getElementById('ok')?.addEventListener('click', () => act('accepteer'));
+      document.getElementById('no')?.addEventListener('click', () => act('afwijzen'));
+      function act(actie) {
+        fetch('/api/portal/quote', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ token, actie }) })
+          .then(() => location.reload());
+      }
+    });
+  </script>
+</body>
+</html>
