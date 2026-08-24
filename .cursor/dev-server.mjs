@@ -1,26 +1,24 @@
 // Local development server for the Fluweel Events site.
 //
 // Production runs on Vercel: the static files are served directly and
-// `api/contact.js` runs as a serverless function. This harness reproduces that
-// locally with only the Node standard library so `vercel dev` (and a Vercel
-// login) is not required inside a Cloud Agent:
-//   * static files are served from the repository root;
-//   * POST /api/contact is routed to the real handler in api/contact.js,
-//     wrapped in a Vercel-compatible request/response shim;
-//   * the outbound call to the Resend email API is intercepted so the happy
-//     path can be exercised without a real RESEND_API_KEY or sending mail.
-//     Set RESEND_API_KEY to a real value to disable the mock and hit Resend.
+// `api/*.js` runs as serverless functions. This harness reproduces that
+// locally so `vercel dev` is not required inside a Cloud Agent.
 
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { extname, join, normalize, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
 const PORT = Number(process.env.PORT) || 3000;
 const MOCK_RESEND = !process.env.RESEND_API_KEY;
+
+process.env.ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@fluweelevents.nl";
+process.env.ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "fluweel-admin-dev";
+process.env.ADMIN_SESSION_SECRET =
+  process.env.ADMIN_SESSION_SECRET || process.env.ADMIN_PASSWORD;
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -37,8 +35,24 @@ const MIME = {
   ".txt": "text/plain; charset=utf-8",
 };
 
-// Intercept the Resend email API in local dev so the contact handler's happy
-// path succeeds without sending real mail. Any other request passes through.
+const API_ROUTES = {
+  "POST /api/contact": "api/contact.js",
+  "POST /api/auth/login": "api/auth/login.js",
+  "POST /api/auth/logout": "api/auth/logout.js",
+  "GET /api/auth/me": "api/auth/me.js",
+  "GET /api/submissions": "api/submissions.js",
+  "PATCH /api/submissions": "api/submissions.js",
+};
+
+const handlerCache = new Map();
+
+async function loadHandler(relativePath) {
+  if (handlerCache.has(relativePath)) return handlerCache.get(relativePath);
+  const mod = await import(pathToFileURL(join(ROOT, relativePath)).href);
+  handlerCache.set(relativePath, mod.default);
+  return mod.default;
+}
+
 if (MOCK_RESEND) {
   const realFetch = globalThis.fetch;
   globalThis.fetch = async (input, init) => {
@@ -59,20 +73,6 @@ if (MOCK_RESEND) {
   process.env.RESEND_API_KEY = "dev-mock-key";
 }
 
-// api/contact.js uses ESM syntax in a .js file. Without a root package.json
-// declaring "type": "module", Node treats .js as CommonJS, so it is loaded via
-// a data: URL to evaluate it as a real ES module. The handler has no imports of
-// its own and reads process.env / global fetch, so this is faithful to Vercel.
-async function loadContactHandler() {
-  const source = await readFile(join(ROOT, "api", "contact.js"), "utf8");
-  const dataUrl =
-    "data:text/javascript;base64," + Buffer.from(source, "utf8").toString("base64");
-  const mod = await import(dataUrl);
-  return mod.default;
-}
-
-const contactHandler = await loadContactHandler();
-
 function readBody(req) {
   return new Promise((resolve, reject) => {
     const chunks = [];
@@ -82,7 +82,6 @@ function readBody(req) {
   });
 }
 
-// Minimal Vercel-style response shim: res.status().json() / .send() / .end().
 function makeVercelRes(res) {
   res.status = (code) => {
     res.statusCode = code;
@@ -102,7 +101,7 @@ function makeVercelRes(res) {
   return res;
 }
 
-async function handleApiContact(req, res) {
+async function handleApi(req, res, relativePath) {
   const raw = await readBody(req);
   const contentType = req.headers["content-type"] || "";
   if (contentType.includes("application/json")) {
@@ -115,21 +114,21 @@ async function handleApiContact(req, res) {
     req.body = raw;
   }
   makeVercelRes(res);
-  await contactHandler(req, res);
+  const handler = await loadHandler(relativePath);
+  await handler(req, res);
 }
 
 async function serveStatic(req, res, pathname) {
   let rel = decodeURIComponent(pathname);
   if (rel === "/") rel = "/index.html";
+  if (rel === "/admin" || rel === "/admin/") rel = "/admin/index.html";
 
-  // Prevent path traversal outside the project root.
   let filePath = normalize(join(ROOT, rel));
   if (!filePath.startsWith(ROOT)) {
     res.statusCode = 403;
     return res.end("Forbidden");
   }
 
-  // Allow extension-less URLs to resolve to their .html file.
   if (!extname(filePath) && existsSync(filePath + ".html")) {
     filePath += ".html";
   }
@@ -152,9 +151,12 @@ async function serveStatic(req, res, pathname) {
 
 const server = createServer(async (req, res) => {
   const { pathname } = new URL(req.url, `http://${req.headers.host}`);
+  const routeKey = `${req.method} ${pathname}`;
+
   try {
-    if (pathname === "/api/contact") {
-      return await handleApiContact(req, res);
+    const apiPath = API_ROUTES[routeKey];
+    if (apiPath) {
+      return await handleApi(req, res, apiPath);
     }
     return await serveStatic(req, res, pathname);
   } catch (err) {
@@ -164,9 +166,19 @@ const server = createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
+  const { getStorageMode } = await import("../lib/store.js");
+  const { getAuthMode } = await import("../lib/auth.js");
+
   console.log(`[dev] Fluweel Events dev server on http://localhost:${PORT}`);
   console.log(`[dev] Access code (index.html gate): FLUWEEL26  ->  /preview.html`);
+  console.log(`[dev] Admin login: http://localhost:${PORT}/admin/login.html`);
+  console.log(`[dev] Opslag: ${getStorageMode()} · Auth: ${getAuthMode()}`);
+  if (getAuthMode() === "legacy") {
+    console.log(`[dev] Admin credentials: ${process.env.ADMIN_EMAIL} / ${process.env.ADMIN_PASSWORD}`);
+  } else {
+    console.log("[dev] Supabase Auth actief — log in met je Supabase-gebruiker.");
+  }
   console.log(
     MOCK_RESEND
       ? "[dev] Resend API is mocked locally; no email is sent."

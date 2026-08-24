@@ -1,7 +1,10 @@
-// Vercel serverless function. Vangt het contactformulier op en verstuurt
-// via Resend een mail naar Fluweel, met reply-to op het adres van de afzender.
+// Vercel serverless function. Vangt het contactformulier op, slaat het op in
+// centrale opslag en verstuurt via Resend een mail naar Fluweel, met reply-to
+// op het adres van de afzender.
 // RESEND_API_KEY staat als omgevingsvariabele in de Vercel-projectinstellingen,
 // nooit hier in de code.
+
+import { addSubmission } from "../lib/store.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -42,6 +45,12 @@ export default async function handler(req, res) {
       const detail = await resendResponse.text();
       console.error("Resend fout:", detail);
       return res.status(502).json({ ok: false, error: "Verzenden is niet gelukt. Probeer het later opnieuw." });
+    }
+
+    try {
+      await addSubmission({ naam, email, telefoon, bericht, bron: "website" });
+    } catch (storeErr) {
+      console.error("Opslaan contactformulier mislukt:", storeErr);
     }
 
     return res.status(200).json({ ok: true });

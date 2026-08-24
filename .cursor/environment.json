@@ -1,6 +1,6 @@
 {
   "name": "Fluweel Events (static site + /api/contact)",
-  "install": "node --version",
+  "install": "npm install",
   "start": "node .cursor/dev-server.mjs",
   "ports": [
     {

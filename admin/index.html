@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="color-scheme" content="light" />
+  <title>Contactformulieren · Fluweel Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ivoor:#FAF5EF; --vlak:#F3EAE0; --inkt:#2A1322; --aubergine:#5B2A4E;
+      --fuchsia:#C81E63; --mauve:#7A5E6E; --lijn:#E3D5C9;
+      --serif:'Newsreader',Georgia,serif; --sans:'Inter',system-ui,sans-serif;
+      --maxw:980px;
+    }
+    *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+    body {
+      background:var(--ivoor); color:var(--inkt); font-family:var(--sans);
+      min-height:100svh; line-height:1.6;
+    }
+    .wrap { max-width:var(--maxw); margin:0 auto; padding:0 1.4rem; }
+    header {
+      padding:1.2rem 0; border-bottom:1px solid var(--lijn);
+      background:rgba(250,245,239,.92); position:sticky; top:0; z-index:10;
+    }
+    .kop {
+      display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+    }
+    .merk { font-family:var(--serif); font-weight:500; font-size:1.35rem; }
+    .merk em { color:var(--fuchsia); font-style:normal; }
+    .meta { color:var(--mauve); font-size:.9rem; }
+    .uitloggen {
+      font:inherit; font-size:.9rem; color:var(--inkt); background:#fff;
+      border:1px solid var(--lijn); border-radius:4px; padding:.55rem .95rem; cursor:pointer;
+    }
+    .uitloggen:hover { border-color:var(--aubergine); color:var(--aubergine); }
+    main { padding:2rem 0 3rem; }
+    .stats {
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+      gap:1rem; margin-bottom:1.8rem;
+    }
+    .stat {
+      background:#fff; border:1px solid var(--lijn); border-radius:4px; padding:1rem 1.1rem;
+    }
+    .stat .label { font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; color:var(--mauve); }
+    .stat .waarde { font-family:var(--serif); font-size:1.8rem; color:var(--aubergine); margin-top:.2rem; }
+    .lijst { display:flex; flex-direction:column; gap:1rem; }
+    .bericht {
+      background:#fff; border:1px solid var(--lijn); border-radius:4px; padding:1.2rem 1.3rem;
+    }
+    .bericht.nieuw { border-left:3px solid var(--fuchsia); }
+    .bericht-kop {
+      display:flex; justify-content:space-between; gap:1rem; align-items:flex-start;
+      margin-bottom:.75rem; flex-wrap:wrap;
+    }
+    .bericht-kop h2 {
+      font-family:var(--serif); font-weight:500; font-size:1.25rem; color:var(--inkt);
+    }
+    .datum { font-size:.85rem; color:var(--mauve); white-space:nowrap; }
+    .contactregels { display:flex; flex-wrap:wrap; gap:.6rem 1.2rem; font-size:.92rem; color:var(--mauve); margin-bottom:.9rem; }
+    .contactregels a { color:var(--aubergine); }
+    .tekst {
+      white-space:pre-wrap; color:var(--inkt); background:var(--vlak);
+      border-radius:4px; padding:.9rem 1rem; margin-bottom:.9rem;
+    }
+    .acties { display:flex; gap:.7rem; flex-wrap:wrap; }
+    .knop {
+      font:inherit; font-size:.85rem; border-radius:4px; padding:.45rem .85rem; cursor:pointer;
+      border:1px solid var(--lijn); background:#fff; color:var(--inkt);
+    }
+    .knop:hover { border-color:var(--aubergine); color:var(--aubergine); }
+    .leeg, .laden, .fout {
+      text-align:center; color:var(--mauve); padding:2.5rem 1rem;
+      background:#fff; border:1px dashed var(--lijn); border-radius:4px;
+    }
+    .fout { color:var(--fuchsia); border-style:solid; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap kop">
+      <div>
+        <p class="merk">Fluweel<em>.</em> Admin</p>
+        <p class="meta" id="account">Contactformulieren</p>
+      </div>
+      <button class="uitloggen" id="uitloggen" type="button">Uitloggen</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="stats">
+      <div class="stat">
+        <div class="label">Totaal</div>
+        <div class="waarde" id="stat-totaal">0</div>
+      </div>
+      <div class="stat">
+        <div class="label">Nieuw</div>
+        <div class="waarde" id="stat-nieuw">0</div>
+      </div>
+    </div>
+    <div id="lijst" class="lijst">
+      <p class="laden">Berichten laden...</p>
+    </div>
+  </main>
+
+  <script>
+    const lijst = document.getElementById('lijst');
+    const account = document.getElementById('account');
+
+    function formatDatum(iso) {
+      return new Intl.DateTimeFormat('nl-NL', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      }).format(new Date(iso));
+    }
+
+    function renderSubmissions(submissions) {
+      document.getElementById('stat-totaal').textContent = submissions.length;
+      document.getElementById('stat-nieuw').textContent = submissions.filter((s) => !s.gelezen).length;
+
+      if (!submissions.length) {
+        lijst.innerHTML = '<p class="leeg">Nog geen contactformulieren ontvangen.</p>';
+        return;
+      }
+
+      lijst.innerHTML = submissions.map((item) => `
+        <article class="bericht ${item.gelezen ? '' : 'nieuw'}" data-id="${item.id}">
+          <div class="bericht-kop">
+            <h2>${escapeHtml(item.naam)}</h2>
+            <time class="datum" datetime="${item.ontvangenOp}">${formatDatum(item.ontvangenOp)}</time>
+          </div>
+          <div class="contactregels">
+            <span><a href="mailto:${escapeAttr(item.email)}">${escapeHtml(item.email)}</a></span>
+            ${item.telefoon ? `<span>${escapeHtml(item.telefoon)}</span>` : ''}
+            <span>${escapeHtml(item.bron || 'website')}</span>
+          </div>
+          <div class="tekst">${escapeHtml(item.bericht)}</div>
+          <div class="acties">
+            <a class="knop" href="mailto:${escapeAttr(item.email)}?subject=${escapeAttr('Re: ' + item.naam)}">Beantwoorden</a>
+            ${item.gelezen ? '' : `<button class="knop markeer" type="button" data-id="${item.id}">Markeer als gelezen</button>`}
+          </div>
+        </article>
+      `).join('');
+
+      lijst.querySelectorAll('.markeer').forEach((knop) => {
+        knop.addEventListener('click', async () => {
+          const id = knop.dataset.id;
+          knop.disabled = true;
+          const res = await fetch('/api/submissions', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id }),
+          });
+          if (res.ok) await loadSubmissions();
+          else knop.disabled = false;
+        });
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;');
+    }
+
+    function escapeAttr(str) {
+      return encodeURIComponent(String(str)).replaceAll('%20', ' ');
+    }
+
+    async function requireAuth() {
+      const res = await fetch('/api/auth/me');
+      if (!res.ok) {
+        location.replace('/admin/login.html');
+        return null;
+      }
+      const json = await res.json();
+      account.textContent = `Ingelogd als ${json.email}`;
+      return json;
+    }
+
+    async function loadSubmissions() {
+      const res = await fetch('/api/submissions');
+      if (res.status === 401) {
+        location.replace('/admin/login.html');
+        return;
+      }
+      if (!res.ok) {
+        lijst.innerHTML = '<p class="fout">Berichten konden niet worden geladen.</p>';
+        return;
+      }
+      const json = await res.json();
+      renderSubmissions(json.submissions || []);
+    }
+
+    document.getElementById('uitloggen').addEventListener('click', async () => {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      location.replace('/admin/login.html');
+    });
+
+    (async () => {
+      const session = await requireAuth();
+      if (session) await loadSubmissions();
+    })();
+  </script>
+</body>
+</html>
