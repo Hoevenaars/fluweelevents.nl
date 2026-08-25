@@ -81,6 +81,37 @@ async function api(path, opts = {}) {
   return { res, json };
 }
 
+async function authedFetch(path) {
+  const headers = {};
+  const session = readSession();
+  if (session?.accessToken) {
+    headers.Authorization = `Bearer ${session.accessToken}`;
+    headers["x-fluweel-access"] = session.accessToken;
+    if (session.refreshToken) headers["x-fluweel-refresh"] = session.refreshToken;
+  }
+  return fetch(path, { credentials: "same-origin", headers });
+}
+
+async function openAuthedFile(path) {
+  const res = await authedFetch(path);
+  if (!res.ok) {
+    const json = await res.json().catch(() => ({}));
+    alert(json.error || "Bestand openen mislukt.");
+    return;
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const opened = window.open(url, "_blank", "noopener");
+  if (!opened) {
+    const a = document.createElement("a");
+    a.href = url;
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.click();
+  }
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+}
+
 function esc(s) { return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
 function fmt(iso) { return iso ? new Intl.DateTimeFormat("nl-NL",{dateStyle:"medium",timeStyle:"short"}).format(new Date(iso)) : "-"; }
 function fase(id) { return FASES.find(f=>f.id===id)?.label || id; }
@@ -557,8 +588,8 @@ async function openQuoteDetail(id) {
     </div>
     <div class="btn-groep">
       <button class="btn btn-primair" id="save-quote">Opslaan</button>
-      <a class="btn" href="/api/quotes/pdf?id=${quote.id}" target="_blank">PDF</a>
-      <button class="btn btn-primair" id="send-quote-detail">Versturen</button>
+      <button type="button" class="btn" id="quote-pdf">PDF</button>
+      <button class="btn btn-primair" id="new-quote-send">Versturen</button>
     </div>
     <p class="melding" id="quote-melding"></p>`;
   detail.classList.add("open");
@@ -591,13 +622,9 @@ async function openQuoteDetail(id) {
     openQuoteDetail(id);
   };
 
-  $("#send-quote-detail").onclick = async () => {
-    const { json: out } = await api("/api/quotes/send", { method: "POST", body: JSON.stringify({ id }) });
-    alert(`Offerte verstuurd (PDF in bijlage).\nKlantportaal: ${out.portalUrl || "—"}`);
-    await refresh();
-    if (state.view === "quotes") renderView();
-    openQuoteDetail(id);
-  };
+  $("#quote-pdf").onclick = () => openAuthedFile(`/api/quotes/pdf?id=${encodeURIComponent(id)}`);
+
+  $("#new-quote-send").onclick = () => openSendQuoteModal(id);
 }
 
 function renderQuotes() {
@@ -613,7 +640,7 @@ function renderQuotes() {
       <td>€ ${Number(q.totaal || 0).toFixed(2)}</td>
       <td class="btn-groep">
         <button class="btn open-quote" data-id="${q.id}">Bewerken</button>
-        <a class="btn" href="/api/quotes/pdf?id=${q.id}" target="_blank">PDF</a>
+        <button type="button" class="btn open-pdf" data-href="/api/quotes/pdf?id=${q.id}">PDF</button>
         <button class="btn btn-primair send-quote" data-id="${q.id}">Versturen</button>
       </td>
     </tr>`).join("") || "<tr><td colspan='5' class='leeg'>Nog geen offertes</td></tr>"}
@@ -622,13 +649,11 @@ function renderQuotes() {
   main.querySelectorAll(".open-quote").forEach((b) => {
     b.onclick = () => openQuoteDetail(b.dataset.id);
   });
+  main.querySelectorAll(".open-pdf").forEach((b) => {
+    b.onclick = () => openAuthedFile(b.dataset.href);
+  });
   main.querySelectorAll(".send-quote").forEach((b) => {
-    b.onclick = async () => {
-      const { json } = await api("/api/quotes/send", { method: "POST", body: JSON.stringify({ id: b.dataset.id }) });
-      alert(`Offerte verstuurd (PDF in bijlage).\nKlantportaal: ${json.portalUrl || "—"}`);
-      await refresh();
-      renderView();
-    };
+    b.onclick = () => openSendQuoteModal(b.dataset.id);
   });
 }
 
@@ -640,14 +665,17 @@ function renderInvoices() {
       <td><span class="tag">${esc(i.status)}</span></td>
       <td>€ ${Number(i.totaal || 0).toFixed(2)}</td>
       <td class="btn-groep">
-        <a class="btn" href="/api/invoices/pdf?id=${i.id}" target="_blank">PDF</a>
-        <a class="btn" href="/api/invoices/moneybird?id=${i.id}" target="_blank">Moneybird</a>
+        <button type="button" class="btn open-pdf" data-href="/api/invoices/pdf?id=${i.id}">PDF</button>
+        <button type="button" class="btn open-pdf" data-href="/api/invoices/moneybird?id=${i.id}">Moneybird</button>
         ${i.status === "concept" || i.status === "vervallen" ? `<button class="btn btn-primair send-inv" data-id="${i.id}">Versturen</button>` : ""}
         ${i.status !== "betaald" ? `<button class="btn mark-paid" data-id="${i.id}">Betaald</button>` : ""}
       </td>
     </tr>`).join("") || "<tr><td colspan='5' class='leeg'>Nog geen facturen</td></tr>"}
   </tbody></table>
   <div class="panel"><h2>Factuur van offerte</h2><div class="form-grid"><select id="quote-pick">${state.quotes.map((q) => `<option value="${q.id}">${esc(q.nummer)} — ${esc(q.klantNaam)}</option>`).join("")}</select><button class="btn btn-primair" id="mk-invoice">Factuur aanmaken</button></div></div>`;
+  main.querySelectorAll(".open-pdf").forEach((b) => {
+    b.onclick = () => openAuthedFile(b.dataset.href);
+  });
   $("#mk-invoice")?.addEventListener("click", async () => {
     await api("/api/invoices", { method: "POST", body: JSON.stringify({ quoteId: $("#quote-pick").value }) });
     await refresh();
@@ -795,13 +823,16 @@ function renderIntegrations() {
   const base = location.origin;
   main.innerHTML += `
     <div class="panel"><h2>Koppelingen</h2>
-      <p><strong>Google Calendar</strong> - <a href="/api/tasks/ics" target="_blank">Taken exporteren (.ics)</a></p>
+      <p><strong>Google Calendar</strong> - <button type="button" class="btn open-pdf" data-href="/api/tasks/ics">Taken exporteren (.ics)</button></p>
       <p><strong>Typeform webhook</strong> - POST naar <code>${base}/api/webhooks/typeform</code></p>
       <p><strong>Moneybird</strong> - export via factuur naar Moneybird JSON</p>
       <p><strong>WhatsApp</strong> - via lead-detail (wa.me link)</p>
       <p><strong>DocuSign</strong> - binnenkort beschikbaar</p>
       <p><strong>Klantportaal</strong> - ${base}/portal/</p>
     </div>`;
+  main.querySelectorAll(".open-pdf").forEach((b) => {
+    b.onclick = () => openAuthedFile(b.dataset.href);
+  });
 }
 
 async function refresh() { await loadAll(); }
@@ -823,6 +854,55 @@ function closeCreateModal() {
   if (!createModal) return;
   createModal.hidden = true;
   if (createModalPaneel) createModalPaneel.innerHTML = "";
+}
+
+function openSendQuoteModal(id) {
+  const quote = state.quotes.find((q) => q.id === id);
+  if (!quote) {
+    api(`/api/quotes?id=${encodeURIComponent(id)}`).then(({ json }) => {
+      if (json.quote) {
+        state.quotes.unshift(json.quote);
+        openSendQuoteModal(id);
+      } else {
+        alert("Offerte niet gevonden.");
+      }
+    });
+    return;
+  }
+  closeCreateMenu();
+  createModalPaneel.innerHTML = `
+    <button type="button" class="create-modal-x" id="create-modal-x" aria-label="Sluiten">&times;</button>
+    <p class="label">Versturen</p>
+    <h2 id="create-modal-titel">Offerte ${esc(quote.nummer)}</h2>
+    <p style="color:var(--mauve);margin-bottom:1rem">Naar ${esc(quote.klantNaam)} · ${esc(quote.klantEmail)}</p>
+    <form id="send-quote-form" class="form-grid">
+      <label>Extra tekst in de mail</label>
+      <textarea name="bericht" rows="5" placeholder="Optioneel. Een persoonlijke zin bij deze offerte — in de toon van Fluweel."></textarea>
+      <button type="submit" class="btn btn-primair">Versturen</button>
+      <p class="melding" id="create-melding"></p>
+    </form>`;
+  createModal.hidden = false;
+  $("#create-modal-x").onclick = closeCreateModal;
+  $("#send-quote-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const melding = $("#create-melding");
+    melding.textContent = "";
+    const data = Object.fromEntries(new FormData(e.target));
+    const { res, json: out } = await api("/api/quotes/send", {
+      method: "POST",
+      body: JSON.stringify({ id, bericht: data.bericht || "" }),
+    });
+    if (!res.ok) {
+      melding.textContent = out.error || "Versturen mislukt.";
+      return;
+    }
+    closeCreateModal();
+    await refresh();
+    if (state.view === "quotes") renderView();
+    alert(`Offerte verstuurd.\nKlantportaal: ${out.portalUrl || "—"}`);
+    if (state.activeLead || detail?.classList.contains("open")) openQuoteDetail(id);
+  });
+  createModalPaneel.querySelector("textarea")?.focus();
 }
 
 function openCreateModal(type) {

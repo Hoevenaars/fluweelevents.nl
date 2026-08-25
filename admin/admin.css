@@ -357,7 +357,7 @@ body {
 .werk-kop {
   position:sticky;
   top:0;
-  z-index:5;
+  z-index:30;
   display:flex;
   align-items:center;
   justify-content:space-between;
