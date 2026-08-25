@@ -51,8 +51,12 @@ async function api(path, opts = {}) {
     ...(opts.headers || {}),
   };
   const session = readSession();
-  if (session?.accessToken && !headers.Authorization) {
-    headers.Authorization = `Bearer ${session.accessToken}`;
+  if (session?.accessToken) {
+    if (!headers.Authorization) headers.Authorization = `Bearer ${session.accessToken}`;
+    if (!headers["x-fluweel-access"]) headers["x-fluweel-access"] = session.accessToken;
+    if (session.refreshToken && !headers["x-fluweel-refresh"]) {
+      headers["x-fluweel-refresh"] = session.refreshToken;
+    }
   }
 
   const res = await fetch(path, {
@@ -368,19 +372,12 @@ $("#loginform").addEventListener("submit", async e => {
       provider: json.provider || null,
     });
 
-    const me = await api("/api/auth/me");
-    if (!me.res.ok) {
-      clearSession();
-      melding.textContent = me.json.error || "Sessie kon niet worden gecontroleerd. Probeer het opnieuw.";
-      return;
-    }
-
-    showApp(me.json.email || json.email);
+    // Direct door naar de werkomgeving — login is al bewezen door Supabase.
+    showApp(json.email);
     try {
       await refresh();
     } catch (loadErr) {
       console.error(loadErr);
-      melding.textContent = "Ingelogd, maar data laden mislukte. Vernieuw de pagina.";
     }
   } catch (err) {
     melding.textContent = err?.message || "Inloggen mislukt.";
@@ -406,13 +403,16 @@ $("#detail-sluit")?.addEventListener("click", closeDetail);
   }, { passive: true });
 
   try {
-    if (!readSession()?.accessToken) {
+    const session = readSession();
+    if (!session?.accessToken) {
       showLogin();
       return;
     }
+    // Toon meteen de app op basis van opgeslagen sessie; valideer op de achtergrond.
+    showApp(session.email || "");
     const { res, json } = await api("/api/auth/me");
     if (res.ok) {
-      showApp(json.email);
+      if (json.email) $("#account").textContent = json.email;
       await refresh();
     } else {
       showLogin();
