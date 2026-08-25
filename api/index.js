@@ -1,4 +1,5 @@
 import { resolveApiHandler } from "../lib/api-routes.js";
+import { isAdminHost, isPublicCrmRoute } from "../lib/admin-host.js";
 import { json } from "../lib/http.js";
 
 /**
@@ -24,6 +25,10 @@ export default async function handler(req, res) {
 
   if (!routeHandler) {
     return json(res, 404, { ok: false, error: "Route niet gevonden." });
+  }
+
+  if (!isPublicCrmRoute(req.method, pathname) && !isAdminHost(req)) {
+    return json(res, 404, { ok: false, error: "Niet gevonden." });
   }
 
   return routeHandler(req, res);

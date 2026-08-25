@@ -1,4 +1,5 @@
 import { getSessionFromRequest } from "../lib/auth.js";
+import { rejectUnlessAdminHost } from "../lib/admin-host.js";
 import { json } from "../lib/http.js";
 
 /** Top-level /api/me — avoids nested rewrite issues on Vercel. */
@@ -6,6 +7,7 @@ export default async function handler(req, res) {
   if (req.method !== "GET") {
     return json(res, 405, { ok: false, error: "Methode niet toegestaan." });
   }
+  if (rejectUnlessAdminHost(req, res)) return;
 
   const session = await getSessionFromRequest(req, res);
   if (!session) {

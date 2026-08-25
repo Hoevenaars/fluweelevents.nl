@@ -1,3 +1,5 @@
+import { pathForView, viewFromPath, PUBLIC_ORIGIN } from "./routes.js";
+
 const FASES = [
   { id: "nieuw", label: "Nieuw" }, { id: "contact", label: "In contact" },
   { id: "offerte", label: "Offerte" }, { id: "gewonnen", label: "Gewonnen" }, { id: "verloren", label: "Verloren" },
@@ -16,7 +18,7 @@ const NAV = [
   { id: "integrations", label: "Integraties" },
 ];
 
-const state = { view: "dashboard", leads: [], quotes: [], invoices: [], projects: [], tasks: [], campaigns: [], templates: [], analytics: null, team: [], activeLead: null };
+const state = { view: viewFromPath(location.pathname, location.hostname), leads: [], quotes: [], invoices: [], projects: [], tasks: [], campaigns: [], templates: [], analytics: null, team: [], activeLead: null };
 
 const SESSION_KEY = "fluweel_admin_session";
 const $ = (s, r = document) => r.querySelector(s);
@@ -233,8 +235,7 @@ function showApp(email) {
   const account = $("#account");
   if (account) account.textContent = email || "";
   updateWerkDatum();
-  renderNav();
-  renderView();
+  go(state.view, { replace: true });
 }
 
 function updateWerkDatum() {
@@ -248,9 +249,23 @@ function updateWerkDatum() {
   }).format(new Date());
 }
 
+function go(view, { replace = false } = {}) {
+  const id = NAV.some((n) => n.id === view) ? view : "dashboard";
+  state.view = id;
+  const nextPath = pathForView(id, location.hostname);
+  const current = location.pathname.replace(/\/+$/, "") || "/";
+  const target = nextPath.replace(/\/+$/, "") || "/";
+  if (current !== target) {
+    if (replace) history.replaceState({ view: id }, "", nextPath);
+    else history.pushState({ view: id }, "", nextPath);
+  }
+  renderNav();
+  renderView();
+}
+
 function renderNav() {
   $("#nav").innerHTML = NAV.map(n => `<button type="button" class="nav-item ${state.view===n.id?"actief":""}" data-view="${n.id}">${n.label}</button>`).join("");
-  $("#nav").querySelectorAll(".nav-item").forEach(b => b.onclick = () => { state.view = b.dataset.view; renderNav(); renderView(); });
+  $("#nav").querySelectorAll(".nav-item").forEach(b => b.onclick = () => go(b.dataset.view));
 }
 
 async function loadAll() {
@@ -589,9 +604,7 @@ async function createQuoteForLead(lead) {
     }),
   });
   await refresh();
-  state.view = "quotes";
-  renderNav();
-  renderView();
+  go("quotes");
   closeDetail();
   if (res.ok && json.quote?.id) openQuoteDetail(json.quote.id);
 }
@@ -930,6 +943,7 @@ async function renderWebsite() {
 
 function renderIntegrations() {
   const base = location.origin;
+  const portal = `${PUBLIC_ORIGIN}/portal/`;
   main.innerHTML += `
     <div class="panel"><h2>Koppelingen</h2>
       <p><strong>Google Calendar</strong> - <button type="button" class="btn open-pdf" data-href="/api/tasks/ics">Taken exporteren (.ics)</button></p>
@@ -937,7 +951,7 @@ function renderIntegrations() {
       <p><strong>Moneybird</strong> - export via factuur naar Moneybird JSON</p>
       <p><strong>WhatsApp</strong> - via lead-detail (wa.me link)</p>
       <p><strong>DocuSign</strong> - binnenkort beschikbaar</p>
-      <p><strong>Klantportaal</strong> - ${base}/portal/</p>
+      <p><strong>Klantportaal</strong> - ${portal}</p>
     </div>`;
   main.querySelectorAll(".open-pdf").forEach((b) => {
     b.onclick = () => openAuthedFile(b.dataset.href);
@@ -1225,9 +1239,7 @@ function openCreateModal(type) {
       }
       closeCreateModal();
       await refresh();
-      state.view = type === "contact" ? "adresboek" : "leads";
-      renderNav();
-      renderView();
+      go(type === "contact" ? "adresboek" : "leads");
       if (json.lead?.id) openLeadDetail(json.lead.id);
       return;
     }
@@ -1256,9 +1268,7 @@ function openCreateModal(type) {
       }
       closeCreateModal();
       await refresh();
-      state.view = "quotes";
-      renderNav();
-      renderView();
+      go("quotes");
       if (json.quote?.id) openQuoteDetail(json.quote.id);
       return;
     }
@@ -1281,9 +1291,7 @@ function openCreateModal(type) {
       }
       closeCreateModal();
       await refresh();
-      state.view = "projects";
-      renderNav();
-      renderView();
+      go("projects");
     }
   });
 
@@ -1368,6 +1376,12 @@ document.addEventListener("keydown", (e) => {
   mainEl?.addEventListener("scroll", () => {
     werkKop?.classList.toggle("scrolled", (mainEl.scrollTop || 0) > 8);
   }, { passive: true });
+
+  window.addEventListener("popstate", () => {
+    state.view = viewFromPath(location.pathname, location.hostname);
+    renderNav();
+    renderView();
+  });
 
   try {
     const session = readSession();
