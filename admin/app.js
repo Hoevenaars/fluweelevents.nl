@@ -149,7 +149,25 @@ function nlNum(n, decimals = 2) {
   return (neg ? "-" : "") + body;
 }
 function euro(n, decimals = 2) { return `€ ${nlNum(n, decimals)}`; }
-function fmt(iso) { return iso ? new Intl.DateTimeFormat("nl-NL",{dateStyle:"medium",timeStyle:"short"}).format(new Date(iso)) : "-"; }
+function parseDate(iso) {
+  if (!iso) return null;
+  if (iso instanceof Date) return Number.isNaN(iso.getTime()) ? null : iso;
+  const raw = String(iso).trim();
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
+  if (dateOnly) return new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]));
+  const parsed = new Date(raw);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+function fmtDate(iso) {
+  const date = parseDate(iso);
+  if (!date) return iso ? String(iso) : "-";
+  return new Intl.DateTimeFormat("nl-NL", { day: "numeric", month: "long", year: "numeric" }).format(date);
+}
+function fmt(iso) {
+  const date = parseDate(iso);
+  if (!date) return iso ? String(iso) : "-";
+  return new Intl.DateTimeFormat("nl-NL", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(date);
+}
 function fase(id) { return FASES.find(f=>f.id===id)?.label || id; }
 
 const QUOTE_STATUS = {
@@ -169,6 +187,21 @@ function quoteBekekenLabel(q) {
   if (!n) return "Nog niet bekeken";
   const last = q.laatstBekekenOp ? ` · ${fmt(q.laatstBekekenOp)}` : "";
   return `${n}× bekeken${last}`;
+}
+function quoteBekekenCell(q) {
+  return `<span class="bekeken-cel">
+    <span>${esc(quoteBekekenLabel(q))}</span>
+    <button type="button" class="info-i bekeken-log" data-id="${esc(q.id)}" title="Bekeken-log" aria-label="Bekeken-log ${esc(q.nummer)}">i</button>
+  </span>`;
+}
+function bekekenLogLijstHtml(quote) {
+  const times = [...(quote.bekekenOp || [])].reverse();
+  const n = Number(quote.bekekenAantal || times.length || 0);
+  if (!times.length) {
+    return `<p class="leeg" style="padding:.5rem 0;text-align:left">Nog niet geopend via het portaal.</p>`;
+  }
+  return `<p class="sub-meta">${n}× in totaal</p>
+    <ol class="bekeken-lijst">${times.map((t, i) => `<li><span class="bekeken-nr">${times.length - i}.</span> ${esc(fmt(t))}</li>`).join("")}</ol>`;
 }
 
 function showLogin() {
@@ -211,6 +244,7 @@ function updateWerkDatum() {
     weekday: "long",
     day: "numeric",
     month: "long",
+    year: "numeric",
   }).format(new Date());
 }
 
@@ -268,7 +302,7 @@ function renderDashboard() {
       <div class="kaart-stat"><span>Omzet betaald</span><strong>${euro(a.invoices?.betaald||0, 0)}</strong></div>
     </div>
     <div class="panel"><h2>Vandaag te doen (${vandaag.length})</h2>
-      ${vandaag.length ? vandaag.map(t=>`<p class="taak-rij"><button type="button" class="taak-check" data-id="${t.id}" aria-label="Afvinken">☐</button> <strong>${esc(t.titel)}</strong> <span class="tag">${t.deadline}</span></p>`).join("") : "<p class='leeg'>Geen open taken voor vandaag.</p>"}
+      ${vandaag.length ? vandaag.map(t=>`<p class="taak-rij"><button type="button" class="taak-check" data-id="${t.id}" aria-label="Afvinken">☐</button> <strong>${esc(t.titel)}</strong> <span class="tag">${esc(fmtDate(t.deadline))}</span></p>`).join("") : "<p class='leeg'>Geen open taken voor vandaag.</p>"}
     </div>
     <div class="panel"><h2>Pipeline</h2>
       <p style="color:var(--mauve);margin-bottom:.85rem;font-size:.92rem">Sleep aanvragen naar een andere fase.</p>
@@ -382,7 +416,7 @@ function exportLeadsCsv(leads) {
   const cols = ["naam", "email", "telefoon", "bedrijf", "status", "bron", "ontvangenOp", "notities"];
   const escCsv = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
   const rows = [cols.join(",")].concat(
-    leads.map((l) => cols.map((c) => escCsv(l[c])).join(","))
+    leads.map((l) => cols.map((c) => escCsv(c === "ontvangenOp" ? fmt(l[c]) : l[c])).join(","))
   );
   const blob = new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -489,7 +523,7 @@ async function openLeadDetail(id) {
     <div class="panel"><h2>Fase</h2><div class="btn-groep">${FASES.map(f=>`<button class="btn fase-btn" data-status="${f.id}">${f.label}</button>`).join("")}</div></div>
     <div class="panel"><h2>Taken</h2>
       <div class="form-grid"><input id="task-titel" placeholder="Nieuwe taak"><input id="task-deadline" type="date"><button class="btn" id="add-task">Taak toevoegen</button></div>
-      ${(tj.tasks||[]).map(t=>`<p class="taak-rij"><button type="button" class="taak-check" data-id="${t.id}" data-done="${t.voltooid?"1":"0"}" aria-label="${t.voltooid?"Heropenen":"Afvinken"}">${t.voltooid?"☑":"☐"}</button> <span class="${t.voltooid?"taak-done":""}">${esc(t.titel)}</span> <span class="tag">${t.deadline||""}</span></p>`).join("")}
+      ${(tj.tasks||[]).map(t=>`<p class="taak-rij"><button type="button" class="taak-check" data-id="${t.id}" data-done="${t.voltooid?"1":"0"}" aria-label="${t.voltooid?"Heropenen":"Afvinken"}">${t.voltooid?"☑":"☐"}</button> <span class="${t.voltooid?"taak-done":""}">${esc(t.titel)}</span> <span class="tag">${t.deadline?esc(fmtDate(t.deadline)):""}</span></p>`).join("")}
     </div>
     <div class="panel"><h2>Tijdlijn</h2><div class="timeline">${(json.activities||[]).map(a=>`<div class="timeline-item"><strong>${esc(a.titel)}</strong><p>${fmt(a.aangemaaktOp)} · ${esc(a.omschrijving)}</p></div>`).join("")||"<p class='leeg'>Nog geen activiteiten</p>"}</div></div>`;
   detail.classList.add("open");
@@ -631,7 +665,9 @@ async function openQuoteDetail(id) {
     <h2 style="font-family:var(--serif);margin:.3rem 0 .4rem">${esc(quote.nummer)}</h2>
     <p>${esc(quote.klantNaam)}${quote.klantBedrijf ? ` · ${esc(quote.klantBedrijf)}` : ""}</p>
     <p><a href="mailto:${esc(quote.klantEmail)}">${esc(quote.klantEmail)}</a></p>
-    <p class="sub-meta">${esc(quoteBekekenLabel(quote))}</p>
+    <p class="sub-meta bekeken-cel">${esc(quoteBekekenLabel(quote))}
+      <button type="button" class="info-i bekeken-log" data-id="${esc(quote.id)}" title="Bekeken-log" aria-label="Bekeken-log">i</button>
+    </p>
     <div class="form-grid" style="margin-top:1rem;max-width:none">
       <label>Geldig tot</label>
       <input id="q-geldig" type="date" value="${esc(quote.geldigTot || "")}">
@@ -651,12 +687,7 @@ async function openQuoteDetail(id) {
     <p class="melding" id="quote-melding"></p>
     <div class="panel" style="margin-top:1.1rem">
       <h2>Bekeken</h2>
-      ${
-        (quote.bekekenOp || []).length
-          ? `<p class="sub-meta">${quote.bekekenAantal || quote.bekekenOp.length}× in totaal</p>
-            <ul class="bekeken-lijst">${[...quote.bekekenOp].reverse().map((t) => `<li>${esc(fmt(t))}</li>`).join("")}</ul>`
-          : "<p class='leeg' style='padding:0.5rem 0'>Nog niet geopend via het portaal.</p>"
-      }
+      ${bekekenLogLijstHtml(quote)}
     </div>`;
   detail.classList.add("open");
   $("#detail-x").onclick = closeDetail;
@@ -692,6 +723,9 @@ async function openQuoteDetail(id) {
 
   $("#new-quote-send").onclick = () => openSendQuoteModal(id);
   $("#delete-quote").onclick = () => openDeleteQuoteModal(id);
+  detailPaneel.querySelectorAll(".bekeken-log").forEach((b) => {
+    b.onclick = () => openBekekenLog(b.dataset.id);
+  });
 }
 
 function renderQuotes() {
@@ -704,7 +738,7 @@ function renderQuotes() {
       <td>${esc(q.nummer)}</td>
       <td>${esc(q.klantNaam)}</td>
       <td><span class="tag ${quoteStatusClass(q.status)}">${esc(quoteStatusLabel(q.status))}</span></td>
-      <td>${esc(quoteBekekenLabel(q))}</td>
+      <td>${quoteBekekenCell(q)}</td>
       <td>${euro(q.totaal)}</td>
       <td class="btn-groep">
         <button class="btn open-quote" data-id="${q.id}">Bewerken</button>
@@ -726,6 +760,9 @@ function renderQuotes() {
   });
   main.querySelectorAll(".delete-quote").forEach((b) => {
     b.onclick = () => openDeleteQuoteModal(b.dataset.id);
+  });
+  main.querySelectorAll(".bekeken-log").forEach((b) => {
+    b.onclick = () => openBekekenLog(b.dataset.id);
   });
 }
 
@@ -975,6 +1012,26 @@ function openSendQuoteModal(id) {
     if (state.activeLead || detail?.classList.contains("open")) openQuoteDetail(id);
   });
   createModalPaneel.querySelector("textarea")?.focus();
+}
+
+async function openBekekenLog(id) {
+  let quote = state.quotes.find((q) => q.id === id);
+  const { json } = await api(`/api/quotes?id=${encodeURIComponent(id)}`);
+  if (json.quote) quote = json.quote;
+  if (!quote) return;
+  closeCreateMenu();
+  createModalPaneel.innerHTML = `
+    <button type="button" class="create-modal-x" id="create-modal-x" aria-label="Sluiten">&times;</button>
+    <p class="label">Log</p>
+    <h2 id="create-modal-titel">Bekeken · ${esc(quote.nummer)}</h2>
+    <p style="color:var(--mauve);margin-bottom:1rem">${esc(quote.klantNaam)}${quote.klantEmail ? ` · ${esc(quote.klantEmail)}` : ""}</p>
+    ${bekekenLogLijstHtml(quote)}
+    <div class="btn-groep" style="margin-top:1.1rem">
+      <button type="button" class="btn" id="bekeken-log-sluit">Sluiten</button>
+    </div>`;
+  createModal.hidden = false;
+  $("#create-modal-x").onclick = closeCreateModal;
+  $("#bekeken-log-sluit").onclick = closeCreateModal;
 }
 
 function openDeleteQuoteModal(id) {
