@@ -68,7 +68,7 @@ create table if not exists public.quotes (
   btw_bedrag numeric(10,2) not null default 0,
   totaal numeric(10,2) not null default 0,
   notities text default '',
-  portal_token text unique default encode(gen_random_bytes(16), 'hex'),
+  portal_token text unique default encode(extensions.gen_random_bytes(16), 'hex'),
   aangemaakt_op timestamptz not null default now()
 );
 
@@ -166,8 +166,18 @@ create table if not exists public.website_sections (
 -- ===== INDEXEN =====
 create index if not exists idx_leads_status on public.contact_submissions(status);
 create index if not exists idx_leads_ontvangen on public.contact_submissions(ontvangen_op desc);
-create index if not exists idx_tasks_deadline on public.tasks(deadline);
 create index if not exists idx_activities_lead on public.activities(lead_id);
+create index if not exists idx_tasks_lead on public.tasks(lead_id);
+create index if not exists idx_tasks_project on public.tasks(project_id);
+create index if not exists idx_tasks_deadline on public.tasks(deadline);
+create index if not exists idx_quotes_lead on public.quotes(lead_id);
+create index if not exists idx_quote_lines_quote on public.quote_lines(quote_id);
+create index if not exists idx_invoices_quote on public.invoices(quote_id);
+create index if not exists idx_invoices_lead on public.invoices(lead_id);
+create index if not exists idx_invoice_lines_invoice on public.invoice_lines(invoice_id);
+create index if not exists idx_projects_lead on public.projects(lead_id);
+create index if not exists idx_campaign_sends_campaign on public.campaign_sends(campaign_id);
+create index if not exists idx_campaign_sends_lead on public.campaign_sends(lead_id);
 
 -- ===== RLS =====
 alter table public.contact_submissions enable row level security;
@@ -184,16 +194,18 @@ alter table public.campaign_sends enable row level security;
 alter table public.website_sections enable row level security;
 
 -- Authenticated admins: volledige toegang
-do $$ declare t text; begin
-  foreach t in array array[
-    'contact_submissions','activities','tasks','email_templates',
-    'quotes','quote_lines','invoices','invoice_lines',
-    'projects','campaigns','campaign_sends','website_sections'
-  ] loop
-    execute format('create policy if not exists "admin_all_%s" on public.%I for all to authenticated using (true) with check (true)', t, t);
-  exception when duplicate_object then null;
-  end loop;
-end $$;
+create policy if not exists admin_all_contact_submissions on public.contact_submissions for all to authenticated using (true) with check (true);
+create policy if not exists admin_all_activities on public.activities for all to authenticated using (true) with check (true);
+create policy if not exists admin_all_tasks on public.tasks for all to authenticated using (true) with check (true);
+create policy if not exists admin_all_email_templates on public.email_templates for all to authenticated using (true) with check (true);
+create policy if not exists admin_all_quotes on public.quotes for all to authenticated using (true) with check (true);
+create policy if not exists admin_all_quote_lines on public.quote_lines for all to authenticated using (true) with check (true);
+create policy if not exists admin_all_invoices on public.invoices for all to authenticated using (true) with check (true);
+create policy if not exists admin_all_invoice_lines on public.invoice_lines for all to authenticated using (true) with check (true);
+create policy if not exists admin_all_projects on public.projects for all to authenticated using (true) with check (true);
+create policy if not exists admin_all_campaigns on public.campaigns for all to authenticated using (true) with check (true);
+create policy if not exists admin_all_campaign_sends on public.campaign_sends for all to authenticated using (true) with check (true);
+create policy if not exists admin_all_website_sections on public.website_sections for all to authenticated using (true) with check (true);
 
 -- Standaard e-mailtemplates
 insert into public.email_templates (slug, naam, onderwerp, inhoud) values
