@@ -17,6 +17,7 @@ const NAV = [
 
 const state = { view: "dashboard", leads: [], quotes: [], invoices: [], projects: [], tasks: [], campaigns: [], templates: [], analytics: null, team: [], activeLead: null };
 
+const SESSION_KEY = "fluweel_admin_session";
 const $ = (s, r = document) => r.querySelector(s);
 const loginView = $("#login-view");
 const appView = $("#app-view");
@@ -24,11 +25,40 @@ const main = $("#main");
 const detail = $("#detail");
 const detailPaneel = $("#detail-paneel");
 
+function readSession() {
+  try {
+    return JSON.parse(sessionStorage.getItem(SESSION_KEY) || "null");
+  } catch {
+    return null;
+  }
+}
+
+function writeSession(session) {
+  if (!session?.accessToken) {
+    sessionStorage.removeItem(SESSION_KEY);
+    return;
+  }
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+}
+
+function clearSession() {
+  sessionStorage.removeItem(SESSION_KEY);
+}
+
 async function api(path, opts = {}) {
+  const headers = {
+    "Content-Type": "application/json",
+    ...(opts.headers || {}),
+  };
+  const session = readSession();
+  if (session?.accessToken && !headers.Authorization) {
+    headers.Authorization = `Bearer ${session.accessToken}`;
+  }
+
   const res = await fetch(path, {
     credentials: "same-origin",
-    headers: { "Content-Type": "application/json" },
     ...opts,
+    headers,
   });
   const json = await res.json().catch(() => ({}));
   return { res, json };
@@ -38,7 +68,12 @@ function esc(s) { return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt
 function fmt(iso) { return iso ? new Intl.DateTimeFormat("nl-NL",{dateStyle:"medium",timeStyle:"short"}).format(new Date(iso)) : "—"; }
 function fase(id) { return FASES.find(f=>f.id===id)?.label || id; }
 
-function showLogin() { loginView.hidden = false; appView.hidden = true; detail.classList.remove("open"); }
+function showLogin() {
+  clearSession();
+  loginView.hidden = false;
+  appView.hidden = true;
+  detail.classList.remove("open");
+}
 function showApp(email) {
   loginView.hidden = true;
   appView.hidden = false;
@@ -321,9 +356,22 @@ $("#loginform").addEventListener("submit", async e => {
       return;
     }
 
+    if (!json.accessToken) {
+      melding.textContent = "Inloggen lukte, maar er kwam geen sessie terug. Probeer het opnieuw.";
+      return;
+    }
+
+    writeSession({
+      email: json.email,
+      accessToken: json.accessToken,
+      refreshToken: json.refreshToken || null,
+      provider: json.provider || null,
+    });
+
     const me = await api("/api/auth/me");
     if (!me.res.ok) {
-      melding.textContent = "Inloggen lukte, maar de sessie werd niet bewaard. Sta cookies toe voor deze site en probeer opnieuw.";
+      clearSession();
+      melding.textContent = me.json.error || "Sessie kon niet worden gecontroleerd. Probeer het opnieuw.";
       return;
     }
 
@@ -332,6 +380,7 @@ $("#loginform").addEventListener("submit", async e => {
       await refresh();
     } catch (loadErr) {
       console.error(loadErr);
+      melding.textContent = "Ingelogd, maar data laden mislukte. Vernieuw de pagina.";
     }
   } catch (err) {
     melding.textContent = err?.message || "Inloggen mislukt.";
@@ -357,9 +406,17 @@ $("#detail-sluit")?.addEventListener("click", closeDetail);
   }, { passive: true });
 
   try {
+    if (!readSession()?.accessToken) {
+      showLogin();
+      return;
+    }
     const { res, json } = await api("/api/auth/me");
-    if (res.ok) { showApp(json.email); await refresh(); }
-    else showLogin();
+    if (res.ok) {
+      showApp(json.email);
+      await refresh();
+    } else {
+      showLogin();
+    }
   } catch {
     showLogin();
   }
