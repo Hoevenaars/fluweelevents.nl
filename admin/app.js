@@ -188,6 +188,21 @@ function quoteBekekenLabel(q) {
   const last = q.laatstBekekenOp ? ` · ${fmt(q.laatstBekekenOp)}` : "";
   return `${n}× bekeken${last}`;
 }
+function quoteBekekenCell(q) {
+  return `<span class="bekeken-cel">
+    <span>${esc(quoteBekekenLabel(q))}</span>
+    <button type="button" class="info-i bekeken-log" data-id="${esc(q.id)}" title="Bekeken-log" aria-label="Bekeken-log ${esc(q.nummer)}">i</button>
+  </span>`;
+}
+function bekekenLogLijstHtml(quote) {
+  const times = [...(quote.bekekenOp || [])].reverse();
+  const n = Number(quote.bekekenAantal || times.length || 0);
+  if (!times.length) {
+    return `<p class="leeg" style="padding:.5rem 0;text-align:left">Nog niet geopend via het portaal.</p>`;
+  }
+  return `<p class="sub-meta">${n}× in totaal</p>
+    <ol class="bekeken-lijst">${times.map((t, i) => `<li><span class="bekeken-nr">${times.length - i}.</span> ${esc(fmt(t))}</li>`).join("")}</ol>`;
+}
 
 function showLogin() {
   clearSession();
@@ -650,7 +665,9 @@ async function openQuoteDetail(id) {
     <h2 style="font-family:var(--serif);margin:.3rem 0 .4rem">${esc(quote.nummer)}</h2>
     <p>${esc(quote.klantNaam)}${quote.klantBedrijf ? ` · ${esc(quote.klantBedrijf)}` : ""}</p>
     <p><a href="mailto:${esc(quote.klantEmail)}">${esc(quote.klantEmail)}</a></p>
-    <p class="sub-meta">${esc(quoteBekekenLabel(quote))}</p>
+    <p class="sub-meta bekeken-cel">${esc(quoteBekekenLabel(quote))}
+      <button type="button" class="info-i bekeken-log" data-id="${esc(quote.id)}" title="Bekeken-log" aria-label="Bekeken-log">i</button>
+    </p>
     <div class="form-grid" style="margin-top:1rem;max-width:none">
       <label>Geldig tot</label>
       <input id="q-geldig" type="date" value="${esc(quote.geldigTot || "")}">
@@ -670,12 +687,7 @@ async function openQuoteDetail(id) {
     <p class="melding" id="quote-melding"></p>
     <div class="panel" style="margin-top:1.1rem">
       <h2>Bekeken</h2>
-      ${
-        (quote.bekekenOp || []).length
-          ? `<p class="sub-meta">${quote.bekekenAantal || quote.bekekenOp.length}× in totaal</p>
-            <ul class="bekeken-lijst">${[...quote.bekekenOp].reverse().map((t) => `<li>${esc(fmt(t))}</li>`).join("")}</ul>`
-          : "<p class='leeg' style='padding:0.5rem 0'>Nog niet geopend via het portaal.</p>"
-      }
+      ${bekekenLogLijstHtml(quote)}
     </div>`;
   detail.classList.add("open");
   $("#detail-x").onclick = closeDetail;
@@ -711,6 +723,9 @@ async function openQuoteDetail(id) {
 
   $("#new-quote-send").onclick = () => openSendQuoteModal(id);
   $("#delete-quote").onclick = () => openDeleteQuoteModal(id);
+  detailPaneel.querySelectorAll(".bekeken-log").forEach((b) => {
+    b.onclick = () => openBekekenLog(b.dataset.id);
+  });
 }
 
 function renderQuotes() {
@@ -723,7 +738,7 @@ function renderQuotes() {
       <td>${esc(q.nummer)}</td>
       <td>${esc(q.klantNaam)}</td>
       <td><span class="tag ${quoteStatusClass(q.status)}">${esc(quoteStatusLabel(q.status))}</span></td>
-      <td>${esc(quoteBekekenLabel(q))}</td>
+      <td>${quoteBekekenCell(q)}</td>
       <td>${euro(q.totaal)}</td>
       <td class="btn-groep">
         <button class="btn open-quote" data-id="${q.id}">Bewerken</button>
@@ -745,6 +760,9 @@ function renderQuotes() {
   });
   main.querySelectorAll(".delete-quote").forEach((b) => {
     b.onclick = () => openDeleteQuoteModal(b.dataset.id);
+  });
+  main.querySelectorAll(".bekeken-log").forEach((b) => {
+    b.onclick = () => openBekekenLog(b.dataset.id);
   });
 }
 
@@ -994,6 +1012,26 @@ function openSendQuoteModal(id) {
     if (state.activeLead || detail?.classList.contains("open")) openQuoteDetail(id);
   });
   createModalPaneel.querySelector("textarea")?.focus();
+}
+
+async function openBekekenLog(id) {
+  let quote = state.quotes.find((q) => q.id === id);
+  const { json } = await api(`/api/quotes?id=${encodeURIComponent(id)}`);
+  if (json.quote) quote = json.quote;
+  if (!quote) return;
+  closeCreateMenu();
+  createModalPaneel.innerHTML = `
+    <button type="button" class="create-modal-x" id="create-modal-x" aria-label="Sluiten">&times;</button>
+    <p class="label">Log</p>
+    <h2 id="create-modal-titel">Bekeken · ${esc(quote.nummer)}</h2>
+    <p style="color:var(--mauve);margin-bottom:1rem">${esc(quote.klantNaam)}${quote.klantEmail ? ` · ${esc(quote.klantEmail)}` : ""}</p>
+    ${bekekenLogLijstHtml(quote)}
+    <div class="btn-groep" style="margin-top:1.1rem">
+      <button type="button" class="btn" id="bekeken-log-sluit">Sluiten</button>
+    </div>`;
+  createModal.hidden = false;
+  $("#create-modal-x").onclick = closeCreateModal;
+  $("#bekeken-log-sluit").onclick = closeCreateModal;
 }
 
 function openDeleteQuoteModal(id) {

@@ -937,14 +937,55 @@ body {
   margin:.35rem 0 .2rem;
 }
 
+.bekeken-cel {
+  display:inline-flex;
+  align-items:center;
+  gap:.4rem;
+}
+
+.bekeken-kop {
+  display:flex;
+  align-items:center;
+  gap:.45rem;
+}
+
+.info-i {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:1.2rem;
+  height:1.2rem;
+  flex-shrink:0;
+  border-radius:50%;
+  border:1px solid var(--lijn);
+  background:#fff;
+  color:var(--aubergine);
+  font:italic 600 .78rem/1 var(--serif);
+  cursor:pointer;
+  padding:0;
+}
+
+.info-i:hover,
+.info-i:focus-visible {
+  border-color:var(--fuchsia);
+  color:var(--fuchsia);
+}
+
 .bekeken-lijst {
   margin:.45rem 0 0;
-  padding-left:1.1rem;
+  padding-left:0;
+  list-style:none;
   color:var(--mauve);
   font-size:.88rem;
 }
 
-.bekeken-lijst li { margin:.2rem 0; }
+.bekeken-lijst li { margin:.35rem 0; }
+
+.bekeken-nr {
+  font-variant-numeric:tabular-nums;
+  color:var(--aubergine);
+  margin-right:.2rem;
+}
 
 .leeg {
   color:var(--mauve);
