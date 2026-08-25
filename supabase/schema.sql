@@ -1,6 +1,8 @@
 -- Fluweel Events · volledig CRM-schema
 -- Voer uit in Supabase SQL Editor (EU-regio aanbevolen)
 
+create extension if not exists pgcrypto;
+
 -- ===== LEADS (contactformulieren) =====
 create table if not exists public.contact_submissions (
   id uuid primary key default gen_random_uuid(),
@@ -10,13 +12,38 @@ create table if not exists public.contact_submissions (
   bedrijf text,
   bericht text not null,
   bron text not null default 'website',
-  status text not null default 'nieuw'
-    check (status in ('nieuw', 'contact', 'offerte', 'gewonnen', 'verloren')),
+  status text not null default 'nieuw',
   notities text default '',
   toegewezen_aan text,
   gelezen boolean not null default false,
   ontvangen_op timestamptz not null default now()
 );
+
+alter table public.contact_submissions
+  add column if not exists bedrijf text,
+  add column if not exists bron text,
+  add column if not exists status text,
+  add column if not exists notities text,
+  add column if not exists toegewezen_aan text,
+  add column if not exists gelezen boolean,
+  add column if not exists ontvangen_op timestamptz;
+
+update public.contact_submissions set bron = coalesce(bron, 'website') where bron is null;
+update public.contact_submissions set status = coalesce(status, 'nieuw') where status is null;
+update public.contact_submissions set notities = coalesce(notities, '') where notities is null;
+update public.contact_submissions set gelezen = coalesce(gelezen, false) where gelezen is null;
+update public.contact_submissions set ontvangen_op = coalesce(ontvangen_op, now()) where ontvangen_op is null;
+
+alter table public.contact_submissions alter column bron set default 'website';
+alter table public.contact_submissions alter column status set default 'nieuw';
+alter table public.contact_submissions alter column notities set default '';
+alter table public.contact_submissions alter column gelezen set default false;
+alter table public.contact_submissions alter column ontvangen_op set default now();
+
+alter table public.contact_submissions drop constraint if exists contact_submissions_status_check;
+alter table public.contact_submissions
+  add constraint contact_submissions_status_check
+  check (status in ('nieuw', 'contact', 'offerte', 'gewonnen', 'verloren'));
 
 -- ===== ACTIVITEITEN (timeline) =====
 create table if not exists public.activities (
@@ -60,8 +87,7 @@ create table if not exists public.quotes (
   klant_naam text not null,
   klant_email text not null,
   klant_bedrijf text,
-  status text not null default 'concept'
-    check (status in ('concept', 'verstuurd', 'geaccepteerd', 'afgewezen')),
+  status text not null default 'concept',
   geldig_tot date,
   subtotaal numeric(10,2) not null default 0,
   btw_pct numeric(5,2) not null default 21,
@@ -71,6 +97,11 @@ create table if not exists public.quotes (
   portal_token text unique default encode(gen_random_bytes(16), 'hex'),
   aangemaakt_op timestamptz not null default now()
 );
+
+alter table public.quotes drop constraint if exists quotes_status_check;
+alter table public.quotes
+  add constraint quotes_status_check
+  check (status in ('concept', 'verstuurd', 'geaccepteerd', 'afgewezen'));
 
 create table if not exists public.quote_lines (
   id uuid primary key default gen_random_uuid(),
@@ -90,8 +121,7 @@ create table if not exists public.invoices (
   klant_naam text not null,
   klant_email text not null,
   klant_bedrijf text,
-  status text not null default 'concept'
-    check (status in ('concept', 'verstuurd', 'betaald', 'vervallen')),
+  status text not null default 'concept',
   vervaldatum date,
   subtotaal numeric(10,2) not null default 0,
   btw_pct numeric(5,2) not null default 21,
@@ -100,6 +130,11 @@ create table if not exists public.invoices (
   notities text default '',
   aangemaakt_op timestamptz not null default now()
 );
+
+alter table public.invoices drop constraint if exists invoices_status_check;
+alter table public.invoices
+  add constraint invoices_status_check
+  check (status in ('concept', 'verstuurd', 'betaald', 'vervallen'));
 
 create table if not exists public.invoice_lines (
   id uuid primary key default gen_random_uuid(),
@@ -121,15 +156,18 @@ create table if not exists public.projects (
   locatie text,
   aantal_gasten int,
   budget numeric(10,2),
-  status text not null default 'planning'
-    check (status in ('planning', 'voorbereiding', 'live', 'afgerond')),
+  status text not null default 'planning',
   draaiboek text default '',
   moodboard_urls text[] default '{}',
   aangemaakt_op timestamptz not null default now()
 );
 
-alter table public.tasks
-  drop constraint if exists tasks_project_id_fkey;
+alter table public.projects drop constraint if exists projects_status_check;
+alter table public.projects
+  add constraint projects_status_check
+  check (status in ('planning', 'voorbereiding', 'live', 'afgerond'));
+
+alter table public.tasks drop constraint if exists tasks_project_id_fkey;
 alter table public.tasks
   add constraint tasks_project_id_fkey
   foreign key (project_id) references public.projects(id) on delete set null;
@@ -142,11 +180,15 @@ create table if not exists public.campaigns (
   inhoud text not null,
   filter_status text,
   filter_dagen_oud int,
-  status text not null default 'concept'
-    check (status in ('concept', 'verzonden')),
+  status text not null default 'concept',
   verzonden_op timestamptz,
   aangemaakt_op timestamptz not null default now()
 );
+
+alter table public.campaigns drop constraint if exists campaigns_status_check;
+alter table public.campaigns
+  add constraint campaigns_status_check
+  check (status in ('concept', 'verzonden'));
 
 create table if not exists public.campaign_sends (
   id uuid primary key default gen_random_uuid(),
@@ -170,6 +212,8 @@ create index if not exists idx_tasks_deadline on public.tasks(deadline);
 create index if not exists idx_activities_lead on public.activities(lead_id);
 
 -- ===== RLS =====
+-- De app gebruikt de service role key en bypassed RLS.
+-- Policies laten authenticated users (admin-login) later veilig client-side werken.
 alter table public.contact_submissions enable row level security;
 alter table public.activities enable row level security;
 alter table public.tasks enable row level security;
@@ -183,28 +227,53 @@ alter table public.campaigns enable row level security;
 alter table public.campaign_sends enable row level security;
 alter table public.website_sections enable row level security;
 
--- Authenticated admins: volledige toegang
--- (App gebruikt service role en bypassed RLS; policies zijn voor toekomstige client-side access.)
-do $$
-declare
-  t text;
-begin
-  foreach t in array array[
-    'contact_submissions','activities','tasks','email_templates',
-    'quotes','quote_lines','invoices','invoice_lines',
-    'projects','campaigns','campaign_sends','website_sections'
-  ]
-  loop
-    begin
-      execute format(
-        'create policy "admin_all_%s" on public.%I for all to authenticated using (true) with check (true)',
-        t, t
-      );
-    exception
-      when duplicate_object then null;
-    end;
-  end loop;
-end $$;
+drop policy if exists "admin_all_contact_submissions" on public.contact_submissions;
+create policy "admin_all_contact_submissions" on public.contact_submissions
+  for all to authenticated using (true) with check (true);
+
+drop policy if exists "admin_all_activities" on public.activities;
+create policy "admin_all_activities" on public.activities
+  for all to authenticated using (true) with check (true);
+
+drop policy if exists "admin_all_tasks" on public.tasks;
+create policy "admin_all_tasks" on public.tasks
+  for all to authenticated using (true) with check (true);
+
+drop policy if exists "admin_all_email_templates" on public.email_templates;
+create policy "admin_all_email_templates" on public.email_templates
+  for all to authenticated using (true) with check (true);
+
+drop policy if exists "admin_all_quotes" on public.quotes;
+create policy "admin_all_quotes" on public.quotes
+  for all to authenticated using (true) with check (true);
+
+drop policy if exists "admin_all_quote_lines" on public.quote_lines;
+create policy "admin_all_quote_lines" on public.quote_lines
+  for all to authenticated using (true) with check (true);
+
+drop policy if exists "admin_all_invoices" on public.invoices;
+create policy "admin_all_invoices" on public.invoices
+  for all to authenticated using (true) with check (true);
+
+drop policy if exists "admin_all_invoice_lines" on public.invoice_lines;
+create policy "admin_all_invoice_lines" on public.invoice_lines
+  for all to authenticated using (true) with check (true);
+
+drop policy if exists "admin_all_projects" on public.projects;
+create policy "admin_all_projects" on public.projects
+  for all to authenticated using (true) with check (true);
+
+drop policy if exists "admin_all_campaigns" on public.campaigns;
+create policy "admin_all_campaigns" on public.campaigns
+  for all to authenticated using (true) with check (true);
+
+drop policy if exists "admin_all_campaign_sends" on public.campaign_sends;
+create policy "admin_all_campaign_sends" on public.campaign_sends
+  for all to authenticated using (true) with check (true);
+
+drop policy if exists "admin_all_website_sections" on public.website_sections;
+create policy "admin_all_website_sections" on public.website_sections
+  for all to authenticated using (true) with check (true);
 
 -- Standaard e-mailtemplates
 insert into public.email_templates (slug, naam, onderwerp, inhoud) values
