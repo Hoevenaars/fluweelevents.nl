@@ -6,7 +6,7 @@
 
 import { addLead } from "../lib/crm.js";
 import { getTemplate } from "../lib/crm.js";
-import { sendTemplateEmail } from "../lib/email.js";
+import { sendBrandedEmail, sendTemplateEmail } from "../lib/email.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -28,32 +28,43 @@ export default async function handler(req, res) {
       return res.status(400).json({ ok: false, error: "Dit e-mailadres klopt niet." });
     }
 
-    const resendResponse = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: "Fluweel Events <noreply@fluweelevents.nl>",
-        to: ["contact@fluweelevents.nl"],
-        reply_to: email,
-        subject: `Nieuw bericht van ${naam}`,
-        text: `Naam: ${naam}\nE-mail: ${email}${telefoon ? `\nTelefoon: ${telefoon}` : ""}\n\nBericht:\n${bericht}`,
-      }),
-    });
+    if (!process.env.RESEND_API_KEY) {
+      return res.status(502).json({ ok: false, error: "Verzenden is niet gelukt. Probeer het later opnieuw." });
+    }
 
-    if (!resendResponse.ok) {
-      const detail = await resendResponse.text();
-      console.error("Resend fout:", detail);
+    const details = [
+      `Naam: ${naam}`,
+      `E-mail: ${email}`,
+      telefoon ? `Telefoon: ${telefoon}` : "",
+      "",
+      "Bericht:",
+      bericht,
+    ].filter((line) => line !== "").join("\n");
+
+    try {
+      await sendBrandedEmail({
+        to: "contact@fluweelevents.nl",
+        replyTo: email,
+        subject: `Nieuw bericht van ${naam}`,
+        kicker: "Aanvraag",
+        title: "Iemand klopt aan",
+        text: `Er is een nieuw bericht binnengekomen via fluweelevents.nl.\n\n${details}`,
+      });
+    } catch (mailErr) {
+      console.error("Resend fout:", mailErr);
       return res.status(502).json({ ok: false, error: "Verzenden is niet gelukt. Probeer het later opnieuw." });
     }
 
     try {
-      const lead = await addLead({ naam, email, telefoon, bericht, bron: "website" });
+      await addLead({ naam, email, telefoon, bericht, bron: "website" });
       const template = await getTemplate("bevestiging");
       if (template) {
-        await sendTemplateEmail({ template, to: email, vars: { naam, email } });
+        await sendTemplateEmail({
+          template,
+          to: email,
+          vars: { naam, email },
+          kicker: "Welkom",
+        });
       }
     } catch (storeErr) {
       console.error("Opslaan contactformulier mislukt:", storeErr);
