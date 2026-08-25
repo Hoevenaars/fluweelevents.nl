@@ -363,13 +363,21 @@ body {
   justify-content:space-between;
   gap:1rem;
   padding:1rem 1.6rem;
-  background:rgba(250,245,239,.78);
+  background:rgba(250,245,239,.92);
   backdrop-filter:blur(12px);
   -webkit-backdrop-filter:blur(12px);
   border-bottom:1px solid transparent;
+  transition:border-color .2s;
 }
 
 .werk-kop.scrolled { border-bottom-color:var(--lijn); }
+
+.werk-kop-links {
+  display:flex;
+  flex-direction:column;
+  gap:.15rem;
+  min-width:0;
+}
 
 .werk-datum {
   font-size:.82rem;
@@ -677,27 +685,22 @@ body {
 }
 
 .create-fab-wrap {
-  position:fixed;
-  right:1.4rem;
-  bottom:1.4rem;
-  z-index:90;
-  display:flex;
-  flex-direction:column;
-  align-items:flex-end;
-  gap:.65rem;
+  position:relative;
+  z-index:20;
+  flex-shrink:0;
 }
 
 .create-fab {
-  width:3.35rem;
-  height:3.35rem;
+  width:2.55rem;
+  height:2.55rem;
   border:0;
   border-radius:50%;
   background:var(--fuchsia);
   color:#fff;
-  font-size:1.85rem;
+  font-size:1.55rem;
   line-height:1;
   cursor:pointer;
-  box-shadow:0 14px 32px -14px rgba(200,30,99,.55);
+  box-shadow:0 10px 24px -12px rgba(200,30,99,.5);
   transition:transform .18s ease, background .18s ease;
 }
 
@@ -711,6 +714,9 @@ body {
 }
 
 .create-menu {
+  position:absolute;
+  top:calc(100% + .45rem);
+  right:0;
   display:flex;
   flex-direction:column;
   gap:.35rem;
@@ -920,11 +926,6 @@ body {
   }
 
   .board { grid-template-columns:1fr; }
-
-  .create-fab-wrap {
-    right:1rem;
-    bottom:1rem;
-  }
 
   .werk-kop { padding:.85rem 1rem; }
   .main { padding:1rem 1rem 2rem; }
