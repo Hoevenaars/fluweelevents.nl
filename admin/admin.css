@@ -665,9 +665,13 @@ body {
   inset:0;
   z-index:100;
   pointer-events:none;
+  visibility:hidden;
 }
 
-.detail.open { pointer-events:auto; }
+.detail.open {
+  pointer-events:auto;
+  visibility:visible;
+}
 
 .detail-backdrop {
   position:absolute;
