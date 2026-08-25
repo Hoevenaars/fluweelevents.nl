@@ -42,20 +42,46 @@ function readSession() {
   }
 }
 
+function cookieSecureSuffix() {
+  return location.protocol === "https:" ? "; Secure" : "";
+}
+
+function setClientCookie(name, value, maxAgeSeconds) {
+  document.cookie = `${name}=${encodeURIComponent(value)}; Path=/; SameSite=Lax; Max-Age=${maxAgeSeconds}${cookieSecureSuffix()}`;
+}
+
+function clearClientCookie(name) {
+  document.cookie = `${name}=; Path=/; SameSite=Lax; Max-Age=0${cookieSecureSuffix()}`;
+}
+
 function writeSession(session) {
   if (!session?.accessToken) {
     localStorage.removeItem(SESSION_KEY);
     sessionStorage.removeItem(SESSION_KEY);
+    clearClientCookie("fluweel_access");
+    clearClientCookie("fluweel_refresh");
+    clearClientCookie("fluweel_session");
     return;
   }
   const raw = JSON.stringify(session);
   localStorage.setItem(SESSION_KEY, raw);
   sessionStorage.setItem(SESSION_KEY, raw);
+  // PDF/ICS-links openen in een nieuw tabblad zonder Authorization-header.
+  // Zet de sessie daarom ook als cookie (client-side, zodat grote JWT's
+  // de login-response op Vercel niet stukmaken).
+  setClientCookie("fluweel_access", session.accessToken, 60 * 60 * 24 * 7);
+  setClientCookie("fluweel_session", session.accessToken, 60 * 60 * 24 * 7);
+  if (session.refreshToken) {
+    setClientCookie("fluweel_refresh", session.refreshToken, 60 * 60 * 24 * 30);
+  }
 }
 
 function clearSession() {
   localStorage.removeItem(SESSION_KEY);
   sessionStorage.removeItem(SESSION_KEY);
+  clearClientCookie("fluweel_access");
+  clearClientCookie("fluweel_refresh");
+  clearClientCookie("fluweel_session");
 }
 
 async function api(path, opts = {}) {
@@ -1190,6 +1216,7 @@ document.addEventListener("keydown", (e) => {
       showLogin();
       return;
     }
+    writeSession(session);
     showApp(session.email || "");
     const { res, json } = await api("/api/me");
     if (res.ok && json.email) $("#account").textContent = json.email;
