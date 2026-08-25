@@ -799,6 +799,49 @@ body {
   padding:.15rem .35rem;
 }
 
+.keuze-rij {
+  display:grid;
+  gap:.7rem;
+}
+
+.keuze-btn {
+  display:block;
+  width:100%;
+  text-align:left;
+  font:inherit;
+  padding:1rem 1.1rem;
+  border:1px solid var(--lijn);
+  border-radius:6px;
+  background:#fff;
+  color:var(--inkt);
+  cursor:pointer;
+}
+
+.keuze-btn strong {
+  display:block;
+  font-family:var(--serif);
+  font-weight:500;
+  font-size:1.15rem;
+  margin-bottom:.2rem;
+}
+
+.keuze-btn span {
+  color:var(--mauve);
+  font-size:.88rem;
+  line-height:1.45;
+}
+
+.keuze-btn:hover,
+.keuze-btn:focus-visible {
+  border-color:var(--aubergine);
+  background:var(--vlak);
+}
+
+.keuze-btn:disabled {
+  opacity:.6;
+  cursor:wait;
+}
+
 .page-acties {
   display:flex;
   flex-wrap:wrap;
@@ -878,13 +921,70 @@ body {
   margin-top:.15rem;
 }
 
-.tag {
-  display:inline-block;
-  font-size:.72rem;
-  padding:.18rem .55rem;
-  border-radius:999px;
-  background:var(--vlak);
+.tag.akkoord {
+  background:rgba(184,151,90,.22);
   color:var(--aubergine);
+}
+
+.tag.afgewezen {
+  background:rgba(42,19,34,.08);
+  color:var(--mauve);
+}
+
+.sub-meta {
+  color:var(--mauve);
+  font-size:.88rem;
+  margin:.35rem 0 .2rem;
+}
+
+.bekeken-cel {
+  display:inline-flex;
+  align-items:center;
+  gap:.4rem;
+}
+
+.bekeken-kop {
+  display:flex;
+  align-items:center;
+  gap:.45rem;
+}
+
+.info-i {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:1.2rem;
+  height:1.2rem;
+  flex-shrink:0;
+  border-radius:50%;
+  border:1px solid var(--lijn);
+  background:#fff;
+  color:var(--aubergine);
+  font:italic 600 .78rem/1 var(--serif);
+  cursor:pointer;
+  padding:0;
+}
+
+.info-i:hover,
+.info-i:focus-visible {
+  border-color:var(--fuchsia);
+  color:var(--fuchsia);
+}
+
+.bekeken-lijst {
+  margin:.45rem 0 0;
+  padding-left:0;
+  list-style:none;
+  color:var(--mauve);
+  font-size:.88rem;
+}
+
+.bekeken-lijst li { margin:.35rem 0; }
+
+.bekeken-nr {
+  font-variant-numeric:tabular-nums;
+  color:var(--aubergine);
+  margin-right:.2rem;
 }
 
 .leeg {
