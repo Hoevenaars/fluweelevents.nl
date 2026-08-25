@@ -799,6 +799,49 @@ body {
   padding:.15rem .35rem;
 }
 
+.keuze-rij {
+  display:grid;
+  gap:.7rem;
+}
+
+.keuze-btn {
+  display:block;
+  width:100%;
+  text-align:left;
+  font:inherit;
+  padding:1rem 1.1rem;
+  border:1px solid var(--lijn);
+  border-radius:6px;
+  background:#fff;
+  color:var(--inkt);
+  cursor:pointer;
+}
+
+.keuze-btn strong {
+  display:block;
+  font-family:var(--serif);
+  font-weight:500;
+  font-size:1.15rem;
+  margin-bottom:.2rem;
+}
+
+.keuze-btn span {
+  color:var(--mauve);
+  font-size:.88rem;
+  line-height:1.45;
+}
+
+.keuze-btn:hover,
+.keuze-btn:focus-visible {
+  border-color:var(--aubergine);
+  background:var(--vlak);
+}
+
+.keuze-btn:disabled {
+  opacity:.6;
+  cursor:wait;
+}
+
 .page-acties {
   display:flex;
   flex-wrap:wrap;

@@ -646,6 +646,7 @@ async function openQuoteDetail(id) {
       <button class="btn btn-primair" id="save-quote">Opslaan</button>
       <button type="button" class="btn" id="quote-pdf">PDF</button>
       <button class="btn btn-primair" id="new-quote-send">Versturen</button>
+      <button type="button" class="btn" id="delete-quote">Verwijderen</button>
     </div>
     <p class="melding" id="quote-melding"></p>
     <div class="panel" style="margin-top:1.1rem">
@@ -690,6 +691,7 @@ async function openQuoteDetail(id) {
   $("#quote-pdf").onclick = () => openAuthedFile(`/api/quotes/pdf?id=${encodeURIComponent(id)}`);
 
   $("#new-quote-send").onclick = () => openSendQuoteModal(id);
+  $("#delete-quote").onclick = () => openDeleteQuoteModal(id);
 }
 
 function renderQuotes() {
@@ -708,6 +710,7 @@ function renderQuotes() {
         <button class="btn open-quote" data-id="${q.id}">Bewerken</button>
         <button type="button" class="btn open-pdf" data-href="/api/quotes/pdf?id=${q.id}">PDF</button>
         <button class="btn btn-primair send-quote" data-id="${q.id}">Versturen</button>
+        <button type="button" class="btn delete-quote" data-id="${q.id}">Verwijderen</button>
       </td>
     </tr>`).join("") || "<tr><td colspan='6' class='leeg'>Nog geen offertes</td></tr>"}
   </tbody></table>`;
@@ -720,6 +723,9 @@ function renderQuotes() {
   });
   main.querySelectorAll(".send-quote").forEach((b) => {
     b.onclick = () => openSendQuoteModal(b.dataset.id);
+  });
+  main.querySelectorAll(".delete-quote").forEach((b) => {
+    b.onclick = () => openDeleteQuoteModal(b.dataset.id);
   });
 }
 
@@ -969,6 +975,62 @@ function openSendQuoteModal(id) {
     if (state.activeLead || detail?.classList.contains("open")) openQuoteDetail(id);
   });
   createModalPaneel.querySelector("textarea")?.focus();
+}
+
+function openDeleteQuoteModal(id) {
+  const quote = state.quotes.find((q) => q.id === id);
+  if (!quote) {
+    api(`/api/quotes?id=${encodeURIComponent(id)}`).then(({ json }) => {
+      if (json.quote) {
+        if (!state.quotes.some((q) => q.id === json.quote.id)) state.quotes.unshift(json.quote);
+        openDeleteQuoteModal(id);
+      }
+    });
+    return;
+  }
+  closeCreateMenu();
+  createModalPaneel.innerHTML = `
+    <button type="button" class="create-modal-x" id="create-modal-x" aria-label="Sluiten">&times;</button>
+    <p class="label">Verwijderen</p>
+    <h2 id="create-modal-titel">Waarom verwijder je ${esc(quote.nummer)}?</h2>
+    <p style="color:var(--mauve);margin-bottom:1rem">${esc(quote.klantNaam)} · ${euro(quote.totaal)}</p>
+    <div class="keuze-rij">
+      <button type="button" class="keuze-btn" data-reden="foutief">
+        <strong>Foutief</strong>
+        <span>Verkeerd of dubbel aangemaakt. De offerte verdwijnt uit het overzicht.</span>
+      </button>
+      <button type="button" class="keuze-btn" data-reden="afgewezen">
+        <strong>Afgewezen</strong>
+        <span>We gaan hier niet mee verder. De offerte verdwijnt uit het overzicht.</span>
+      </button>
+    </div>
+    <p class="melding" id="delete-quote-melding"></p>
+    <div class="btn-groep" style="margin-top:1rem">
+      <button type="button" class="btn" id="delete-quote-cancel">Annuleren</button>
+    </div>`;
+  createModal.hidden = false;
+  $("#create-modal-x").onclick = closeCreateModal;
+  $("#delete-quote-cancel").onclick = closeCreateModal;
+  createModalPaneel.querySelectorAll("[data-reden]").forEach((btn) => {
+    btn.onclick = async () => {
+      const melding = $("#delete-quote-melding");
+      melding.textContent = "";
+      createModalPaneel.querySelectorAll("[data-reden]").forEach((b) => { b.disabled = true; });
+      const { res, json: out } = await api("/api/quotes", {
+        method: "DELETE",
+        body: JSON.stringify({ id, reden: btn.dataset.reden }),
+      });
+      if (!res.ok) {
+        melding.textContent = out.error || "Verwijderen mislukt.";
+        createModalPaneel.querySelectorAll("[data-reden]").forEach((b) => { b.disabled = false; });
+        return;
+      }
+      closeCreateModal();
+      closeDetail();
+      await refresh();
+      if (state.view === "quotes") renderView();
+    };
+  });
 }
 
 function openCreateModal(type) {
