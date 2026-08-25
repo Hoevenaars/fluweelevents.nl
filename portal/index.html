@@ -67,6 +67,16 @@
       const intPart = intRaw.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
       return "€ " + (value < 0 ? "-" : "") + intPart + "," + fracRaw;
     };
+    const fmtDate = (iso) => {
+      if (!iso) return "";
+      const raw = String(iso).trim();
+      const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
+      const date = dateOnly
+        ? new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]))
+        : new Date(raw);
+      if (Number.isNaN(date.getTime())) return raw;
+      return new Intl.DateTimeFormat("nl-NL", { day: "numeric", month: "long", year: "numeric" }).format(date);
+    };
     const statusLabel = { concept: "Concept", verstuurd: "Verstuurd", geaccepteerd: "Akkoord", afgewezen: "Afgewezen" };
     if (!token) document.getElementById("content").innerHTML = "<p>Geen geldige link. Neem contact op met Fluweel.</p>";
     else fetch("/api/portal/quote?token=" + encodeURIComponent(token)).then((r) => r.json()).then((d) => {
@@ -82,7 +92,7 @@
           <tbody>${(q.regels || []).map((r) => `<tr><td>${r.omschrijving}</td><td>${r.aantal}</td><td>${euro(r.aantal * r.prijs)}</td></tr>`).join("")}</tbody>
         </table>
         <p class="totaal">Totaal ${euro(q.totaal)}</p>
-        ${q.geldigTot ? `<p class="sub">Geldig tot ${q.geldigTot}</p>` : ""}
+        ${q.geldigTot ? `<p class="sub">Geldig tot ${fmtDate(q.geldigTot)}</p>` : ""}
         ${q.status === "verstuurd" ? `<button class="btn primair" id="ok">Akkoord</button><button class="btn sec" id="no">Afwijzen</button>` : ""}
         ${q.status === "geaccepteerd" ? `<p class="sub">Je hebt akkoord gegeven. We nemen het verder op.</p>` : ""}
         ${q.status === "afgewezen" ? `<p class="sub">Deze offerte is afgewezen.</p>` : ""}

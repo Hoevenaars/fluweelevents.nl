@@ -149,7 +149,25 @@ function nlNum(n, decimals = 2) {
   return (neg ? "-" : "") + body;
 }
 function euro(n, decimals = 2) { return `€ ${nlNum(n, decimals)}`; }
-function fmt(iso) { return iso ? new Intl.DateTimeFormat("nl-NL",{dateStyle:"medium",timeStyle:"short"}).format(new Date(iso)) : "-"; }
+function parseDate(iso) {
+  if (!iso) return null;
+  if (iso instanceof Date) return Number.isNaN(iso.getTime()) ? null : iso;
+  const raw = String(iso).trim();
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
+  if (dateOnly) return new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]));
+  const parsed = new Date(raw);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+function fmtDate(iso) {
+  const date = parseDate(iso);
+  if (!date) return iso ? String(iso) : "-";
+  return new Intl.DateTimeFormat("nl-NL", { day: "numeric", month: "long", year: "numeric" }).format(date);
+}
+function fmt(iso) {
+  const date = parseDate(iso);
+  if (!date) return iso ? String(iso) : "-";
+  return new Intl.DateTimeFormat("nl-NL", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(date);
+}
 function fase(id) { return FASES.find(f=>f.id===id)?.label || id; }
 
 const QUOTE_STATUS = {
@@ -211,6 +229,7 @@ function updateWerkDatum() {
     weekday: "long",
     day: "numeric",
     month: "long",
+    year: "numeric",
   }).format(new Date());
 }
 
@@ -268,7 +287,7 @@ function renderDashboard() {
       <div class="kaart-stat"><span>Omzet betaald</span><strong>${euro(a.invoices?.betaald||0, 0)}</strong></div>
     </div>
     <div class="panel"><h2>Vandaag te doen (${vandaag.length})</h2>
-      ${vandaag.length ? vandaag.map(t=>`<p class="taak-rij"><button type="button" class="taak-check" data-id="${t.id}" aria-label="Afvinken">☐</button> <strong>${esc(t.titel)}</strong> <span class="tag">${t.deadline}</span></p>`).join("") : "<p class='leeg'>Geen open taken voor vandaag.</p>"}
+      ${vandaag.length ? vandaag.map(t=>`<p class="taak-rij"><button type="button" class="taak-check" data-id="${t.id}" aria-label="Afvinken">☐</button> <strong>${esc(t.titel)}</strong> <span class="tag">${esc(fmtDate(t.deadline))}</span></p>`).join("") : "<p class='leeg'>Geen open taken voor vandaag.</p>"}
     </div>
     <div class="panel"><h2>Pipeline</h2>
       <p style="color:var(--mauve);margin-bottom:.85rem;font-size:.92rem">Sleep aanvragen naar een andere fase.</p>
@@ -382,7 +401,7 @@ function exportLeadsCsv(leads) {
   const cols = ["naam", "email", "telefoon", "bedrijf", "status", "bron", "ontvangenOp", "notities"];
   const escCsv = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
   const rows = [cols.join(",")].concat(
-    leads.map((l) => cols.map((c) => escCsv(l[c])).join(","))
+    leads.map((l) => cols.map((c) => escCsv(c === "ontvangenOp" ? fmt(l[c]) : l[c])).join(","))
   );
   const blob = new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -489,7 +508,7 @@ async function openLeadDetail(id) {
     <div class="panel"><h2>Fase</h2><div class="btn-groep">${FASES.map(f=>`<button class="btn fase-btn" data-status="${f.id}">${f.label}</button>`).join("")}</div></div>
     <div class="panel"><h2>Taken</h2>
       <div class="form-grid"><input id="task-titel" placeholder="Nieuwe taak"><input id="task-deadline" type="date"><button class="btn" id="add-task">Taak toevoegen</button></div>
-      ${(tj.tasks||[]).map(t=>`<p class="taak-rij"><button type="button" class="taak-check" data-id="${t.id}" data-done="${t.voltooid?"1":"0"}" aria-label="${t.voltooid?"Heropenen":"Afvinken"}">${t.voltooid?"☑":"☐"}</button> <span class="${t.voltooid?"taak-done":""}">${esc(t.titel)}</span> <span class="tag">${t.deadline||""}</span></p>`).join("")}
+      ${(tj.tasks||[]).map(t=>`<p class="taak-rij"><button type="button" class="taak-check" data-id="${t.id}" data-done="${t.voltooid?"1":"0"}" aria-label="${t.voltooid?"Heropenen":"Afvinken"}">${t.voltooid?"☑":"☐"}</button> <span class="${t.voltooid?"taak-done":""}">${esc(t.titel)}</span> <span class="tag">${t.deadline?esc(fmtDate(t.deadline)):""}</span></p>`).join("")}
     </div>
     <div class="panel"><h2>Tijdlijn</h2><div class="timeline">${(json.activities||[]).map(a=>`<div class="timeline-item"><strong>${esc(a.titel)}</strong><p>${fmt(a.aangemaaktOp)} · ${esc(a.omschrijving)}</p></div>`).join("")||"<p class='leeg'>Nog geen activiteiten</p>"}</div></div>`;
   detail.classList.add("open");
