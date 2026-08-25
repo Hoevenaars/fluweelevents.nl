@@ -1,5 +1,5 @@
 {
-  "name": "Fluweel Events (static site + /api/contact)",
+  "name": "Fluweel Events (static site + CRM admin)",
   "install": "npm install",
   "start": "node .cursor/dev-server.mjs",
   "ports": [

@@ -4,38 +4,68 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#FAF5EF" />
   <title>Fluweel · Werkomgeving</title>
+  <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/admin/admin.css" />
 </head>
 <body>
   <section id="login-view" class="login-view" hidden>
-    <div class="login-kaart">
-      <p class="merk">Fluweel<em>.</em></p>
-      <p class="login-sub">Log in op je werkomgeving</p>
-      <form id="loginform">
-        <label for="email">E-mail</label>
-        <input id="email" name="email" type="email" autocomplete="username" required>
-        <label for="password">Wachtwoord</label>
-        <input id="password" name="password" type="password" autocomplete="current-password" required>
-        <button type="submit">Inloggen</button>
-        <p class="melding" id="login-melding"></p>
-      </form>
+    <div class="login-bg" aria-hidden="true"></div>
+    <div class="login-shell wrap">
+      <div class="login-brand">
+        <p class="label">Werkomgeving</p>
+        <p class="merk merk-groot">Fluweel<em>.</em></p>
+        <p class="login-tagline">Meer dan een evenement.<br>Een herinnering.</p>
+        <p class="login-intro">Beheer aanvragen, offertes en projecten — rustig en overzichtelijk, in de stijl van Fluweel.</p>
+      </div>
+      <div class="login-kaart">
+        <h2 class="login-titel">Welkom terug</h2>
+        <p class="login-sub">Log in met je teamaccount</p>
+        <form id="loginform" class="login-form">
+          <div class="veld">
+            <label for="email">E-mailadres</label>
+            <input id="email" name="email" type="email" autocomplete="username" placeholder="naam@fluweelevents.nl" required>
+          </div>
+          <div class="veld">
+            <label for="password">Wachtwoord</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn btn-primair btn-breed">Inloggen</button>
+          <p class="melding" id="login-melding" role="alert"></p>
+        </form>
+        <p class="login-hulp">Nog geen account? Vraag je beheerder om toegang, of maak een gebruiker aan in Supabase.</p>
+      </div>
     </div>
+    <footer class="login-foot wrap">
+      <span>&copy; 2026 Fluweel Events</span>
+      <a href="mailto:contact@fluweelevents.nl">contact@fluweelevents.nl</a>
+    </footer>
   </section>
 
   <section id="app-view" class="app" hidden>
     <aside class="sidebar">
-      <p class="merk">Fluweel<em>.</em></p>
-      <nav id="nav"></nav>
+      <div class="sidebar-top">
+        <p class="merk">Fluweel<em>.</em></p>
+        <p class="sidebar-label">Werkomgeving</p>
+      </div>
+      <nav id="nav" aria-label="Hoofdmenu"></nav>
       <div class="sidebar-foot">
         <span id="account" class="account"></span>
         <button type="button" class="knop-licht" id="uitloggen">Uitloggen</button>
       </div>
     </aside>
-    <main class="main" id="main"></main>
+    <div class="werk">
+      <header class="werk-kop">
+        <p class="label">Fluweel CRM</p>
+        <p class="werk-datum" id="werk-datum"></p>
+      </header>
+      <main class="main" id="main"></main>
+    </div>
   </section>
 
   <aside id="detail" class="detail" aria-hidden="true">

@@ -36,7 +36,24 @@ function fmt(iso) { return iso ? new Intl.DateTimeFormat("nl-NL",{dateStyle:"med
 function fase(id) { return FASES.find(f=>f.id===id)?.label || id; }
 
 function showLogin() { loginView.hidden = false; appView.hidden = true; detail.classList.remove("open"); }
-function showApp(email) { loginView.hidden = true; appView.hidden = false; $("#account").textContent = email; renderNav(); renderView(); }
+function showApp(email) {
+  loginView.hidden = true;
+  appView.hidden = false;
+  $("#account").textContent = email;
+  updateWerkDatum();
+  renderNav();
+  renderView();
+}
+
+function updateWerkDatum() {
+  const el = $("#werk-datum");
+  if (!el) return;
+  el.textContent = new Intl.DateTimeFormat("nl-NL", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).format(new Date());
+}
 
 function renderNav() {
   $("#nav").innerHTML = NAV.map(n => `<button type="button" class="nav-item ${state.view===n.id?"actief":""}" data-view="${n.id}">${n.label}</button>`).join("");
@@ -60,8 +77,13 @@ async function loadAll() {
 }
 
 function renderView() {
+  const current = NAV.find(n => n.id === state.view);
+  main.innerHTML = `
+    <div class="page-kop">
+      <p class="label">${esc(current?.label || "Overzicht")}</p>
+      <h1>${esc(current?.label || "Dashboard")}</h1>
+    </div>`;
   const renderers = { dashboard: renderDashboard, leads: renderLeads, quotes: renderQuotes, invoices: renderInvoices, projects: renderProjects, campaigns: renderCampaigns, templates: renderTemplates, website: renderWebsite, integrations: renderIntegrations };
-  main.innerHTML = `<div class="page-kop"><h1>${NAV.find(n=>n.id===state.view)?.label}</h1></div>`;
   renderers[state.view]?.();
 }
 
@@ -278,16 +300,29 @@ async function refresh() { await loadAll(); }
 
 $("#loginform").addEventListener("submit", async e => {
   e.preventDefault();
+  const melding = $("#login-melding");
+  melding.textContent = "";
   const data = Object.fromEntries(new FormData(e.target));
   const { res, json } = await api("/api/auth/login", { method:"POST", body: JSON.stringify(data) });
   if (res.ok) { showApp(json.email); await refresh(); }
-  else $("#login-melding").textContent = json.error || "Inloggen mislukt.";
+  else {
+    melding.textContent = json.error || "Inloggen mislukt.";
+    e.target.classList.remove("shake");
+    void e.target.offsetWidth;
+    e.target.classList.add("shake");
+  }
 });
 
 $("#uitloggen").onclick = async () => { await api("/api/auth/logout", { method:"POST" }); showLogin(); };
 $("#detail-sluit")?.addEventListener("click", closeDetail);
 
 (async () => {
+  const werkKop = document.querySelector(".werk-kop");
+  const mainEl = document.querySelector(".main");
+  mainEl?.addEventListener("scroll", () => {
+    werkKop?.classList.toggle("scrolled", (mainEl.scrollTop || 0) > 8);
+  }, { passive: true });
+
   const { res, json } = await api("/api/auth/me");
   if (res.ok) { showApp(json.email); await refresh(); }
   else showLogin();
