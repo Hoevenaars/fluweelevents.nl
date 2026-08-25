@@ -95,6 +95,11 @@ create table if not exists public.quotes (
   totaal numeric(10,2) not null default 0,
   notities text default '',
   portal_token text unique default encode(gen_random_bytes(16), 'hex'),
+  bekeken_aantal int not null default 0,
+  laatst_bekeken_op timestamptz,
+  bekeken_op timestamptz[] not null default '{}',
+  verwijderd_op timestamptz,
+  verwijderd_reden text,
   aangemaakt_op timestamptz not null default now()
 );
 
@@ -102,6 +107,18 @@ alter table public.quotes drop constraint if exists quotes_status_check;
 alter table public.quotes
   add constraint quotes_status_check
   check (status in ('concept', 'verstuurd', 'geaccepteerd', 'afgewezen'));
+
+alter table public.quotes drop constraint if exists quotes_verwijderd_reden_check;
+alter table public.quotes
+  add constraint quotes_verwijderd_reden_check
+  check (
+    (verwijderd_op is null and verwijderd_reden is null)
+    or (verwijderd_op is not null and verwijderd_reden in ('foutief', 'afgewezen'))
+  );
+
+create index if not exists idx_quotes_actief
+  on public.quotes (aangemaakt_op desc)
+  where verwijderd_op is null;
 
 create table if not exists public.quote_lines (
   id uuid primary key default gen_random_uuid(),
