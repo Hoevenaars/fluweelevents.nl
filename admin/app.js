@@ -745,7 +745,10 @@ function renderIntegrations() {
     </div>`;
 }
 
-async function refresh() { await loadAll(); }
+async function refresh() {
+  await loadAll();
+  if (appView && !appView.hidden) renderView();
+}
 
 $("#loginform").addEventListener("submit", async e => {
   e.preventDefault();
