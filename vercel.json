@@ -1,10 +1,97 @@
 {
+  "redirects": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "admin.fluweelevents.nl" }],
+      "destination": "/dashboard",
+      "permanent": false
+    },
+    {
+      "source": "/admin",
+      "has": [{ "type": "host", "value": "admin.fluweelevents.nl" }],
+      "destination": "/dashboard",
+      "permanent": false
+    },
+    {
+      "source": "/admin/",
+      "has": [{ "type": "host", "value": "admin.fluweelevents.nl" }],
+      "destination": "/dashboard",
+      "permanent": false
+    },
+    {
+      "source": "/admin",
+      "has": [{ "type": "host", "value": "fluweelevents.nl" }],
+      "destination": "https://admin.fluweelevents.nl/dashboard",
+      "permanent": true
+    },
+    {
+      "source": "/admin/",
+      "has": [{ "type": "host", "value": "fluweelevents.nl" }],
+      "destination": "https://admin.fluweelevents.nl/dashboard",
+      "permanent": true
+    },
+    {
+      "source": "/admin",
+      "has": [{ "type": "host", "value": "www.fluweelevents.nl" }],
+      "destination": "https://admin.fluweelevents.nl/dashboard",
+      "permanent": true
+    },
+    {
+      "source": "/admin/",
+      "has": [{ "type": "host", "value": "www.fluweelevents.nl" }],
+      "destination": "https://admin.fluweelevents.nl/dashboard",
+      "permanent": true
+    },
+    {
+      "source": "/admin/:view(dashboard|leads|adresboek|quotes|invoices|projects|campaigns|templates|website|integrations)",
+      "has": [{ "type": "host", "value": "fluweelevents.nl" }],
+      "destination": "https://admin.fluweelevents.nl/:view",
+      "permanent": true
+    },
+    {
+      "source": "/admin/:view(dashboard|leads|adresboek|quotes|invoices|projects|campaigns|templates|website|integrations)",
+      "has": [{ "type": "host", "value": "www.fluweelevents.nl" }],
+      "destination": "https://admin.fluweelevents.nl/:view",
+      "permanent": true
+    }
+  ],
   "rewrites": [
+    {
+      "source": "/robots.txt",
+      "has": [{ "type": "host", "value": "admin.fluweelevents.nl" }],
+      "destination": "/admin/robots.txt"
+    },
+    {
+      "source": "/:view(dashboard|leads|adresboek|quotes|invoices|projects|campaigns|templates|website|integrations)",
+      "has": [{ "type": "host", "value": "admin.fluweelevents.nl" }],
+      "destination": "/admin/index.html"
+    },
     { "source": "/admin", "destination": "/admin/index.html" },
     { "source": "/portal", "destination": "/portal/index.html" },
     {
       "source": "/api/((?!contact$|login$|me$|logout$).*)",
       "destination": "/api?__p=/api/$1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "admin.fluweelevents.nl" }],
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+      ]
+    },
+    {
+      "source": "/admin/(.*)",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+      ]
+    },
+    {
+      "source": "/portal/(.*)",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+      ]
     }
   ]
 }

@@ -2,8 +2,9 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="0;url=/admin/" />
-  <script>location.replace("/admin/");</script>
+  <script>
+    location.replace(location.hostname === "admin.fluweelevents.nl" ? "/dashboard" : "/admin/");
+  </script>
   <title>Doorverwijzen…</title>
 </head>
 <body></body>

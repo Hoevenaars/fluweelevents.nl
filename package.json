@@ -2,6 +2,10 @@
   "name": "fluweelevents",
   "private": true,
   "type": "module",
+  "scripts": {
+    "test": "node --test admin/routes.test.js lib/admin-host.test.js",
+    "start": "node .cursor/dev-server.mjs"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",
     "pdfkit": "^0.16.0"

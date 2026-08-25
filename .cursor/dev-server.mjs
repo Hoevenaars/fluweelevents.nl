@@ -125,6 +125,20 @@ async function handleApi(req, res, handler) {
 
 async function serveStatic(req, res, pathname) {
   let rel = decodeURIComponent(pathname);
+  const host = String(req.headers.host || "").split(":")[0].toLowerCase();
+  const adminHost = host === "admin.fluweelevents.nl";
+  const adminViews = new Set([
+    "dashboard", "leads", "adresboek", "quotes", "invoices",
+    "projects", "campaigns", "templates", "website", "integrations",
+  ]);
+
+  if (adminHost) {
+    res.setHeader("X-Robots-Tag", "noindex, nofollow");
+    if (rel === "/robots.txt") rel = "/admin/robots.txt";
+    const first = rel.replace(/^\//, "").split("/")[0];
+    if (rel === "/" || adminViews.has(first)) rel = "/admin/index.html";
+  }
+
   if (rel === "/") rel = "/index.html";
   if (rel === "/admin" || rel === "/admin/") rel = "/admin/index.html";
   if (rel === "/portal" || rel === "/portal/") rel = "/portal/index.html";
@@ -178,6 +192,7 @@ server.listen(PORT, async () => {
   console.log(`[dev] Fluweel Events dev server on http://localhost:${PORT}`);
   console.log(`[dev] Access code (index.html gate): FLUWEEL26  ->  /preview.html`);
   console.log(`[dev] Admin werkomgeving: http://localhost:${PORT}/admin/`);
+  console.log(`[dev] Admin host (Hosts-file of curl -H Host): http://admin.fluweelevents.nl:${PORT}/dashboard`);
   console.log(`[dev] Opslag: ${getStorageMode()} · Auth: ${getAuthMode()}`);
   if (getAuthMode() === "legacy") {
     console.log(`[dev] Admin credentials: ${process.env.ADMIN_EMAIL} / ${process.env.ADMIN_PASSWORD}`);
