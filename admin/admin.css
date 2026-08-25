@@ -557,6 +557,31 @@ body {
   max-width:540px;
 }
 
+.toolbar-grid {
+  display:grid;
+  grid-template-columns:1fr minmax(140px,180px) auto;
+  gap:.75rem;
+  align-items:end;
+}
+
+.toolbar-grid label {
+  display:block;
+  font-size:.82rem;
+  letter-spacing:.04em;
+  color:var(--mauve);
+  margin-bottom:.45rem;
+}
+
+.toolbar-grid input,
+.toolbar-grid select {
+  font:inherit;
+  padding:.7rem .85rem;
+  border:1px solid var(--lijn);
+  border-radius:var(--radius);
+  width:100%;
+  background:rgba(250,245,239,.7);
+}
+
 .form-grid label {
   font-size:.82rem;
   letter-spacing:.04em;
@@ -704,6 +729,7 @@ body {
 
   .werk-kop { padding:.85rem 1rem; }
   .main { padding:1rem 1rem 2rem; }
+  .toolbar-grid { grid-template-columns:1fr; }
 }
 
 @media (prefers-reduced-motion:reduce) {
