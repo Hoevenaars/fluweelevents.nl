@@ -660,6 +660,146 @@ body {
   font-size:.9rem;
 }
 
+.kaart-lead.dragging {
+  opacity:.45;
+  transform:scale(.98);
+}
+
+.kolom-lijst.drag-over {
+  outline:2px dashed rgba(200,30,99,.45);
+  outline-offset:-4px;
+  background:rgba(200,30,99,.06);
+}
+
+.kolom-lijst .leeg {
+  pointer-events:none;
+  padding:1rem .5rem;
+}
+
+.create-fab-wrap {
+  position:fixed;
+  right:1.4rem;
+  bottom:1.4rem;
+  z-index:90;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:.65rem;
+}
+
+.create-fab {
+  width:3.35rem;
+  height:3.35rem;
+  border:0;
+  border-radius:50%;
+  background:var(--fuchsia);
+  color:#fff;
+  font-size:1.85rem;
+  line-height:1;
+  cursor:pointer;
+  box-shadow:0 14px 32px -14px rgba(200,30,99,.55);
+  transition:transform .18s ease, background .18s ease;
+}
+
+.create-fab:hover {
+  background:var(--aubergine);
+  transform:scale(1.05);
+}
+
+.create-fab[aria-expanded="true"] {
+  transform:rotate(45deg);
+}
+
+.create-menu {
+  display:flex;
+  flex-direction:column;
+  gap:.35rem;
+  min-width:11.5rem;
+  padding:.4rem;
+  background:#fff;
+  border:1px solid var(--lijn);
+  border-radius:var(--radius);
+  box-shadow:var(--schaduw);
+}
+
+.create-menu[hidden] { display:none !important; }
+
+.create-menu button {
+  font:inherit;
+  text-align:left;
+  border:0;
+  background:transparent;
+  padding:.65rem .8rem;
+  border-radius:var(--radius);
+  cursor:pointer;
+  color:var(--inkt);
+  transition:background .15s;
+}
+
+.create-menu button:hover {
+  background:var(--vlak);
+}
+
+.create-modal {
+  position:fixed;
+  inset:0;
+  z-index:110;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:1.25rem;
+}
+
+.create-modal[hidden] { display:none !important; }
+
+.create-modal-backdrop {
+  position:absolute;
+  inset:0;
+  background:rgba(42,19,34,.4);
+}
+
+.create-modal-paneel {
+  position:relative;
+  z-index:1;
+  width:min(560px,100%);
+  max-height:min(88svh,720px);
+  overflow:auto;
+  background:#fff;
+  border:1px solid var(--lijn);
+  border-radius:calc(var(--radius) + 4px);
+  padding:1.35rem 1.3rem 1.5rem;
+  box-shadow:var(--schaduw);
+}
+
+.create-modal-paneel h2 {
+  font-family:var(--serif);
+  font-weight:500;
+  font-size:1.35rem;
+  margin:.15rem 0 1rem;
+}
+
+.create-modal-paneel .form-grid {
+  max-width:none;
+}
+
+.create-modal-x {
+  float:right;
+  background:none;
+  border:0;
+  font-size:1.5rem;
+  line-height:1;
+  cursor:pointer;
+  color:var(--mauve);
+  padding:.15rem .35rem;
+}
+
+.page-acties {
+  display:flex;
+  flex-wrap:wrap;
+  gap:.5rem;
+  margin-bottom:1rem;
+}
+
 .detail {
   position:fixed;
   inset:0;
@@ -780,6 +920,11 @@ body {
   }
 
   .board { grid-template-columns:1fr; }
+
+  .create-fab-wrap {
+    right:1rem;
+    bottom:1rem;
+  }
 
   .werk-kop { padding:.85rem 1rem; }
   .main { padding:1rem 1rem 2rem; }

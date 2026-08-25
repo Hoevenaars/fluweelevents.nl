@@ -72,6 +72,21 @@
     <div class="detail-paneel" id="detail-paneel"></div>
   </aside>
 
+  <div id="create-modal" class="create-modal" hidden>
+    <div class="create-modal-backdrop" id="create-modal-sluit"></div>
+    <div class="create-modal-paneel" id="create-modal-paneel" role="dialog" aria-modal="true" aria-labelledby="create-modal-titel"></div>
+  </div>
+
+  <div id="create-fab-wrap" class="create-fab-wrap" hidden>
+    <div id="create-menu" class="create-menu" hidden role="menu" aria-label="Nieuw aanmaken">
+      <button type="button" role="menuitem" data-create="contact">Contactpersoon</button>
+      <button type="button" role="menuitem" data-create="aanvraag">Aanvraag</button>
+      <button type="button" role="menuitem" data-create="offerte">Offerte</button>
+      <button type="button" role="menuitem" data-create="project">Project</button>
+    </div>
+    <button type="button" class="create-fab" id="create-fab" aria-label="Nieuw aanmaken" aria-expanded="false" aria-controls="create-menu">+</button>
+  </div>
+
   <script src="/admin/app.js" type="module"></script>
 </body>
 </html>
