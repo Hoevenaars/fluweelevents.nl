@@ -25,6 +25,14 @@ const appView = $("#app-view");
 const main = $("#main");
 const detail = $("#detail");
 const detailPaneel = $("#detail-paneel");
+const createModal = $("#create-modal");
+const createModalPaneel = $("#create-modal-paneel");
+const createFabWrap = $("#create-fab-wrap");
+const createFab = $("#create-fab");
+const createMenu = $("#create-menu");
+
+let dragLeadId = null;
+let suppressLeadClick = false;
 
 function readSession() {
   try {
@@ -79,6 +87,9 @@ function fase(id) { return FASES.find(f=>f.id===id)?.label || id; }
 
 function showLogin() {
   clearSession();
+  closeCreateMenu();
+  closeCreateModal();
+  if (createFabWrap) createFabWrap.hidden = true;
   if (loginView) {
     loginView.hidden = false;
     loginView.removeAttribute("hidden");
@@ -99,6 +110,7 @@ function showApp(email) {
     appView.hidden = false;
     appView.removeAttribute("hidden");
   }
+  if (createFabWrap) createFabWrap.hidden = false;
   const account = $("#account");
   if (account) account.textContent = email || "";
   updateWerkDatum();
@@ -173,7 +185,8 @@ function renderDashboard() {
       ${vandaag.length ? vandaag.map(t=>`<p class="taak-rij"><button type="button" class="taak-check" data-id="${t.id}" aria-label="Afvinken">☐</button> <strong>${esc(t.titel)}</strong> <span class="tag">${t.deadline}</span></p>`).join("") : "<p class='leeg'>Geen open taken voor vandaag.</p>"}
     </div>
     <div class="panel"><h2>Pipeline</h2>
-      ${FASES.map(f=>`<p><span class="tag">${f.label}</span> ${state.leads.filter(l=>l.status===f.id).length} aanvragen</p>`).join("")}
+      <p style="color:var(--mauve);margin-bottom:.85rem;font-size:.92rem">Sleep aanvragen naar een andere fase.</p>
+      ${pipelineBoardHtml()}
     </div>`;
   main.querySelectorAll(".taak-check").forEach((b) => {
     b.onclick = async () => {
@@ -182,56 +195,88 @@ function renderDashboard() {
       renderView();
     };
   });
+  bindPipelineBoard(main);
+}
+
+function pipelineBoardHtml() {
+  return `<div class="board">${FASES.map((f) => {
+    const items = state.leads.filter((l) => l.status === f.id);
+    return `<section class="kolom" data-status="${f.id}">
+      <div class="kolom-kop"><h3>${f.label} (${items.length})</h3></div>
+      <div class="kolom-lijst" data-status="${f.id}">${
+        items.map((l) => `<button type="button" class="kaart-lead ${l.gelezen ? "" : "ongelezen"}" draggable="true" data-id="${l.id}">
+          <strong>${esc(l.naam)}</strong>
+          <small>${fmt(l.ontvangenOp)}${l.bron ? ` · ${esc(l.bron)}` : ""}</small>
+        </button>`).join("") || "<p class='leeg'>Sleep hierheen</p>"
+      }</div>
+    </section>`;
+  }).join("")}</div>`;
+}
+
+function bindPipelineBoard(root = main) {
+  root.querySelectorAll(".kaart-lead").forEach((card) => {
+    card.addEventListener("dragstart", (e) => {
+      dragLeadId = card.dataset.id;
+      suppressLeadClick = true;
+      card.classList.add("dragging");
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", card.dataset.id);
+    });
+    card.addEventListener("dragend", () => {
+      card.classList.remove("dragging");
+      root.querySelectorAll(".kolom-lijst.drag-over").forEach((el) => el.classList.remove("drag-over"));
+      dragLeadId = null;
+      setTimeout(() => { suppressLeadClick = false; }, 80);
+    });
+    card.onclick = () => {
+      if (suppressLeadClick) return;
+      openLeadDetail(card.dataset.id);
+    };
+  });
+
+  root.querySelectorAll(".kolom-lijst").forEach((lijst) => {
+    lijst.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      lijst.classList.add("drag-over");
+    });
+    lijst.addEventListener("dragleave", (e) => {
+      if (!lijst.contains(e.relatedTarget)) lijst.classList.remove("drag-over");
+    });
+    lijst.addEventListener("drop", async (e) => {
+      e.preventDefault();
+      lijst.classList.remove("drag-over");
+      const id = dragLeadId || e.dataTransfer.getData("text/plain");
+      const nextStatus = lijst.dataset.status;
+      if (!id || !nextStatus) return;
+      const lead = state.leads.find((l) => l.id === id);
+      if (!lead || lead.status === nextStatus) return;
+      suppressLeadClick = true;
+      lead.status = nextStatus;
+      renderView();
+      const { res, json } = await api("/api/leads", {
+        method: "PATCH",
+        body: JSON.stringify({ id, status: nextStatus }),
+      });
+      if (!res.ok) {
+        alert(json.error || "Fase wijzigen mislukt.");
+      }
+      await refresh();
+      renderView();
+    });
+  });
 }
 
 function renderLeads() {
   main.innerHTML += `
-    <div class="panel">
-      <h2>Nieuwe aanvraag</h2>
-      <p style="color:var(--mauve);margin-bottom:.85rem;font-size:.92rem">Voor belletjes, walk-ins of referrals.</p>
-      <form id="nieuw-lead" class="form-grid" style="max-width:640px">
-        <label>Naam *</label><input name="naam" required placeholder="Voor- en achternaam">
-        <label>E-mail *</label><input name="email" type="email" required placeholder="naam@bedrijf.nl">
-        <label>Telefoon</label><input name="telefoon" placeholder="06...">
-        <label>Bedrijf</label><input name="bedrijf" placeholder="Optioneel">
-        <label>Bron</label>
-        <select name="bron">
-          <option value="telefoon">Telefoon</option>
-          <option value="walk-in">Walk-in</option>
-          <option value="referral">Referral</option>
-          <option value="linkedin">LinkedIn</option>
-          <option value="website">Website</option>
-          <option value="overig">Overig</option>
-        </select>
-        <label>Korte notitie</label><textarea name="bericht" rows="3" placeholder="Waar ging het gesprek over?"></textarea>
-        <button type="submit" class="btn btn-primair">Opslaan in pipeline</button>
-        <p class="melding" id="nieuw-lead-melding"></p>
-      </form>
+    <div class="page-acties">
+      <button type="button" class="btn btn-primair" id="btn-nieuwe-aanvraag">+ Nieuwe aanvraag</button>
     </div>
-    <div class="board">${FASES.map(f=>{
-    const items = state.leads.filter(l=>l.status===f.id);
-    return `<section class="kolom"><div class="kolom-kop"><h3>${f.label} (${items.length})</h3></div><div class="kolom-lijst">${
-      items.map(l=>`<button type="button" class="kaart-lead ${l.gelezen?"":"ongelezen"}" data-id="${l.id}"><strong>${esc(l.naam)}</strong><small>${fmt(l.ontvangenOp)}${l.bron?` · ${esc(l.bron)}`:""}</small></button>`).join("") || "<p class='leeg'>Leeg</p>"
-    }</div></section>`;
-  }).join("")}</div>`;
+    <p style="color:var(--mauve);margin-bottom:.85rem;font-size:.92rem">Sleep kaarten tussen fases om de pipeline bij te werken.</p>
+    ${pipelineBoardHtml()}`;
 
-  main.querySelectorAll(".kaart-lead").forEach(b => b.onclick = () => openLeadDetail(b.dataset.id));
-  $("#nieuw-lead")?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const melding = $("#nieuw-lead-melding");
-    melding.textContent = "";
-    const data = Object.fromEntries(new FormData(e.target));
-    const { res, json } = await api("/api/leads", { method: "POST", body: JSON.stringify(data) });
-    if (!res.ok) {
-      melding.textContent = json.error || "Opslaan mislukt.";
-      return;
-    }
-    e.target.reset();
-    melding.textContent = "Opgeslagen in de pipeline.";
-    await refresh();
-    renderView();
-    if (json.lead?.id) openLeadDetail(json.lead.id);
-  });
+  $("#btn-nieuwe-aanvraag")?.addEventListener("click", () => openCreateModal("aanvraag"));
+  bindPipelineBoard(main);
 }
 
 function filterLeads(query, status) {
@@ -265,6 +310,9 @@ function exportLeadsCsv(leads) {
 function renderAdresboek() {
   const initial = filterLeads("", "alle");
   main.innerHTML += `
+    <div class="page-acties">
+      <button type="button" class="btn btn-primair" id="btn-nieuw-contact">+ Contactpersoon</button>
+    </div>
     <div class="panel">
       <div class="toolbar-grid">
         <div>
@@ -289,6 +337,7 @@ function renderAdresboek() {
       </table>
     </div>`;
 
+  $("#btn-nieuw-contact")?.addEventListener("click", () => openCreateModal("contact"));
   const redraw = () => {
     const list = filterLeads($("#ab-zoek").value, $("#ab-fase").value);
     $("#ab-count").textContent = String(list.length);
@@ -552,7 +601,11 @@ async function openQuoteDetail(id) {
 }
 
 function renderQuotes() {
-  main.innerHTML += `<table class="tabel"><thead><tr><th>Nr</th><th>Klant</th><th>Status</th><th>Totaal</th><th>Acties</th></tr></thead><tbody>
+  main.innerHTML += `
+    <div class="page-acties">
+      <button type="button" class="btn btn-primair" id="btn-nieuwe-offerte">+ Nieuwe offerte</button>
+    </div>
+    <table class="tabel"><thead><tr><th>Nr</th><th>Klant</th><th>Status</th><th>Totaal</th><th>Acties</th></tr></thead><tbody>
     ${state.quotes.map((q) => `<tr>
       <td>${esc(q.nummer)}</td>
       <td>${esc(q.klantNaam)}</td>
@@ -565,6 +618,7 @@ function renderQuotes() {
       </td>
     </tr>`).join("") || "<tr><td colspan='5' class='leeg'>Nog geen offertes</td></tr>"}
   </tbody></table>`;
+  $("#btn-nieuwe-offerte")?.addEventListener("click", () => openCreateModal("offerte"));
   main.querySelectorAll(".open-quote").forEach((b) => {
     b.onclick = () => openQuoteDetail(b.dataset.id);
   });
@@ -624,7 +678,11 @@ const PROJECT_STATUSES = [
 ];
 
 function renderProjects() {
-  main.innerHTML += state.projects.map((p) => `
+  main.innerHTML += `
+    <div class="page-acties">
+      <button type="button" class="btn btn-primair" id="btn-nieuw-project">+ Nieuw project</button>
+    </div>
+    ${state.projects.map((p) => `
     <div class="panel" data-project="${p.id}">
       <h2>${esc(p.naam)} <span class="tag">${esc(p.status)}</span></h2>
       <p style="color:var(--mauve);margin-bottom:1rem">${esc(p.klantNaam)}</p>
@@ -648,8 +706,9 @@ function renderProjects() {
         <button class="btn btn-primair save-project" data-id="${p.id}">Opslaan</button>
         <p class="melding p-melding" hidden></p>
       </div>
-    </div>`).join("") || "<p class='leeg'>Nog geen projecten. Worden automatisch aangemaakt bij fase 'Gewonnen'.</p>";
+    </div>`).join("") || "<p class='leeg'>Nog geen projecten. Maak er een via + of zet een aanvraag op Gewonnen.</p>"}`;
 
+  $("#btn-nieuw-project")?.addEventListener("click", () => openCreateModal("project"));
   main.querySelectorAll(".save-project").forEach((b) => {
     b.onclick = async () => {
       const id = b.dataset.id;
@@ -747,6 +806,225 @@ function renderIntegrations() {
 
 async function refresh() { await loadAll(); }
 
+function closeCreateMenu() {
+  if (!createMenu || !createFab) return;
+  createMenu.hidden = true;
+  createFab.setAttribute("aria-expanded", "false");
+}
+
+function toggleCreateMenu() {
+  if (!createMenu || !createFab) return;
+  const open = createMenu.hidden;
+  createMenu.hidden = !open;
+  createFab.setAttribute("aria-expanded", open ? "true" : "false");
+}
+
+function closeCreateModal() {
+  if (!createModal) return;
+  createModal.hidden = true;
+  if (createModalPaneel) createModalPaneel.innerHTML = "";
+}
+
+function openCreateModal(type) {
+  closeCreateMenu();
+  closeDetail();
+  if (!createModal || !createModalPaneel) return;
+
+  const titles = {
+    contact: "Nieuw contactpersoon",
+    aanvraag: "Nieuwe aanvraag",
+    offerte: "Nieuwe offerte",
+    project: "Nieuw project",
+  };
+
+  let body = "";
+  if (type === "contact") {
+    body = `
+      <form id="create-form" class="form-grid">
+        <label>Naam *</label><input name="naam" required placeholder="Voor- en achternaam">
+        <label>E-mail *</label><input name="email" type="email" required placeholder="naam@bedrijf.nl">
+        <label>Telefoon</label><input name="telefoon" placeholder="06...">
+        <label>Bedrijf</label><input name="bedrijf" placeholder="Optioneel">
+        <label>Notitie</label><textarea name="bericht" rows="2" placeholder="Optioneel"></textarea>
+        <button type="submit" class="btn btn-primair">Opslaan in adresboek</button>
+        <p class="melding" id="create-melding"></p>
+      </form>`;
+  } else if (type === "aanvraag") {
+    body = `
+      <form id="create-form" class="form-grid">
+        <label>Naam *</label><input name="naam" required placeholder="Voor- en achternaam">
+        <label>E-mail *</label><input name="email" type="email" required placeholder="naam@bedrijf.nl">
+        <label>Telefoon</label><input name="telefoon" placeholder="06...">
+        <label>Bedrijf</label><input name="bedrijf" placeholder="Optioneel">
+        <label>Bron</label>
+        <select name="bron">
+          <option value="telefoon">Telefoon</option>
+          <option value="walk-in">Walk-in</option>
+          <option value="referral">Referral</option>
+          <option value="linkedin">LinkedIn</option>
+          <option value="website">Website</option>
+          <option value="overig">Overig</option>
+        </select>
+        <label>Korte notitie</label><textarea name="bericht" rows="3" placeholder="Waar ging het gesprek over?"></textarea>
+        <button type="submit" class="btn btn-primair">Opslaan in pipeline</button>
+        <p class="melding" id="create-melding"></p>
+      </form>`;
+  } else if (type === "offerte") {
+    body = `
+      <form id="create-form" class="form-grid">
+        <label>Koppel aan aanvraag (optioneel)</label>
+        <select name="leadId" id="create-lead-pick">
+          <option value="">— Geen / handmatig —</option>
+          ${state.leads.map((l) => `<option value="${l.id}">${esc(l.naam)} · ${esc(l.email)}</option>`).join("")}
+        </select>
+        <label>Klantnaam *</label><input name="klantNaam" id="create-klant-naam" required placeholder="Naam">
+        <label>E-mail *</label><input name="klantEmail" id="create-klant-email" type="email" required placeholder="naam@bedrijf.nl">
+        <label>Bedrijf</label><input name="klantBedrijf" id="create-klant-bedrijf" placeholder="Optioneel">
+        <label>Geldig tot</label><input name="geldigTot" type="date" value="${new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10)}">
+        <label>Regels</label>
+        <div id="regel-lijst">${renderRegelRow({ omschrijving: "Concept & organisatie event", aantal: 1, prijs: 2500 })}</div>
+        <button type="button" class="btn" id="add-regel">Regel toevoegen</button>
+        <p class="regel-totaal"></p>
+        <label>Notities</label><textarea name="notities" rows="2"></textarea>
+        <button type="submit" class="btn btn-primair">Offerte aanmaken</button>
+        <p class="melding" id="create-melding"></p>
+      </form>`;
+  } else if (type === "project") {
+    body = `
+      <form id="create-form" class="form-grid">
+        <label>Koppel aan aanvraag (optioneel)</label>
+        <select name="leadId" id="create-project-lead">
+          <option value="">— Geen —</option>
+          ${state.leads.map((l) => `<option value="${l.id}">${esc(l.naam)} · ${esc(l.email)}</option>`).join("")}
+        </select>
+        <label>Projectnaam *</label><input name="naam" id="create-project-naam" required placeholder="Event · Klant">
+        <label>Klantnaam *</label><input name="klantNaam" id="create-project-klant" required placeholder="Naam">
+        <label>E-mail</label><input name="klantEmail" id="create-project-email" type="email" placeholder="naam@bedrijf.nl">
+        <label>Eventdatum</label><input name="eventDatum" type="date">
+        <label>Locatie</label><input name="locatie" placeholder="Locatie">
+        <button type="submit" class="btn btn-primair">Project aanmaken</button>
+        <p class="melding" id="create-melding"></p>
+      </form>`;
+  } else {
+    return;
+  }
+
+  createModalPaneel.innerHTML = `
+    <button type="button" class="create-modal-x" id="create-modal-x" aria-label="Sluiten">&times;</button>
+    <p class="label">Nieuw</p>
+    <h2 id="create-modal-titel">${titles[type]}</h2>
+    ${body}`;
+  createModal.hidden = false;
+  $("#create-modal-x").onclick = closeCreateModal;
+
+  if (type === "offerte") {
+    bindRegelEditor(createModalPaneel);
+    $("#create-lead-pick")?.addEventListener("change", (e) => {
+      const lead = state.leads.find((l) => l.id === e.target.value);
+      if (!lead) return;
+      $("#create-klant-naam").value = lead.naam || "";
+      $("#create-klant-email").value = lead.email || "";
+      $("#create-klant-bedrijf").value = lead.bedrijf || "";
+    });
+  }
+
+  if (type === "project") {
+    $("#create-project-lead")?.addEventListener("change", (e) => {
+      const lead = state.leads.find((l) => l.id === e.target.value);
+      if (!lead) return;
+      $("#create-project-naam").value = `Event · ${lead.naam}`;
+      $("#create-project-klant").value = lead.naam || "";
+      $("#create-project-email").value = lead.email || "";
+    });
+  }
+
+  $("#create-form")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const melding = $("#create-melding");
+    melding.textContent = "";
+    const data = Object.fromEntries(new FormData(e.target));
+
+    if (type === "contact" || type === "aanvraag") {
+      const payload = {
+        naam: data.naam,
+        email: data.email,
+        telefoon: data.telefoon || "",
+        bedrijf: data.bedrijf || "",
+        bron: type === "contact" ? "overig" : (data.bron || "telefoon"),
+        bericht: data.bericht || (type === "contact" ? "Contactpersoon adresboek" : "Handmatig toegevoegd."),
+      };
+      const { res, json } = await api("/api/leads", { method: "POST", body: JSON.stringify(payload) });
+      if (!res.ok) {
+        melding.textContent = json.error || "Opslaan mislukt.";
+        return;
+      }
+      closeCreateModal();
+      await refresh();
+      state.view = type === "contact" ? "adresboek" : "leads";
+      renderNav();
+      renderView();
+      if (json.lead?.id) openLeadDetail(json.lead.id);
+      return;
+    }
+
+    if (type === "offerte") {
+      const regels = readQuoteRegelsFromForm(createModalPaneel);
+      if (!regels.length) {
+        melding.textContent = "Voeg minstens één regel toe.";
+        return;
+      }
+      const { res, json } = await api("/api/quotes", {
+        method: "POST",
+        body: JSON.stringify({
+          leadId: data.leadId || null,
+          klantNaam: data.klantNaam,
+          klantEmail: data.klantEmail,
+          klantBedrijf: data.klantBedrijf || null,
+          geldigTot: data.geldigTot || null,
+          notities: data.notities || "",
+          regels,
+        }),
+      });
+      if (!res.ok) {
+        melding.textContent = json.error || "Aanmaken mislukt.";
+        return;
+      }
+      closeCreateModal();
+      await refresh();
+      state.view = "quotes";
+      renderNav();
+      renderView();
+      if (json.quote?.id) openQuoteDetail(json.quote.id);
+      return;
+    }
+
+    if (type === "project") {
+      const { res, json } = await api("/api/projects", {
+        method: "POST",
+        body: JSON.stringify({
+          leadId: data.leadId || null,
+          naam: data.naam,
+          klantNaam: data.klantNaam,
+          klantEmail: data.klantEmail || null,
+          eventDatum: data.eventDatum || null,
+          locatie: data.locatie || null,
+        }),
+      });
+      if (!res.ok) {
+        melding.textContent = json.error || "Aanmaken mislukt.";
+        return;
+      }
+      closeCreateModal();
+      await refresh();
+      state.view = "projects";
+      renderNav();
+      renderView();
+    }
+  });
+
+  createModalPaneel.querySelector("input, select, textarea")?.focus();
+}
+
 $("#loginform").addEventListener("submit", async e => {
   e.preventDefault();
   const melding = $("#login-melding");
@@ -800,6 +1078,24 @@ $("#uitloggen")?.addEventListener("click", async () => {
   showLogin();
 });
 $("#detail-sluit")?.addEventListener("click", closeDetail);
+
+createFab?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  toggleCreateMenu();
+});
+createMenu?.querySelectorAll("[data-create]").forEach((btn) => {
+  btn.addEventListener("click", () => openCreateModal(btn.dataset.create));
+});
+$("#create-modal-sluit")?.addEventListener("click", closeCreateModal);
+document.addEventListener("click", (e) => {
+  if (!createFabWrap?.contains(e.target)) closeCreateMenu();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    closeCreateMenu();
+    closeCreateModal();
+  }
+});
 
 (async () => {
   const werkKop = document.querySelector(".werk-kop");
