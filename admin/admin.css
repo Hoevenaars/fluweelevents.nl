@@ -22,6 +22,8 @@
 
 html { scroll-behavior:smooth; }
 
+[hidden] { display:none !important; }
+
 body {
   font-family:var(--sans);
   font-weight:400;
