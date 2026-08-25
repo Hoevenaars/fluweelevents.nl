@@ -170,11 +170,18 @@ function renderDashboard() {
       <div class="kaart-stat"><span>Omzet betaald</span><strong>€ ${(a.invoices?.betaald||0).toFixed(0)}</strong></div>
     </div>
     <div class="panel"><h2>Vandaag te doen (${vandaag.length})</h2>
-      ${vandaag.length ? vandaag.map(t=>`<p>☐ <strong>${esc(t.titel)}</strong> <span class="tag">${t.deadline}</span></p>`).join("") : "<p class='leeg'>Geen open taken voor vandaag.</p>"}
+      ${vandaag.length ? vandaag.map(t=>`<p class="taak-rij"><button type="button" class="taak-check" data-id="${t.id}" aria-label="Afvinken">☐</button> <strong>${esc(t.titel)}</strong> <span class="tag">${t.deadline}</span></p>`).join("") : "<p class='leeg'>Geen open taken voor vandaag.</p>"}
     </div>
     <div class="panel"><h2>Pipeline</h2>
       ${FASES.map(f=>`<p><span class="tag">${f.label}</span> ${state.leads.filter(l=>l.status===f.id).length} aanvragen</p>`).join("")}
     </div>`;
+  main.querySelectorAll(".taak-check").forEach((b) => {
+    b.onclick = async () => {
+      await api("/api/tasks", { method: "PATCH", body: JSON.stringify({ id: b.dataset.id, voltooid: true }) });
+      await refresh();
+      renderView();
+    };
+  });
 }
 
 function renderLeads() {
@@ -347,7 +354,7 @@ async function openLeadDetail(id) {
     <div class="panel"><h2>Fase</h2><div class="btn-groep">${FASES.map(f=>`<button class="btn fase-btn" data-status="${f.id}">${f.label}</button>`).join("")}</div></div>
     <div class="panel"><h2>Taken</h2>
       <div class="form-grid"><input id="task-titel" placeholder="Nieuwe taak"><input id="task-deadline" type="date"><button class="btn" id="add-task">Taak toevoegen</button></div>
-      ${(tj.tasks||[]).map(t=>`<p>${t.voltooid?"☑":"☐"} ${esc(t.titel)} <span class="tag">${t.deadline||""}</span></p>`).join("")}
+      ${(tj.tasks||[]).map(t=>`<p class="taak-rij"><button type="button" class="taak-check" data-id="${t.id}" data-done="${t.voltooid?"1":"0"}" aria-label="${t.voltooid?"Heropenen":"Afvinken"}">${t.voltooid?"☑":"☐"}</button> <span class="${t.voltooid?"taak-done":""}">${esc(t.titel)}</span> <span class="tag">${t.deadline||""}</span></p>`).join("")}
     </div>
     <div class="panel"><h2>Tijdlijn</h2><div class="timeline">${(json.activities||[]).map(a=>`<div class="timeline-item"><strong>${esc(a.titel)}</strong><p>${fmt(a.aangemaaktOp)} · ${esc(a.omschrijving)}</p></div>`).join("")||"<p class='leeg'>Nog geen activiteiten</p>"}</div></div>`;
   detail.classList.add("open");
@@ -380,8 +387,17 @@ async function openLeadDetail(id) {
   $("#new-quote").onclick = () => createQuoteForLead(lead);
   $("#add-task").onclick = async () => {
     await api("/api/tasks", { method:"POST", body: JSON.stringify({ leadId:id, titel:$("#task-titel").value, deadline:$("#task-deadline").value||null }) });
+    await refresh();
     openLeadDetail(id);
   };
+  detailPaneel.querySelectorAll(".taak-check").forEach((b) => {
+    b.onclick = async () => {
+      const done = b.dataset.done === "1";
+      await api("/api/tasks", { method: "PATCH", body: JSON.stringify({ id: b.dataset.id, voltooid: !done }) });
+      await refresh();
+      openLeadDetail(id);
+    };
+  });
   if (!lead.gelezen) api("/api/leads", { method:"PATCH", body: JSON.stringify({ id, gelezen:true }) });
 }
 
@@ -391,61 +407,277 @@ async function sendTemplate(slug, leadId) {
 }
 
 async function createQuoteForLead(lead) {
-  const regels = [{ omschrijving:"Concept & organisatie event", aantal:1, prijs:2500 }];
-  await api("/api/quotes", { method:"POST", body: JSON.stringify({
-    leadId: lead.id, klantNaam: lead.naam, klantEmail: lead.email, klantBedrijf: lead.bedrijf,
-    regels, geldigTot: new Date(Date.now()+30*86400000).toISOString().slice(0,10),
-  })});
+  const regels = [{ omschrijving: "Concept & organisatie event", aantal: 1, prijs: 2500 }];
+  const { res, json } = await api("/api/quotes", {
+    method: "POST",
+    body: JSON.stringify({
+      leadId: lead.id,
+      klantNaam: lead.naam,
+      klantEmail: lead.email,
+      klantBedrijf: lead.bedrijf,
+      regels,
+      geldigTot: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+    }),
+  });
   await refresh();
-  state.view = "quotes"; renderNav(); renderView();
+  state.view = "quotes";
+  renderNav();
+  renderView();
   closeDetail();
+  if (res.ok && json.quote?.id) openQuoteDetail(json.quote.id);
 }
 
-function closeDetail() { detail.classList.remove("open"); state.activeLead = null; }
+function closeDetail() {
+  detail.classList.remove("open");
+  state.activeLead = null;
+}
+
+function calcRegelsPreview(rows) {
+  const subtotaal = rows.reduce((s, r) => s + (Number(r.aantal) || 0) * (Number(r.prijs) || 0), 0);
+  const btw = subtotaal * 0.21;
+  return { subtotaal, btw, totaal: subtotaal + btw };
+}
+
+function readQuoteRegelsFromForm(root) {
+  return [...root.querySelectorAll(".regel-rij")].map((row) => ({
+    omschrijving: row.querySelector(".r-omschr").value.trim(),
+    aantal: Number(row.querySelector(".r-aantal").value) || 0,
+    prijs: Number(row.querySelector(".r-prijs").value) || 0,
+  })).filter((r) => r.omschrijving);
+}
+
+function renderRegelRow(r = { omschrijving: "", aantal: 1, prijs: 0 }) {
+  return `<div class="regel-rij">
+    <input class="r-omschr" value="${esc(r.omschrijving)}" placeholder="Omschrijving">
+    <input class="r-aantal" type="number" min="0" step="0.5" value="${esc(r.aantal)}" title="Aantal">
+    <input class="r-prijs" type="number" min="0" step="0.01" value="${esc(r.prijs)}" title="Prijs">
+    <button type="button" class="btn r-del" aria-label="Regel verwijderen">×</button>
+  </div>`;
+}
+
+function bindRegelEditor(root, onChange) {
+  const redrawTotals = () => {
+    const totals = calcRegelsPreview(readQuoteRegelsFromForm(root));
+    const el = root.querySelector(".regel-totaal");
+    if (el) {
+      el.textContent = `Subtotaal € ${totals.subtotaal.toFixed(2)} · BTW € ${totals.btw.toFixed(2)} · Totaal € ${totals.totaal.toFixed(2)}`;
+    }
+    onChange?.(totals);
+  };
+  root.querySelector("#add-regel")?.addEventListener("click", () => {
+    root.querySelector("#regel-lijst").insertAdjacentHTML("beforeend", renderRegelRow());
+    bindRegelRowEvents(root, redrawTotals);
+    redrawTotals();
+  });
+  bindRegelRowEvents(root, redrawTotals);
+  redrawTotals();
+}
+
+function bindRegelRowEvents(root, redrawTotals) {
+  root.querySelectorAll(".regel-rij").forEach((row) => {
+    row.querySelectorAll("input").forEach((inp) => {
+      inp.oninput = redrawTotals;
+    });
+    row.querySelector(".r-del").onclick = () => {
+      row.remove();
+      redrawTotals();
+    };
+  });
+}
+
+async function openQuoteDetail(id) {
+  const { json } = await api(`/api/quotes?id=${encodeURIComponent(id)}`);
+  const quote = json.quote || state.quotes.find((q) => q.id === id);
+  if (!quote) return;
+
+  detailPaneel.innerHTML = `
+    <button type="button" class="detail-x" id="detail-x">&times;</button>
+    <p class="tag">${esc(quote.status)}</p>
+    <h2 style="font-family:var(--serif);margin:.3rem 0 .4rem">${esc(quote.nummer)}</h2>
+    <p>${esc(quote.klantNaam)}${quote.klantBedrijf ? ` · ${esc(quote.klantBedrijf)}` : ""}</p>
+    <p><a href="mailto:${esc(quote.klantEmail)}">${esc(quote.klantEmail)}</a></p>
+    <div class="form-grid" style="margin-top:1rem;max-width:none">
+      <label>Geldig tot</label>
+      <input id="q-geldig" type="date" value="${esc(quote.geldigTot || "")}">
+      <label>Notities</label>
+      <textarea id="q-notities" rows="2">${esc(quote.notities || "")}</textarea>
+      <label>Regels</label>
+      <div id="regel-lijst">${(quote.regels || []).map(renderRegelRow).join("") || renderRegelRow()}</div>
+      <button type="button" class="btn" id="add-regel">Regel toevoegen</button>
+      <p class="regel-totaal"></p>
+    </div>
+    <div class="btn-groep">
+      <button class="btn btn-primair" id="save-quote">Opslaan</button>
+      <a class="btn" href="/api/quotes/pdf?id=${quote.id}" target="_blank">PDF</a>
+      <button class="btn btn-primair" id="send-quote-detail">Versturen</button>
+    </div>
+    <p class="melding" id="quote-melding"></p>`;
+  detail.classList.add("open");
+  $("#detail-x").onclick = closeDetail;
+  bindRegelEditor(detailPaneel);
+
+  $("#save-quote").onclick = async () => {
+    const melding = $("#quote-melding");
+    const regels = readQuoteRegelsFromForm(detailPaneel);
+    if (!regels.length) {
+      melding.textContent = "Voeg minstens één regel toe.";
+      return;
+    }
+    const { res, json: out } = await api("/api/quotes", {
+      method: "PATCH",
+      body: JSON.stringify({
+        id,
+        regels,
+        notities: $("#q-notities").value,
+        geldigTot: $("#q-geldig").value || null,
+      }),
+    });
+    if (!res.ok) {
+      melding.textContent = out.error || "Opslaan mislukt.";
+      return;
+    }
+    melding.textContent = "Offerte opgeslagen.";
+    await refresh();
+    if (state.view === "quotes") renderView();
+    openQuoteDetail(id);
+  };
+
+  $("#send-quote-detail").onclick = async () => {
+    const { json: out } = await api("/api/quotes/send", { method: "POST", body: JSON.stringify({ id }) });
+    alert(`Offerte verstuurd (PDF in bijlage).\nKlantportaal: ${out.portalUrl || "—"}`);
+    await refresh();
+    if (state.view === "quotes") renderView();
+    openQuoteDetail(id);
+  };
+}
 
 function renderQuotes() {
   main.innerHTML += `<table class="tabel"><thead><tr><th>Nr</th><th>Klant</th><th>Status</th><th>Totaal</th><th>Acties</th></tr></thead><tbody>
-    ${state.quotes.map(q=>`<tr><td>${esc(q.nummer)}</td><td>${esc(q.klantNaam)}</td><td><span class="tag">${q.status}</span></td><td>€ ${q.totaal.toFixed(2)}</td><td class="btn-groep">
-      <a class="btn" href="/api/quotes/pdf?id=${q.id}" target="_blank">PDF</a>
-      <button class="btn btn-primair send-quote" data-id="${q.id}">Versturen</button>
-    </td></tr>`).join("")||"<tr><td colspan='5' class='leeg'>Nog geen offertes</td></tr>"}
+    ${state.quotes.map((q) => `<tr>
+      <td>${esc(q.nummer)}</td>
+      <td>${esc(q.klantNaam)}</td>
+      <td><span class="tag">${esc(q.status)}</span></td>
+      <td>€ ${Number(q.totaal || 0).toFixed(2)}</td>
+      <td class="btn-groep">
+        <button class="btn open-quote" data-id="${q.id}">Bewerken</button>
+        <a class="btn" href="/api/quotes/pdf?id=${q.id}" target="_blank">PDF</a>
+        <button class="btn btn-primair send-quote" data-id="${q.id}">Versturen</button>
+      </td>
+    </tr>`).join("") || "<tr><td colspan='5' class='leeg'>Nog geen offertes</td></tr>"}
   </tbody></table>`;
-  main.querySelectorAll(".send-quote").forEach(b => b.onclick = async () => {
-    const { json } = await api("/api/quotes/send", { method:"POST", body: JSON.stringify({ id: b.dataset.id }) });
-    alert(`Offerte verstuurd.\nKlantportaal: ${json.portalUrl||"—"}`);
-    await refresh(); renderView();
+  main.querySelectorAll(".open-quote").forEach((b) => {
+    b.onclick = () => openQuoteDetail(b.dataset.id);
+  });
+  main.querySelectorAll(".send-quote").forEach((b) => {
+    b.onclick = async () => {
+      const { json } = await api("/api/quotes/send", { method: "POST", body: JSON.stringify({ id: b.dataset.id }) });
+      alert(`Offerte verstuurd (PDF in bijlage).\nKlantportaal: ${json.portalUrl || "—"}`);
+      await refresh();
+      renderView();
+    };
   });
 }
 
 function renderInvoices() {
   main.innerHTML += `<table class="tabel"><thead><tr><th>Nr</th><th>Klant</th><th>Status</th><th>Totaal</th><th>Acties</th></tr></thead><tbody>
-    ${state.invoices.map(i=>`<tr><td>${esc(i.nummer)}</td><td>${esc(i.klantNaam)}</td><td><span class="tag">${i.status}</span></td><td>€ ${i.totaal.toFixed(2)}</td><td class="btn-groep">
-      <a class="btn" href="/api/invoices/pdf?id=${i.id}" target="_blank">PDF</a>
-      <a class="btn" href="/api/invoices/moneybird?id=${i.id}" target="_blank">Moneybird</a>
-      <button class="btn mark-paid" data-id="${i.id}">Betaald</button>
-    </td></tr>`).join("")||"<tr><td colspan='5' class='leeg'>Nog geen facturen</td></tr>"}
+    ${state.invoices.map((i) => `<tr>
+      <td>${esc(i.nummer)}</td>
+      <td>${esc(i.klantNaam)}</td>
+      <td><span class="tag">${esc(i.status)}</span></td>
+      <td>€ ${Number(i.totaal || 0).toFixed(2)}</td>
+      <td class="btn-groep">
+        <a class="btn" href="/api/invoices/pdf?id=${i.id}" target="_blank">PDF</a>
+        <a class="btn" href="/api/invoices/moneybird?id=${i.id}" target="_blank">Moneybird</a>
+        ${i.status === "concept" || i.status === "vervallen" ? `<button class="btn btn-primair send-inv" data-id="${i.id}">Versturen</button>` : ""}
+        ${i.status !== "betaald" ? `<button class="btn mark-paid" data-id="${i.id}">Betaald</button>` : ""}
+      </td>
+    </tr>`).join("") || "<tr><td colspan='5' class='leeg'>Nog geen facturen</td></tr>"}
   </tbody></table>
-  <div class="panel"><h2>Factuur van offerte</h2><div class="form-grid"><select id="quote-pick">${state.quotes.map(q=>`<option value="${q.id}">${esc(q.nummer)} — ${esc(q.klantNaam)}</option>`).join("")}</select><button class="btn btn-primair" id="mk-invoice">Factuur aanmaken</button></div></div>`;
-  $("#mk-invoice")?.addEventListener("click", async () => { await api("/api/invoices", { method:"POST", body: JSON.stringify({ quoteId: $("#quote-pick").value }) }); await refresh(); renderView(); });
-  main.querySelectorAll(".mark-paid").forEach(b => b.onclick = async () => { await api("/api/invoices", { method:"PATCH", body: JSON.stringify({ id:b.dataset.id, status:"betaald" }) }); await refresh(); renderView(); });
+  <div class="panel"><h2>Factuur van offerte</h2><div class="form-grid"><select id="quote-pick">${state.quotes.map((q) => `<option value="${q.id}">${esc(q.nummer)} — ${esc(q.klantNaam)}</option>`).join("")}</select><button class="btn btn-primair" id="mk-invoice">Factuur aanmaken</button></div></div>`;
+  $("#mk-invoice")?.addEventListener("click", async () => {
+    await api("/api/invoices", { method: "POST", body: JSON.stringify({ quoteId: $("#quote-pick").value }) });
+    await refresh();
+    renderView();
+  });
+  main.querySelectorAll(".send-inv").forEach((b) => {
+    b.onclick = async () => {
+      await api("/api/invoices", { method: "PATCH", body: JSON.stringify({ id: b.dataset.id, status: "verstuurd" }) });
+      alert("Factuur verstuurd (PDF in bijlage).");
+      await refresh();
+      renderView();
+    };
+  });
+  main.querySelectorAll(".mark-paid").forEach((b) => {
+    b.onclick = async () => {
+      await api("/api/invoices", { method: "PATCH", body: JSON.stringify({ id: b.dataset.id, status: "betaald" }) });
+      await refresh();
+      renderView();
+    };
+  });
 }
 
+const PROJECT_STATUSES = [
+  { id: "planning", label: "Planning" },
+  { id: "voorbereiding", label: "Voorbereiding" },
+  { id: "live", label: "Live" },
+  { id: "afgerond", label: "Afgerond" },
+];
+
 function renderProjects() {
-  main.innerHTML += state.projects.map(p=>`
-    <div class="panel"><h2>${esc(p.naam)} <span class="tag">${p.status}</span></h2>
-      <p>${esc(p.klantNaam)} · ${p.eventDatum||"Datum n.t.b."} · ${p.locatie||"Locatie n.t.b."}</p>
-      <div class="form-grid"><label>Draaiboek</label><textarea class="draaiboek" data-id="${p.id}" rows="4">${esc(p.draaiboek)}</textarea>
-      <label>Moodboard URL (één per regel)</label><textarea class="mood" data-id="${p.id}" rows="3">${(p.moodboardUrls||[]).join("\n")}</textarea>
-      <button class="btn save-project" data-id="${p.id}">Opslaan</button></div>
+  main.innerHTML += state.projects.map((p) => `
+    <div class="panel" data-project="${p.id}">
+      <h2>${esc(p.naam)} <span class="tag">${esc(p.status)}</span></h2>
+      <p style="color:var(--mauve);margin-bottom:1rem">${esc(p.klantNaam)}</p>
+      <div class="form-grid" style="max-width:640px">
+        <label>Eventdatum</label>
+        <input class="p-datum" type="date" value="${esc(p.eventDatum || "")}">
+        <label>Locatie</label>
+        <input class="p-locatie" value="${esc(p.locatie || "")}" placeholder="Locatie">
+        <label>Aantal gasten</label>
+        <input class="p-gasten" type="number" min="0" value="${p.aantalGasten ?? ""}" placeholder="0">
+        <label>Budget (€)</label>
+        <input class="p-budget" type="number" min="0" step="0.01" value="${p.budget ?? ""}" placeholder="0">
+        <label>Status</label>
+        <select class="p-status">
+          ${PROJECT_STATUSES.map((s) => `<option value="${s.id}" ${p.status === s.id ? "selected" : ""}>${s.label}</option>`).join("")}
+        </select>
+        <label>Draaiboek</label>
+        <textarea class="draaiboek" rows="4">${esc(p.draaiboek || "")}</textarea>
+        <label>Moodboard URL (één per regel)</label>
+        <textarea class="mood" rows="3">${(p.moodboardUrls || []).join("\n")}</textarea>
+        <button class="btn btn-primair save-project" data-id="${p.id}">Opslaan</button>
+        <p class="melding p-melding" hidden></p>
+      </div>
     </div>`).join("") || "<p class='leeg'>Nog geen projecten. Worden automatisch aangemaakt bij fase 'Gewonnen'.</p>";
-  main.querySelectorAll(".save-project").forEach(b => b.onclick = async () => {
-    const id = b.dataset.id;
-    const panel = b.closest(".panel");
-    await api("/api/projects", { method:"PATCH", body: JSON.stringify({
-      id, draaiboek: panel.querySelector(".draaiboek").value,
-      moodboardUrls: panel.querySelector(".mood").value.split("\n").map(s=>s.trim()).filter(Boolean),
-    })});
-    await refresh(); renderView();
+
+  main.querySelectorAll(".save-project").forEach((b) => {
+    b.onclick = async () => {
+      const id = b.dataset.id;
+      const panel = b.closest(".panel");
+      const melding = panel.querySelector(".p-melding");
+      const gastenRaw = panel.querySelector(".p-gasten").value;
+      const budgetRaw = panel.querySelector(".p-budget").value;
+      const { res, json } = await api("/api/projects", {
+        method: "PATCH",
+        body: JSON.stringify({
+          id,
+          eventDatum: panel.querySelector(".p-datum").value || null,
+          locatie: panel.querySelector(".p-locatie").value.trim() || null,
+          aantalGasten: gastenRaw === "" ? null : Number(gastenRaw),
+          budget: budgetRaw === "" ? null : Number(budgetRaw),
+          status: panel.querySelector(".p-status").value,
+          draaiboek: panel.querySelector(".draaiboek").value,
+          moodboardUrls: panel.querySelector(".mood").value.split("\n").map((s) => s.trim()).filter(Boolean),
+        }),
+      });
+      if (!res.ok) {
+        melding.hidden = false;
+        melding.textContent = json.error || "Opslaan mislukt.";
+        return;
+      }
+      await refresh();
+      renderView();
+    };
   });
 }
 

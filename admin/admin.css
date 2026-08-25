@@ -616,6 +616,50 @@ body {
   margin-top:.55rem;
 }
 
+.taak-rij {
+  display:flex;
+  align-items:center;
+  gap:.45rem;
+  margin:.35rem 0;
+}
+
+.taak-check {
+  font:inherit;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  padding:.1rem .25rem;
+  color:var(--aubergine);
+  line-height:1;
+}
+
+.taak-done {
+  text-decoration:line-through;
+  color:var(--mauve);
+}
+
+.regel-rij {
+  display:grid;
+  grid-template-columns:1fr 72px 96px auto;
+  gap:.45rem;
+  align-items:center;
+  margin-bottom:.45rem;
+}
+
+.regel-rij input {
+  font:inherit;
+  padding:.55rem .65rem;
+  border:1px solid var(--lijn);
+  border-radius:var(--radius);
+  width:100%;
+  background:rgba(250,245,239,.7);
+}
+
+.regel-totaal {
+  color:var(--mauve);
+  font-size:.9rem;
+}
+
 .detail {
   position:fixed;
   inset:0;
@@ -709,6 +753,12 @@ body {
 
   .login-brand { text-align:center; margin:0 auto; }
   .login-intro { margin:0 auto; }
+
+  .regel-rij {
+    grid-template-columns:1fr 1fr;
+  }
+
+  .regel-rij .r-omschr { grid-column:1 / -1; }
 
   .app { grid-template-columns:1fr; }
 
