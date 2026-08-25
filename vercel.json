@@ -1,6 +1,10 @@
 {
   "rewrites": [
     { "source": "/admin", "destination": "/admin/index.html" },
-    { "source": "/portal", "destination": "/portal/index.html" }
+    { "source": "/portal", "destination": "/portal/index.html" },
+    {
+      "source": "/api/((?!contact$).*)",
+      "destination": "/api?__p=/api/$1"
+    }
   ]
 }
