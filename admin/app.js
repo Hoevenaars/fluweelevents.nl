@@ -27,7 +27,12 @@ const detailPaneel = $("#detail-paneel");
 async function api(path, opts = {}) {
   const res = await fetch(path, { headers: { "Content-Type": "application/json" }, ...opts });
   const json = await res.json().catch(() => ({}));
-  if (res.status === 401) { showLogin(); throw new Error("Niet ingelogd"); }
+  // Auth-endpoints geven zelf 401 terug; die niet als "sessie verlopen" behandelen.
+  const isAuthEndpoint = path.startsWith("/api/auth/");
+  if (res.status === 401 && !isAuthEndpoint) {
+    showLogin();
+    throw new Error("Niet ingelogd");
+  }
   return { res, json };
 }
 
@@ -301,19 +306,38 @@ async function refresh() { await loadAll(); }
 $("#loginform").addEventListener("submit", async e => {
   e.preventDefault();
   const melding = $("#login-melding");
+  const submitBtn = e.target.querySelector('button[type="submit"]');
   melding.textContent = "";
-  const data = Object.fromEntries(new FormData(e.target));
-  const { res, json } = await api("/api/auth/login", { method:"POST", body: JSON.stringify(data) });
-  if (res.ok) { showApp(json.email); await refresh(); }
-  else {
-    melding.textContent = json.error || "Inloggen mislukt.";
-    e.target.classList.remove("shake");
-    void e.target.offsetWidth;
-    e.target.classList.add("shake");
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Bezig…";
+  }
+  try {
+    const data = Object.fromEntries(new FormData(e.target));
+    const { res, json } = await api("/api/auth/login", { method:"POST", body: JSON.stringify(data) });
+    if (res.ok) {
+      showApp(json.email);
+      await refresh();
+    } else {
+      melding.textContent = json.error || "Inloggen mislukt.";
+      e.target.classList.remove("shake");
+      void e.target.offsetWidth;
+      e.target.classList.add("shake");
+    }
+  } catch (err) {
+    melding.textContent = err?.message || "Inloggen mislukt.";
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Inloggen";
+    }
   }
 });
 
-$("#uitloggen").onclick = async () => { await api("/api/auth/logout", { method:"POST" }); showLogin(); };
+$("#uitloggen")?.addEventListener("click", async () => {
+  try { await api("/api/auth/logout", { method:"POST" }); } catch {}
+  showLogin();
+});
 $("#detail-sluit")?.addEventListener("click", closeDetail);
 
 (async () => {
@@ -323,7 +347,11 @@ $("#detail-sluit")?.addEventListener("click", closeDetail);
     werkKop?.classList.toggle("scrolled", (mainEl.scrollTop || 0) > 8);
   }, { passive: true });
 
-  const { res, json } = await api("/api/auth/me");
-  if (res.ok) { showApp(json.email); await refresh(); }
-  else showLogin();
+  try {
+    const { res, json } = await api("/api/auth/me");
+    if (res.ok) { showApp(json.email); await refresh(); }
+    else showLogin();
+  } catch {
+    showLogin();
+  }
 })();
