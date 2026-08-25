@@ -184,14 +184,25 @@ alter table public.campaign_sends enable row level security;
 alter table public.website_sections enable row level security;
 
 -- Authenticated admins: volledige toegang
-do $$ declare t text; begin
+-- (App gebruikt service role en bypassed RLS; policies zijn voor toekomstige client-side access.)
+do $$
+declare
+  t text;
+begin
   foreach t in array array[
     'contact_submissions','activities','tasks','email_templates',
     'quotes','quote_lines','invoices','invoice_lines',
     'projects','campaigns','campaign_sends','website_sections'
-  ] loop
-    execute format('create policy if not exists "admin_all_%s" on public.%I for all to authenticated using (true) with check (true)', t, t);
-  exception when duplicate_object then null;
+  ]
+  loop
+    begin
+      execute format(
+        'create policy "admin_all_%s" on public.%I for all to authenticated using (true) with check (true)',
+        t, t
+      );
+    exception
+      when duplicate_object then null;
+    end;
   end loop;
 end $$;
 
