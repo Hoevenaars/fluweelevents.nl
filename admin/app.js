@@ -6,6 +6,7 @@ const FASES = [
 const NAV = [
   { id: "dashboard", label: "Dashboard" },
   { id: "leads", label: "Aanvragen" },
+  { id: "adresboek", label: "Adresboek" },
   { id: "quotes", label: "Offertes" },
   { id: "invoices", label: "Facturen" },
   { id: "projects", label: "Projecten" },
@@ -143,7 +144,18 @@ function renderView() {
       <p class="label">${esc(current?.label || "Overzicht")}</p>
       <h1>${esc(current?.label || "Dashboard")}</h1>
     </div>`;
-  const renderers = { dashboard: renderDashboard, leads: renderLeads, quotes: renderQuotes, invoices: renderInvoices, projects: renderProjects, campaigns: renderCampaigns, templates: renderTemplates, website: renderWebsite, integrations: renderIntegrations };
+  const renderers = {
+    dashboard: renderDashboard,
+    leads: renderLeads,
+    adresboek: renderAdresboek,
+    quotes: renderQuotes,
+    invoices: renderInvoices,
+    projects: renderProjects,
+    campaigns: renderCampaigns,
+    templates: renderTemplates,
+    website: renderWebsite,
+    integrations: renderIntegrations,
+  };
   renderers[state.view]?.();
 }
 
@@ -166,13 +178,140 @@ function renderDashboard() {
 }
 
 function renderLeads() {
-  main.innerHTML += `<div class="board">${FASES.map(f=>{
+  main.innerHTML += `
+    <div class="panel">
+      <h2>Nieuwe aanvraag</h2>
+      <p style="color:var(--mauve);margin-bottom:.85rem;font-size:.92rem">Voor belletjes, walk-ins of referrals.</p>
+      <form id="nieuw-lead" class="form-grid" style="max-width:640px">
+        <label>Naam *</label><input name="naam" required placeholder="Voor- en achternaam">
+        <label>E-mail *</label><input name="email" type="email" required placeholder="naam@bedrijf.nl">
+        <label>Telefoon</label><input name="telefoon" placeholder="06...">
+        <label>Bedrijf</label><input name="bedrijf" placeholder="Optioneel">
+        <label>Bron</label>
+        <select name="bron">
+          <option value="telefoon">Telefoon</option>
+          <option value="walk-in">Walk-in</option>
+          <option value="referral">Referral</option>
+          <option value="linkedin">LinkedIn</option>
+          <option value="website">Website</option>
+          <option value="overig">Overig</option>
+        </select>
+        <label>Korte notitie</label><textarea name="bericht" rows="3" placeholder="Waar ging het gesprek over?"></textarea>
+        <button type="submit" class="btn btn-primair">Opslaan in pipeline</button>
+        <p class="melding" id="nieuw-lead-melding"></p>
+      </form>
+    </div>
+    <div class="board">${FASES.map(f=>{
     const items = state.leads.filter(l=>l.status===f.id);
     return `<section class="kolom"><div class="kolom-kop"><h3>${f.label} (${items.length})</h3></div><div class="kolom-lijst">${
-      items.map(l=>`<button type="button" class="kaart-lead ${l.gelezen?"":"ongelezen"}" data-id="${l.id}"><strong>${esc(l.naam)}</strong><small>${fmt(l.ontvangenOp)}</small></button>`).join("") || "<p class='leeg'>Leeg</p>"
+      items.map(l=>`<button type="button" class="kaart-lead ${l.gelezen?"":"ongelezen"}" data-id="${l.id}"><strong>${esc(l.naam)}</strong><small>${fmt(l.ontvangenOp)}${l.bron?` · ${esc(l.bron)}`:""}</small></button>`).join("") || "<p class='leeg'>Leeg</p>"
     }</div></section>`;
   }).join("")}</div>`;
+
   main.querySelectorAll(".kaart-lead").forEach(b => b.onclick = () => openLeadDetail(b.dataset.id));
+  $("#nieuw-lead")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const melding = $("#nieuw-lead-melding");
+    melding.textContent = "";
+    const data = Object.fromEntries(new FormData(e.target));
+    const { res, json } = await api("/api/leads", { method: "POST", body: JSON.stringify(data) });
+    if (!res.ok) {
+      melding.textContent = json.error || "Opslaan mislukt.";
+      return;
+    }
+    e.target.reset();
+    melding.textContent = "Opgeslagen in de pipeline.";
+    await refresh();
+    renderView();
+    if (json.lead?.id) openLeadDetail(json.lead.id);
+  });
+}
+
+function filterLeads(query, status) {
+  const q = String(query || "").trim().toLowerCase();
+  return state.leads.filter((l) => {
+    if (status && status !== "alle" && l.status !== status) return false;
+    if (!q) return true;
+    const hay = [l.naam, l.email, l.telefoon, l.bedrijf, l.bron, l.bericht, l.notities]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    return hay.includes(q);
+  });
+}
+
+function exportLeadsCsv(leads) {
+  const cols = ["naam", "email", "telefoon", "bedrijf", "status", "bron", "ontvangenOp", "notities"];
+  const escCsv = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const rows = [cols.join(",")].concat(
+    leads.map((l) => cols.map((c) => escCsv(l[c])).join(","))
+  );
+  const blob = new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `fluweel-adresboek-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function renderAdresboek() {
+  const initial = filterLeads("", "alle");
+  main.innerHTML += `
+    <div class="panel">
+      <div class="toolbar-grid">
+        <div>
+          <label for="ab-zoek">Zoeken</label>
+          <input id="ab-zoek" placeholder="Naam, e-mail, telefoon, bedrijf...">
+        </div>
+        <div>
+          <label for="ab-fase">Fase</label>
+          <select id="ab-fase">
+            <option value="alle">Alle fases</option>
+            ${FASES.map((f) => `<option value="${f.id}">${f.label}</option>`).join("")}
+          </select>
+        </div>
+        <button type="button" class="btn" id="ab-export">CSV exporteren</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>Contacten (<span id="ab-count">${initial.length}</span>)</h2>
+      <table class="tabel">
+        <thead><tr><th>Naam</th><th>E-mail</th><th>Telefoon</th><th>Bedrijf</th><th>Fase</th><th>Bron</th><th></th></tr></thead>
+        <tbody id="ab-body">${renderAdresboekRows(initial)}</tbody>
+      </table>
+    </div>`;
+
+  const redraw = () => {
+    const list = filterLeads($("#ab-zoek").value, $("#ab-fase").value);
+    $("#ab-count").textContent = String(list.length);
+    $("#ab-body").innerHTML = renderAdresboekRows(list);
+    bindAdresboekRowActions();
+  };
+  $("#ab-zoek").addEventListener("input", redraw);
+  $("#ab-fase").addEventListener("change", redraw);
+  $("#ab-export").onclick = () => exportLeadsCsv(filterLeads($("#ab-zoek").value, $("#ab-fase").value));
+  bindAdresboekRowActions();
+}
+
+function renderAdresboekRows(leads) {
+  if (!leads.length) return `<tr><td colspan="7" class="leeg">Geen contacten gevonden.</td></tr>`;
+  return leads.map((l) => `
+    <tr>
+      <td><strong>${esc(l.naam)}</strong></td>
+      <td><a href="mailto:${esc(l.email)}">${esc(l.email)}</a></td>
+      <td>${l.telefoon ? esc(l.telefoon) : "-"}</td>
+      <td>${l.bedrijf ? esc(l.bedrijf) : "-"}</td>
+      <td><span class="tag">${fase(l.status)}</span></td>
+      <td>${esc(l.bron || "-")}</td>
+      <td><button type="button" class="btn ab-open" data-id="${l.id}">Open</button></td>
+    </tr>`).join("");
+}
+
+function bindAdresboekRowActions() {
+  main.querySelectorAll(".ab-open").forEach((b) => {
+    b.onclick = () => openLeadDetail(b.dataset.id);
+  });
 }
 
 async function openLeadDetail(id) {
@@ -188,12 +327,17 @@ async function openLeadDetail(id) {
     ${lead.bedrijf?`<p>${esc(lead.bedrijf)}</p>`:""}
     <div class="form-grid" style="margin:1rem 0">
       <label>Toegewezen aan</label>
-      <select id="assign-select"><option value="">—</option>${state.team.map(e=>`<option value="${esc(e)}" ${lead.toegewezenAan===e?"selected":""}>${esc(e)}</option>`).join("")}</select>
+      <select id="assign-select"><option value="">-</option>${state.team.map(e=>`<option value="${esc(e)}" ${lead.toegewezenAan===e?"selected":""}>${esc(e)}</option>`).join("")}</select>
     </div>
     <div class="panel"><strong>Aanvraag</strong><p style="margin-top:.5rem;white-space:pre-wrap">${esc(lead.bericht)}</p></div>
     <div class="form-grid"><label>Notities</label><textarea id="lead-notities" rows="3">${esc(lead.notities)}</textarea></div>
+    <div class="form-grid">
+      <label>Bel-log / snelle notitie</label>
+      <input id="bel-log" placeholder="Bijv. Terugbellen donderdag over datum">
+    </div>
     <div class="btn-groep">
       <button class="btn btn-primair" id="save-lead">Opslaan</button>
+      <button class="btn" id="add-bel-log">Bel-log toevoegen</button>
       <button class="btn" id="mail-lead">E-mail</button>
       <button class="btn" id="tpl-bevestiging">Bevestiging</button>
       <button class="btn" id="tpl-followup">Follow-up</button>
@@ -212,6 +356,19 @@ async function openLeadDetail(id) {
   $("#save-lead").onclick = async () => {
     await api("/api/leads", { method:"PATCH", body: JSON.stringify({ id, notities: $("#lead-notities").value, toegewezenAan: $("#assign-select").value||null }) });
     await refresh(); openLeadDetail(id);
+  };
+  $("#add-bel-log").onclick = async () => {
+    const tekst = ($("#bel-log").value || "").trim();
+    if (!tekst) return;
+    await api("/api/leads", {
+      method: "PATCH",
+      body: JSON.stringify({
+        id,
+        activiteit: { type: "telefoon", titel: "Gebeld", omschrijving: tekst },
+      }),
+    });
+    await refresh();
+    openLeadDetail(id);
   };
   detailPaneel.querySelectorAll(".fase-btn").forEach(btn => btn.onclick = async () => {
     await api("/api/leads", { method:"PATCH", body: JSON.stringify({ id, status: btn.dataset.status }) });
