@@ -25,14 +25,12 @@ const detail = $("#detail");
 const detailPaneel = $("#detail-paneel");
 
 async function api(path, opts = {}) {
-  const res = await fetch(path, { headers: { "Content-Type": "application/json" }, ...opts });
+  const res = await fetch(path, {
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json" },
+    ...opts,
+  });
   const json = await res.json().catch(() => ({}));
-  // Auth-endpoints geven zelf 401 terug; die niet als "sessie verlopen" behandelen.
-  const isAuthEndpoint = path.startsWith("/api/auth/");
-  if (res.status === 401 && !isAuthEndpoint) {
-    showLogin();
-    throw new Error("Niet ingelogd");
-  }
   return { res, json };
 }
 
@@ -292,12 +290,12 @@ function renderIntegrations() {
   const base = location.origin;
   main.innerHTML += `
     <div class="panel"><h2>Koppelingen</h2>
-      <p><strong>Google Calendar</strong> — <a href="/api/tasks/ics" target="_blank">Taken exporteren (.ics)</a></p>
-      <p><strong>Typeform webhook</strong> — POST naar <code>${base}/api/webhooks/typeform</code></p>
-      <p><strong>Moneybird</strong> — export via factuur → Moneybird JSON</p>
-      <p><strong>WhatsApp</strong> — via lead-detail (wa.me link)</p>
-      <p><strong>DocuSign</strong> — binnenkort beschikbaar</p>
-      <p><strong>Klantportaal</strong> — ${base}/portal/</p>
+      <p><strong>Google Calendar</strong> - <a href="/api/tasks/ics" target="_blank">Taken exporteren (.ics)</a></p>
+      <p><strong>Typeform webhook</strong> - POST naar <code>${base}/api/webhooks/typeform</code></p>
+      <p><strong>Moneybird</strong> - export via factuur naar Moneybird JSON</p>
+      <p><strong>WhatsApp</strong> - via lead-detail (wa.me link)</p>
+      <p><strong>DocuSign</strong> - binnenkort beschikbaar</p>
+      <p><strong>Klantportaal</strong> - ${base}/portal/</p>
     </div>`;
 }
 
@@ -310,19 +308,30 @@ $("#loginform").addEventListener("submit", async e => {
   melding.textContent = "";
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.textContent = "Bezig…";
+    submitBtn.textContent = "Bezig...";
   }
   try {
     const data = Object.fromEntries(new FormData(e.target));
     const { res, json } = await api("/api/auth/login", { method:"POST", body: JSON.stringify(data) });
-    if (res.ok) {
-      showApp(json.email);
-      await refresh();
-    } else {
+    if (!res.ok) {
       melding.textContent = json.error || "Inloggen mislukt.";
       e.target.classList.remove("shake");
       void e.target.offsetWidth;
       e.target.classList.add("shake");
+      return;
+    }
+
+    const me = await api("/api/auth/me");
+    if (!me.res.ok) {
+      melding.textContent = "Inloggen lukte, maar de sessie werd niet bewaard. Sta cookies toe voor deze site en probeer opnieuw.";
+      return;
+    }
+
+    showApp(me.json.email || json.email);
+    try {
+      await refresh();
+    } catch (loadErr) {
+      console.error(loadErr);
     }
   } catch (err) {
     melding.textContent = err?.message || "Inloggen mislukt.";

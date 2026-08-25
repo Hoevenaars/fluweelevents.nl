@@ -215,15 +215,6 @@ body {
   line-height:1.4;
 }
 
-.login-hulp {
-  margin-top:1.25rem;
-  padding-top:1.1rem;
-  border-top:1px solid var(--lijn);
-  font-size:.82rem;
-  color:var(--mauve);
-  line-height:1.5;
-}
-
 .login-foot {
   position:relative;
   z-index:1;
