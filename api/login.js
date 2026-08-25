@@ -1,6 +1,7 @@
-import { login } from "../../auth.js";
-import { json } from "../../http.js";
+import { login } from "../lib/auth.js";
+import { json } from "../lib/http.js";
 
+/** Top-level /api/login — avoids nested rewrite issues on Vercel. */
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return json(res, 405, { ok: false, error: "Methode niet toegestaan." });
@@ -21,6 +22,8 @@ export default async function handler(req, res) {
       });
     }
 
+    // Geen grote JWT-cookies: die kunnen de response op Vercel breken.
+    // Tokens gaan alleen in de JSON-body; de browser bewaart ze zelf.
     if (result.provider === "supabase") {
       return json(res, 200, {
         ok: true,

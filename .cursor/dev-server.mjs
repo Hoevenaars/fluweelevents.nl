@@ -11,6 +11,9 @@ import { extname, join, normalize, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolveApiHandler } from "../lib/api-routes.js";
 import contactHandler from "../api/contact.js";
+import loginHandler from "../api/login.js";
+import meHandler from "../api/me.js";
+import logoutHandler from "../api/logout.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
@@ -39,6 +42,9 @@ const MIME = {
 
 function resolveDevApiHandler(method, pathname) {
   if (method === "POST" && pathname === "/api/contact") return contactHandler;
+  if (method === "POST" && pathname === "/api/login") return loginHandler;
+  if (method === "GET" && pathname === "/api/me") return meHandler;
+  if (method === "POST" && pathname === "/api/logout") return logoutHandler;
   return resolveApiHandler(method, pathname);
 }
 

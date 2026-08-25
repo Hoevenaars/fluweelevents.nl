@@ -27,7 +27,7 @@ const detailPaneel = $("#detail-paneel");
 
 function readSession() {
   try {
-    return JSON.parse(sessionStorage.getItem(SESSION_KEY) || "null");
+    return JSON.parse(localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY) || "null");
   } catch {
     return null;
   }
@@ -35,13 +35,17 @@ function readSession() {
 
 function writeSession(session) {
   if (!session?.accessToken) {
+    localStorage.removeItem(SESSION_KEY);
     sessionStorage.removeItem(SESSION_KEY);
     return;
   }
-  sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  const raw = JSON.stringify(session);
+  localStorage.setItem(SESSION_KEY, raw);
+  sessionStorage.setItem(SESSION_KEY, raw);
 }
 
 function clearSession() {
+  localStorage.removeItem(SESSION_KEY);
   sessionStorage.removeItem(SESSION_KEY);
 }
 
@@ -69,19 +73,33 @@ async function api(path, opts = {}) {
 }
 
 function esc(s) { return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
-function fmt(iso) { return iso ? new Intl.DateTimeFormat("nl-NL",{dateStyle:"medium",timeStyle:"short"}).format(new Date(iso)) : "—"; }
+function fmt(iso) { return iso ? new Intl.DateTimeFormat("nl-NL",{dateStyle:"medium",timeStyle:"short"}).format(new Date(iso)) : "-"; }
 function fase(id) { return FASES.find(f=>f.id===id)?.label || id; }
 
 function showLogin() {
   clearSession();
-  loginView.hidden = false;
-  appView.hidden = true;
-  detail.classList.remove("open");
+  if (loginView) {
+    loginView.hidden = false;
+    loginView.removeAttribute("hidden");
+  }
+  if (appView) {
+    appView.hidden = true;
+    appView.setAttribute("hidden", "");
+  }
+  detail?.classList.remove("open");
 }
+
 function showApp(email) {
-  loginView.hidden = true;
-  appView.hidden = false;
-  $("#account").textContent = email;
+  if (loginView) {
+    loginView.hidden = true;
+    loginView.setAttribute("hidden", "");
+  }
+  if (appView) {
+    appView.hidden = false;
+    appView.removeAttribute("hidden");
+  }
+  const account = $("#account");
+  if (account) account.textContent = email || "";
   updateWerkDatum();
   renderNav();
   renderView();
@@ -351,7 +369,7 @@ $("#loginform").addEventListener("submit", async e => {
   }
   try {
     const data = Object.fromEntries(new FormData(e.target));
-    const { res, json } = await api("/api/auth/login", { method:"POST", body: JSON.stringify(data) });
+    const { res, json } = await api("/api/login", { method:"POST", body: JSON.stringify(data) });
     if (!res.ok) {
       melding.textContent = json.error || "Inloggen mislukt.";
       e.target.classList.remove("shake");
@@ -360,8 +378,8 @@ $("#loginform").addEventListener("submit", async e => {
       return;
     }
 
-    if (!json.accessToken) {
-      melding.textContent = "Inloggen lukte, maar er kwam geen sessie terug. Probeer het opnieuw.";
+    if (!json.ok || !json.accessToken) {
+      melding.textContent = json.error || "Inloggen lukte, maar er kwam geen sessie terug. Probeer het opnieuw.";
       return;
     }
 
@@ -372,7 +390,6 @@ $("#loginform").addEventListener("submit", async e => {
       provider: json.provider || null,
     });
 
-    // Direct door naar de werkomgeving — login is al bewezen door Supabase.
     showApp(json.email);
     try {
       await refresh();
@@ -390,7 +407,7 @@ $("#loginform").addEventListener("submit", async e => {
 });
 
 $("#uitloggen")?.addEventListener("click", async () => {
-  try { await api("/api/auth/logout", { method:"POST" }); } catch {}
+  try { await api("/api/logout", { method:"POST" }); } catch {}
   showLogin();
 });
 $("#detail-sluit")?.addEventListener("click", closeDetail);
@@ -408,15 +425,10 @@ $("#detail-sluit")?.addEventListener("click", closeDetail);
       showLogin();
       return;
     }
-    // Toon meteen de app op basis van opgeslagen sessie; valideer op de achtergrond.
     showApp(session.email || "");
-    const { res, json } = await api("/api/auth/me");
-    if (res.ok) {
-      if (json.email) $("#account").textContent = json.email;
-      await refresh();
-    } else {
-      showLogin();
-    }
+    const { res, json } = await api("/api/me");
+    if (res.ok && json.email) $("#account").textContent = json.email;
+    try { await refresh(); } catch (err) { console.error(err); }
   } catch {
     showLogin();
   }
