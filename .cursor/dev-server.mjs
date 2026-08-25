@@ -57,7 +57,17 @@ if (MOCK_RESEND) {
       try {
         payload = JSON.parse(init?.body ?? "{}");
       } catch {}
-      console.log("[dev] Resend intercepted (no mail sent):", JSON.stringify(payload));
+      const logPayload = {
+        ...payload,
+        attachments: Array.isArray(payload.attachments)
+          ? payload.attachments.map((a) => ({
+              filename: a.filename,
+              contentType: a.content_type || a.contentType,
+              bytes: typeof a.content === "string" ? Buffer.byteLength(a.content, "base64") : 0,
+            }))
+          : undefined,
+      };
+      console.log("[dev] Resend intercepted (no mail sent):", JSON.stringify(logPayload));
       return new Response(JSON.stringify({ id: "dev-mock-email-id" }), {
         status: 200,
         headers: { "Content-Type": "application/json" },
