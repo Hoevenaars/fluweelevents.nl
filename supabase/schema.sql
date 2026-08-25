@@ -95,6 +95,9 @@ create table if not exists public.quotes (
   totaal numeric(10,2) not null default 0,
   notities text default '',
   portal_token text unique default encode(gen_random_bytes(16), 'hex'),
+  bekeken_aantal int not null default 0,
+  laatst_bekeken_op timestamptz,
+  bekeken_op timestamptz[] not null default '{}',
   aangemaakt_op timestamptz not null default now()
 );
 

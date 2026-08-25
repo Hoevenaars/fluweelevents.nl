@@ -61,14 +61,21 @@
   <script>
     const params = new URLSearchParams(location.search);
     const token = params.get("token");
-    const euro = (n) => "€ " + Number(n || 0).toFixed(2).replace(".", ",");
+    const euro = (n) => {
+      const value = Number(n || 0);
+      const [intRaw, fracRaw] = Math.abs(value).toFixed(2).split(".");
+      const intPart = intRaw.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      return "€ " + (value < 0 ? "-" : "") + intPart + "," + fracRaw;
+    };
+    const statusLabel = { concept: "Concept", verstuurd: "Verstuurd", geaccepteerd: "Akkoord", afgewezen: "Afgewezen" };
     if (!token) document.getElementById("content").innerHTML = "<p>Geen geldige link. Neem contact op met Fluweel.</p>";
     else fetch("/api/portal/quote?token=" + encodeURIComponent(token)).then((r) => r.json()).then((d) => {
       if (!d.ok) { document.getElementById("content").innerHTML = "<p>Offerte niet gevonden.</p>"; return; }
       const q = d.quote;
+      const status = statusLabel[q.status] || q.status;
       document.getElementById("content").innerHTML = `
         <h1>${q.nummer}</h1>
-        <p class="sub">${q.klantNaam || ""} · Status: ${q.status}</p>
+        <p class="sub">${q.klantNaam || ""} · ${status}</p>
         <p class="citaat">Geen copy-paste. Wel een voorstel voor een avond die blijft hangen.</p>
         <table>
           <thead><tr><th>Omschrijving</th><th>Aantal</th><th>Totaal</th></tr></thead>
@@ -76,7 +83,9 @@
         </table>
         <p class="totaal">Totaal ${euro(q.totaal)}</p>
         ${q.geldigTot ? `<p class="sub">Geldig tot ${q.geldigTot}</p>` : ""}
-        ${q.status === "verstuurd" ? `<button class="btn primair" id="ok">Accepteren</button><button class="btn sec" id="no">Afwijzen</button>` : ""}
+        ${q.status === "verstuurd" ? `<button class="btn primair" id="ok">Akkoord</button><button class="btn sec" id="no">Afwijzen</button>` : ""}
+        ${q.status === "geaccepteerd" ? `<p class="sub">Je hebt akkoord gegeven. We nemen het verder op.</p>` : ""}
+        ${q.status === "afgewezen" ? `<p class="sub">Deze offerte is afgewezen.</p>` : ""}
         <div class="foot">
           <p class="citaat" style="border:0;padding:0;margin:0 0 .4rem">Meer dan een evenement. Een herinnering.</p>
           <p><strong>Fluweel.</strong></p>

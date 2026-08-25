@@ -139,8 +139,37 @@ async function openAuthedFile(path) {
 }
 
 function esc(s) { return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
+function nlNum(n, decimals = 2) {
+  const value = Number(n || 0);
+  if (!Number.isFinite(value)) return decimals > 0 ? "0," + "0".repeat(decimals) : "0";
+  const neg = value < 0;
+  const [intRaw, fracRaw] = Math.abs(value).toFixed(decimals).split(".");
+  const intPart = intRaw.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  const body = decimals > 0 ? `${intPart},${fracRaw}` : intPart;
+  return (neg ? "-" : "") + body;
+}
+function euro(n, decimals = 2) { return `€ ${nlNum(n, decimals)}`; }
 function fmt(iso) { return iso ? new Intl.DateTimeFormat("nl-NL",{dateStyle:"medium",timeStyle:"short"}).format(new Date(iso)) : "-"; }
 function fase(id) { return FASES.find(f=>f.id===id)?.label || id; }
+
+const QUOTE_STATUS = {
+  concept: "Concept",
+  verstuurd: "Verstuurd",
+  geaccepteerd: "Akkoord",
+  afgewezen: "Afgewezen",
+};
+function quoteStatusLabel(id) { return QUOTE_STATUS[id] || id; }
+function quoteStatusClass(id) {
+  if (id === "geaccepteerd") return "akkoord";
+  if (id === "afgewezen") return "afgewezen";
+  return "";
+}
+function quoteBekekenLabel(q) {
+  const n = Number(q.bekekenAantal || 0);
+  if (!n) return "Nog niet bekeken";
+  const last = q.laatstBekekenOp ? ` · ${fmt(q.laatstBekekenOp)}` : "";
+  return `${n}× bekeken${last}`;
+}
 
 function showLogin() {
   clearSession();
@@ -233,10 +262,10 @@ function renderDashboard() {
   const vandaag = state.tasks.filter(t => t.deadline && t.deadline <= new Date().toISOString().slice(0,10) && !t.voltooid);
   main.innerHTML += `
     <div class="grid-4">
-      <div class="kaart-stat"><span>Aanvragen</span><strong>${a.leads?.totaal||0}</strong></div>
-      <div class="kaart-stat"><span>Conversie</span><strong>${a.leads?.conversie||0}%</strong></div>
-      <div class="kaart-stat"><span>Pipeline offertes</span><strong>€ ${(a.quotes?.waarde||0).toFixed(0)}</strong></div>
-      <div class="kaart-stat"><span>Omzet betaald</span><strong>€ ${(a.invoices?.betaald||0).toFixed(0)}</strong></div>
+      <div class="kaart-stat"><span>Aanvragen</span><strong>${nlNum(a.leads?.totaal||0, 0)}</strong></div>
+      <div class="kaart-stat"><span>Conversie</span><strong>${nlNum(a.leads?.conversie||0, 0)}%</strong></div>
+      <div class="kaart-stat"><span>Pipeline offertes</span><strong>${euro(a.quotes?.waarde||0, 0)}</strong></div>
+      <div class="kaart-stat"><span>Omzet betaald</span><strong>${euro(a.invoices?.betaald||0, 0)}</strong></div>
     </div>
     <div class="panel"><h2>Vandaag te doen (${vandaag.length})</h2>
       ${vandaag.length ? vandaag.map(t=>`<p class="taak-rij"><button type="button" class="taak-check" data-id="${t.id}" aria-label="Afvinken">☐</button> <strong>${esc(t.titel)}</strong> <span class="tag">${t.deadline}</span></p>`).join("") : "<p class='leeg'>Geen open taken voor vandaag.</p>"}
@@ -566,7 +595,7 @@ function bindRegelEditor(root, onChange) {
     const totals = calcRegelsPreview(readQuoteRegelsFromForm(root));
     const el = root.querySelector(".regel-totaal");
     if (el) {
-      el.textContent = `Subtotaal € ${totals.subtotaal.toFixed(2)} · BTW € ${totals.btw.toFixed(2)} · Totaal € ${totals.totaal.toFixed(2)}`;
+      el.textContent = `Subtotaal ${euro(totals.subtotaal)} · BTW ${euro(totals.btw)} · Totaal ${euro(totals.totaal)}`;
     }
     onChange?.(totals);
   };
@@ -598,10 +627,11 @@ async function openQuoteDetail(id) {
 
   detailPaneel.innerHTML = `
     <button type="button" class="detail-x" id="detail-x">&times;</button>
-    <p class="tag">${esc(quote.status)}</p>
+    <p class="tag ${quoteStatusClass(quote.status)}">${esc(quoteStatusLabel(quote.status))}</p>
     <h2 style="font-family:var(--serif);margin:.3rem 0 .4rem">${esc(quote.nummer)}</h2>
     <p>${esc(quote.klantNaam)}${quote.klantBedrijf ? ` · ${esc(quote.klantBedrijf)}` : ""}</p>
     <p><a href="mailto:${esc(quote.klantEmail)}">${esc(quote.klantEmail)}</a></p>
+    <p class="sub-meta">${esc(quoteBekekenLabel(quote))}</p>
     <div class="form-grid" style="margin-top:1rem;max-width:none">
       <label>Geldig tot</label>
       <input id="q-geldig" type="date" value="${esc(quote.geldigTot || "")}">
@@ -617,7 +647,16 @@ async function openQuoteDetail(id) {
       <button type="button" class="btn" id="quote-pdf">PDF</button>
       <button class="btn btn-primair" id="new-quote-send">Versturen</button>
     </div>
-    <p class="melding" id="quote-melding"></p>`;
+    <p class="melding" id="quote-melding"></p>
+    <div class="panel" style="margin-top:1.1rem">
+      <h2>Bekeken</h2>
+      ${
+        (quote.bekekenOp || []).length
+          ? `<p class="sub-meta">${quote.bekekenAantal || quote.bekekenOp.length}× in totaal</p>
+            <ul class="bekeken-lijst">${[...quote.bekekenOp].reverse().map((t) => `<li>${esc(fmt(t))}</li>`).join("")}</ul>`
+          : "<p class='leeg' style='padding:0.5rem 0'>Nog niet geopend via het portaal.</p>"
+      }
+    </div>`;
   detail.classList.add("open");
   $("#detail-x").onclick = closeDetail;
   bindRegelEditor(detailPaneel);
@@ -658,18 +697,19 @@ function renderQuotes() {
     <div class="page-acties">
       <button type="button" class="btn btn-primair" id="btn-nieuwe-offerte">+ Nieuwe offerte</button>
     </div>
-    <table class="tabel"><thead><tr><th>Nr</th><th>Klant</th><th>Status</th><th>Totaal</th><th>Acties</th></tr></thead><tbody>
+    <table class="tabel"><thead><tr><th>Nr</th><th>Klant</th><th>Status</th><th>Bekeken</th><th>Totaal</th><th>Acties</th></tr></thead><tbody>
     ${state.quotes.map((q) => `<tr>
       <td>${esc(q.nummer)}</td>
       <td>${esc(q.klantNaam)}</td>
-      <td><span class="tag">${esc(q.status)}</span></td>
-      <td>€ ${Number(q.totaal || 0).toFixed(2)}</td>
+      <td><span class="tag ${quoteStatusClass(q.status)}">${esc(quoteStatusLabel(q.status))}</span></td>
+      <td>${esc(quoteBekekenLabel(q))}</td>
+      <td>${euro(q.totaal)}</td>
       <td class="btn-groep">
         <button class="btn open-quote" data-id="${q.id}">Bewerken</button>
         <button type="button" class="btn open-pdf" data-href="/api/quotes/pdf?id=${q.id}">PDF</button>
         <button class="btn btn-primair send-quote" data-id="${q.id}">Versturen</button>
       </td>
-    </tr>`).join("") || "<tr><td colspan='5' class='leeg'>Nog geen offertes</td></tr>"}
+    </tr>`).join("") || "<tr><td colspan='6' class='leeg'>Nog geen offertes</td></tr>"}
   </tbody></table>`;
   $("#btn-nieuwe-offerte")?.addEventListener("click", () => openCreateModal("offerte"));
   main.querySelectorAll(".open-quote").forEach((b) => {
@@ -689,7 +729,7 @@ function renderInvoices() {
       <td>${esc(i.nummer)}</td>
       <td>${esc(i.klantNaam)}</td>
       <td><span class="tag">${esc(i.status)}</span></td>
-      <td>€ ${Number(i.totaal || 0).toFixed(2)}</td>
+      <td>${euro(i.totaal)}</td>
       <td class="btn-groep">
         <button type="button" class="btn open-pdf" data-href="/api/invoices/pdf?id=${i.id}">PDF</button>
         <button type="button" class="btn open-pdf" data-href="/api/invoices/moneybird?id=${i.id}">Moneybird</button>

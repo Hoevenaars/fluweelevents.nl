@@ -878,14 +878,30 @@ body {
   margin-top:.15rem;
 }
 
-.tag {
-  display:inline-block;
-  font-size:.72rem;
-  padding:.18rem .55rem;
-  border-radius:999px;
-  background:var(--vlak);
+.tag.akkoord {
+  background:rgba(184,151,90,.22);
   color:var(--aubergine);
 }
+
+.tag.afgewezen {
+  background:rgba(42,19,34,.08);
+  color:var(--mauve);
+}
+
+.sub-meta {
+  color:var(--mauve);
+  font-size:.88rem;
+  margin:.35rem 0 .2rem;
+}
+
+.bekeken-lijst {
+  margin:.45rem 0 0;
+  padding-left:1.1rem;
+  color:var(--mauve);
+  font-size:.88rem;
+}
+
+.bekeken-lijst li { margin:.2rem 0; }
 
 .leeg {
   color:var(--mauve);
