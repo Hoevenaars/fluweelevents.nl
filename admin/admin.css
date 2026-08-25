@@ -119,9 +119,12 @@ body {
 }
 
 .login-intro {
-  color:var(--mauve);
-  max-width:36ch;
-  font-weight:300;
+  font-family:var(--serif);
+  font-size:1.12rem;
+  line-height:1.45;
+  color:var(--aubergine);
+  max-width:22ch;
+  font-weight:400;
 }
 
 .login-kaart {
@@ -139,7 +142,7 @@ body {
   font-weight:500;
   font-size:1.65rem;
   letter-spacing:-.01em;
-  margin-bottom:.25rem;
+  margin-bottom:1.5rem;
 }
 
 .login-sub {
