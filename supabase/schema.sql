@@ -184,6 +184,24 @@ alter table public.projects
   add constraint projects_status_check
   check (status in ('planning', 'voorbereiding', 'live', 'afgerond'));
 
+-- ===== PROJECTKOSTEN (rekentool) =====
+create table if not exists public.project_costs (
+  id uuid primary key default gen_random_uuid(),
+  project_id uuid not null references public.projects(id) on delete cascade,
+  leverancier text not null default '',
+  wat text not null default '',
+  prijs numeric(10,2) not null default 0,
+  marge_pct numeric(6,2) not null default 0,
+  verkoopprijs numeric(10,2) not null default 0,
+  opmerking text not null default '',
+  bevestigd_betaald boolean not null default false,
+  sort_order int not null default 0,
+  aangemaakt_op timestamptz not null default now()
+);
+
+create index if not exists project_costs_project_id_idx
+  on public.project_costs (project_id, sort_order);
+
 alter table public.tasks drop constraint if exists tasks_project_id_fkey;
 alter table public.tasks
   add constraint tasks_project_id_fkey
@@ -240,6 +258,7 @@ alter table public.quote_lines enable row level security;
 alter table public.invoices enable row level security;
 alter table public.invoice_lines enable row level security;
 alter table public.projects enable row level security;
+alter table public.project_costs enable row level security;
 alter table public.campaigns enable row level security;
 alter table public.campaign_sends enable row level security;
 alter table public.website_sections enable row level security;
@@ -279,6 +298,14 @@ create policy "admin_all_invoice_lines" on public.invoice_lines
 drop policy if exists "admin_all_projects" on public.projects;
 create policy "admin_all_projects" on public.projects
   for all to authenticated using (true) with check (true);
+
+drop policy if exists "admin_all_project_costs" on public.project_costs;
+create policy "admin_all_project_costs" on public.project_costs
+  for all to authenticated using (true) with check (true);
+
+grant select, insert, update, delete on table public.project_costs to authenticated;
+grant select, insert, update, delete on table public.project_costs to service_role;
+revoke all on table public.project_costs from anon;
 
 drop policy if exists "admin_all_campaigns" on public.campaigns;
 create policy "admin_all_campaigns" on public.campaigns
