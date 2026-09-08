@@ -921,10 +921,10 @@ body {
 .rekentool-kop,
 .rekentool-rij {
   display:grid;
-  grid-template-columns:minmax(120px,1.1fr) minmax(120px,1.2fr) 96px 84px 112px minmax(120px,1.1fr) minmax(148px,auto) 42px;
+  grid-template-columns:minmax(120px,1.1fr) minmax(120px,1.2fr) 96px 84px 112px minmax(110px,1fr) minmax(96px,auto) minmax(86px,auto) 42px;
   gap:.4rem;
   align-items:center;
-  min-width:920px;
+  min-width:980px;
 }
 
 .rekentool-kop {
@@ -943,8 +943,16 @@ body {
   border-radius:var(--radius);
 }
 
+.rekentool-rij.bevestigd {
+  background:rgba(200,30,99,.06);
+}
+
 .rekentool-rij.betaald {
-  background:rgba(184,151,90,.14);
+  background:rgba(184,151,90,.16);
+}
+
+.rekentool-rij.bevestigd.betaald {
+  background:rgba(184,151,90,.22);
 }
 
 .rekentool-rij input {
@@ -969,13 +977,13 @@ body {
   font-variant-numeric:tabular-nums;
 }
 
-.btn-betaald {
+.btn-status {
   white-space:nowrap;
   font-size:.78rem;
   padding:.45rem .65rem;
 }
 
-.btn-betaald.actief {
+.btn-status.actief {
   background:var(--aubergine);
   color:#fff;
   border-color:var(--aubergine);
@@ -1178,9 +1186,13 @@ body {
 
   .rekentool-rij .c-leverancier,
   .rekentool-rij .c-wat,
-  .rekentool-rij .c-opmerking,
-  .rekentool-rij .btn-betaald {
+  .rekentool-rij .c-opmerking {
     grid-column:1 / -1;
+  }
+
+  .rekentool-rij .c-del {
+    grid-column:1 / -1;
+    justify-self:start;
   }
 }
 
