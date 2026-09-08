@@ -867,7 +867,8 @@ function costTotals(kosten = []) {
     verkoop,
     marge: verkoop - inkoop,
     regels: kosten.length,
-    bevestigd: kosten.filter((k) => k.bevestigdBetaald).length,
+    bevestigd: kosten.filter((k) => k.bevestigd).length,
+    betaald: kosten.filter((k) => k.betaald).length,
   };
 }
 
@@ -885,15 +886,18 @@ function projectSamenvatting(p) {
 }
 
 function renderCostRow(c, projectId) {
-  const betaald = Boolean(c.bevestigdBetaald);
-  return `<div class="rekentool-rij${betaald ? " betaald" : ""}" data-id="${esc(c.id)}" data-project="${esc(projectId)}">
+  const bevestigd = Boolean(c.bevestigd);
+  const betaald = Boolean(c.betaald);
+  const statusClass = [bevestigd ? "bevestigd" : "", betaald ? "betaald" : ""].filter(Boolean).join(" ");
+  return `<div class="rekentool-rij${statusClass ? ` ${statusClass}` : ""}" data-id="${esc(c.id)}" data-project="${esc(projectId)}">
     <input class="c-leverancier" value="${esc(c.leverancier || "")}" placeholder="Leverancier" aria-label="Leverancier">
     <input class="c-wat" value="${esc(c.wat || "")}" placeholder="Wat" aria-label="Wat">
     <input class="c-prijs" type="number" min="0" step="0.01" value="${esc(c.prijs ?? 0)}" placeholder="0" aria-label="Prijs" title="Prijs">
     <input class="c-marge" type="number" min="0" max="999.99" step="0.1" value="${esc(c.margePct ?? 0)}" placeholder="0" aria-label="Marge %" title="Marge %">
     <input class="c-verkoop" type="number" min="0" step="0.01" value="${esc(c.verkoopprijs ?? 0)}" readonly tabindex="-1" aria-label="Verkoopprijs" title="Verkoopprijs">
     <input class="c-opmerking" value="${esc(c.opmerking || "")}" placeholder="Opmerking" aria-label="Opmerking">
-    <button type="button" class="btn btn-betaald${betaald ? " actief" : ""}" aria-pressed="${betaald ? "true" : "false"}">${betaald ? "Bevestigd en betaald" : "Bevestigd en betaald"}</button>
+    <button type="button" class="btn btn-status btn-bevestigd${bevestigd ? " actief" : ""}" aria-pressed="${bevestigd ? "true" : "false"}">Bevestigd</button>
+    <button type="button" class="btn btn-status btn-betaald${betaald ? " actief" : ""}" aria-pressed="${betaald ? "true" : "false"}">Betaald</button>
     <button type="button" class="btn r-del c-del" aria-label="Regel verwijderen">×</button>
   </div>`;
 }
@@ -910,7 +914,8 @@ function readCostRow(row) {
     margePct,
     verkoopprijs: calcVerkoopprijs(prijs, margePct),
     opmerking: row.querySelector(".c-opmerking").value.trim(),
-    bevestigdBetaald: row.classList.contains("betaald"),
+    bevestigd: row.classList.contains("bevestigd"),
+    betaald: row.classList.contains("betaald"),
   };
 }
 
@@ -947,11 +952,16 @@ function refreshCostTotals(tool) {
   }
 }
 
+function setCostStatus(row, kind, on) {
+  row.classList.toggle(kind, on);
+  const btn = row.querySelector(`.btn-${kind}`);
+  btn?.classList.toggle("actief", on);
+  btn?.setAttribute("aria-pressed", on ? "true" : "false");
+}
+
 function applyCostToRow(row, cost) {
-  row.classList.toggle("betaald", Boolean(cost.bevestigdBetaald));
-  const btn = row.querySelector(".btn-betaald");
-  if (btn) btn.setAttribute("aria-pressed", cost.bevestigdBetaald ? "true" : "false");
-  btn?.classList.toggle("actief", Boolean(cost.bevestigdBetaald));
+  setCostStatus(row, "bevestigd", Boolean(cost.bevestigd));
+  setCostStatus(row, "betaald", Boolean(cost.betaald));
   const verkoop = row.querySelector(".c-verkoop");
   if (verkoop) verkoop.value = cost.verkoopprijs ?? calcVerkoopprijs(cost.prijs, cost.margePct);
 }
@@ -1002,18 +1012,16 @@ function bindCostRow(row) {
       scheduleCostSave(row);
     };
   });
-  row.querySelector(".btn-betaald").onclick = async () => {
-    const next = !row.classList.contains("betaald");
-    row.classList.toggle("betaald", next);
-    row.querySelector(".btn-betaald").classList.toggle("actief", next);
-    row.querySelector(".btn-betaald").setAttribute("aria-pressed", next ? "true" : "false");
-    const saved = await saveCostRow(row, { bevestigdBetaald: next });
-    if (!saved) {
-      row.classList.toggle("betaald", !next);
-      row.querySelector(".btn-betaald").classList.toggle("actief", !next);
-      row.querySelector(".btn-betaald").setAttribute("aria-pressed", !next ? "true" : "false");
-    }
+  const bindStatusToggle = (kind) => {
+    row.querySelector(`.btn-${kind}`).onclick = async () => {
+      const next = !row.classList.contains(kind);
+      setCostStatus(row, kind, next);
+      const saved = await saveCostRow(row, { [kind]: next });
+      if (!saved) setCostStatus(row, kind, !next);
+    };
   };
+  bindStatusToggle("bevestigd");
+  bindStatusToggle("betaald");
   row.querySelector(".c-del").onclick = async () => {
     const id = row.dataset.id;
     const projectId = row.dataset.project;
@@ -1151,6 +1159,7 @@ function renderProjects() {
               <span>Marge %</span>
               <span>Verkoopprijs</span>
               <span>Opmerking</span>
+              <span></span>
               <span></span>
               <span></span>
             </div>

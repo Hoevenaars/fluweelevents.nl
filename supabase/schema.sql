@@ -194,7 +194,8 @@ create table if not exists public.project_costs (
   marge_pct numeric(6,2) not null default 0,
   verkoopprijs numeric(10,2) not null default 0,
   opmerking text not null default '',
-  bevestigd_betaald boolean not null default false,
+  bevestigd boolean not null default false,
+  betaald boolean not null default false,
   sort_order int not null default 0,
   aangemaakt_op timestamptz not null default now()
 );
