@@ -845,11 +845,146 @@ body {
   cursor:wait;
 }
 
-.page-acties {
+.project-kaart { padding: .95rem 1.1rem; }
+
+.project-toggle {
+  display:flex;
+  align-items:flex-start;
+  gap:.85rem;
+  width:100%;
+  background:transparent;
+  border:0;
+  cursor:pointer;
+  text-align:left;
+  font:inherit;
+  color:inherit;
+  padding:.1rem 0;
+}
+
+.project-toggle:hover .project-koptekst h2 { color:var(--aubergine); }
+
+.project-chevron {
+  width:.55rem;
+  height:.55rem;
+  border-right:2px solid var(--fuchsia);
+  border-bottom:2px solid var(--fuchsia);
+  transform:rotate(-45deg);
+  transition:transform .2s ease;
+  margin-top:.62rem;
+  flex-shrink:0;
+}
+
+.project-kaart.open .project-chevron {
+  transform:rotate(45deg);
+  margin-top:.5rem;
+}
+
+.project-koptekst { min-width:0; flex:1; }
+
+.project-koptekst h2 {
+  margin-bottom:.15rem;
   display:flex;
   flex-wrap:wrap;
-  gap:.5rem;
-  margin-bottom:1rem;
+  align-items:center;
+  gap:.4rem .55rem;
+}
+
+.project-samenvatting {
+  color:var(--mauve);
+  font-size:.9rem;
+  margin:0;
+}
+
+.project-body {
+  margin-top:1rem;
+  padding-top:1rem;
+  border-top:1px solid var(--lijn);
+}
+
+.rekentool { margin-top:1.5rem; }
+
+.rekentool h3 {
+  font-family:var(--serif);
+  font-size:1.08rem;
+  font-weight:500;
+  margin-bottom:.25rem;
+}
+
+.rekentool-hint {
+  color:var(--mauve);
+  font-size:.88rem;
+  margin-bottom:.85rem;
+}
+
+.rekentool-wrap { overflow-x:auto; padding-bottom:.25rem; }
+
+.rekentool-kop,
+.rekentool-rij {
+  display:grid;
+  grid-template-columns:minmax(120px,1.1fr) minmax(120px,1.2fr) 96px 84px 112px minmax(120px,1.1fr) minmax(148px,auto) 42px;
+  gap:.4rem;
+  align-items:center;
+  min-width:920px;
+}
+
+.rekentool-kop {
+  color:var(--mauve);
+  font-size:.72rem;
+  font-weight:500;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  margin-bottom:.4rem;
+  padding:0 .2rem;
+}
+
+.rekentool-rij {
+  margin-bottom:.4rem;
+  padding:.2rem;
+  border-radius:var(--radius);
+}
+
+.rekentool-rij.betaald {
+  background:rgba(184,151,90,.14);
+}
+
+.rekentool-rij input {
+  font:inherit;
+  padding:.55rem .65rem;
+  border:1px solid var(--lijn);
+  border-radius:var(--radius);
+  width:100%;
+  background:rgba(250,245,239,.7);
+}
+
+.rekentool-rij input:focus {
+  outline:none;
+  border-color:var(--fuchsia);
+  box-shadow:0 0 0 3px rgba(200,30,99,.16);
+  background:#fff;
+}
+
+.rekentool-rij .c-verkoop {
+  background:var(--vlak);
+  color:var(--aubergine);
+  font-variant-numeric:tabular-nums;
+}
+
+.btn-betaald {
+  white-space:nowrap;
+  font-size:.78rem;
+  padding:.45rem .65rem;
+}
+
+.btn-betaald.actief {
+  background:var(--aubergine);
+  color:#fff;
+  border-color:var(--aubergine);
+}
+
+.rekentool-totaal {
+  color:var(--mauve);
+  font-size:.9rem;
+  margin-top:.55rem;
 }
 
 .detail {
@@ -1033,6 +1168,20 @@ body {
   .werk-kop { padding:.85rem 1rem; }
   .main { padding:1rem 1rem 2rem; }
   .toolbar-grid { grid-template-columns:1fr; }
+
+  .rekentool-kop { display:none; }
+
+  .rekentool-rij {
+    grid-template-columns:1fr 1fr;
+    min-width:0;
+  }
+
+  .rekentool-rij .c-leverancier,
+  .rekentool-rij .c-wat,
+  .rekentool-rij .c-opmerking,
+  .rekentool-rij .btn-betaald {
+    grid-column:1 / -1;
+  }
 }
 
 @media (prefers-reduced-motion:reduce) {

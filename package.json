@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test admin/routes.test.js lib/admin-host.test.js",
+    "test": "node --test admin/routes.test.js lib/admin-host.test.js lib/project-calc.test.js lib/project-costs.test.js",
     "start": "node .cursor/dev-server.mjs"
   },
   "dependencies": {
