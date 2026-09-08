@@ -827,67 +827,349 @@ const PROJECT_STATUSES = [
   { id: "afgerond", label: "Afgerond" },
 ];
 
+const OPEN_PROJECTS_KEY = "fluweel_open_projects";
+const costSaveTimers = new Map();
+
+function loadOpenProjects() {
+  try {
+    const ids = JSON.parse(sessionStorage.getItem(OPEN_PROJECTS_KEY) || "[]");
+    return new Set(Array.isArray(ids) ? ids : []);
+  } catch {
+    return new Set();
+  }
+}
+
+const openProjects = loadOpenProjects();
+
+function persistOpenProjects() {
+  sessionStorage.setItem(OPEN_PROJECTS_KEY, JSON.stringify([...openProjects]));
+}
+
+function setProjectOpen(id, open) {
+  if (open) openProjects.add(id);
+  else openProjects.delete(id);
+  persistOpenProjects();
+}
+
+function projectStatusLabel(id) {
+  return PROJECT_STATUSES.find((s) => s.id === id)?.label || id;
+}
+
+function calcVerkoopprijs(prijs, margePct) {
+  return Math.round((Number(prijs || 0) * (1 + Number(margePct || 0) / 100)) * 100) / 100;
+}
+
+function costTotals(kosten = []) {
+  const inkoop = kosten.reduce((s, k) => s + Number(k.prijs || 0), 0);
+  const verkoop = kosten.reduce((s, k) => s + Number(k.verkoopprijs || 0), 0);
+  return {
+    inkoop,
+    verkoop,
+    marge: verkoop - inkoop,
+    regels: kosten.length,
+    bevestigd: kosten.filter((k) => k.bevestigdBetaald).length,
+  };
+}
+
+function projectSamenvatting(p) {
+  const bits = [esc(p.klantNaam)];
+  if (p.eventDatum) bits.push(esc(fmtDate(p.eventDatum)));
+  if (p.locatie) bits.push(esc(p.locatie));
+  const totals = costTotals(p.kosten || []);
+  if (totals.regels) {
+    bits.push(`${totals.regels} ${totals.regels === 1 ? "regel" : "regels"}`);
+    bits.push(`inkoop ${esc(euro(totals.inkoop))}`);
+    bits.push(`verkoop ${esc(euro(totals.verkoop))}`);
+  }
+  return bits.join(" · ");
+}
+
+function renderCostRow(c, projectId) {
+  const betaald = Boolean(c.bevestigdBetaald);
+  return `<div class="rekentool-rij${betaald ? " betaald" : ""}" data-id="${esc(c.id)}" data-project="${esc(projectId)}">
+    <input class="c-leverancier" value="${esc(c.leverancier || "")}" placeholder="Leverancier" aria-label="Leverancier">
+    <input class="c-wat" value="${esc(c.wat || "")}" placeholder="Wat" aria-label="Wat">
+    <input class="c-prijs" type="number" min="0" step="0.01" value="${esc(c.prijs ?? 0)}" placeholder="0" aria-label="Prijs" title="Prijs">
+    <input class="c-marge" type="number" min="0" max="999.99" step="0.1" value="${esc(c.margePct ?? 0)}" placeholder="0" aria-label="Marge %" title="Marge %">
+    <input class="c-verkoop" type="number" min="0" step="0.01" value="${esc(c.verkoopprijs ?? 0)}" readonly tabindex="-1" aria-label="Verkoopprijs" title="Verkoopprijs">
+    <input class="c-opmerking" value="${esc(c.opmerking || "")}" placeholder="Opmerking" aria-label="Opmerking">
+    <button type="button" class="btn btn-betaald${betaald ? " actief" : ""}" aria-pressed="${betaald ? "true" : "false"}">${betaald ? "Bevestigd en betaald" : "Bevestigd en betaald"}</button>
+    <button type="button" class="btn r-del c-del" aria-label="Regel verwijderen">×</button>
+  </div>`;
+}
+
+function readCostRow(row) {
+  const prijs = Number(row.querySelector(".c-prijs").value) || 0;
+  const margePct = Number(row.querySelector(".c-marge").value) || 0;
+  return {
+    id: row.dataset.id,
+    projectId: row.dataset.project,
+    leverancier: row.querySelector(".c-leverancier").value.trim(),
+    wat: row.querySelector(".c-wat").value.trim(),
+    prijs,
+    margePct,
+    verkoopprijs: calcVerkoopprijs(prijs, margePct),
+    opmerking: row.querySelector(".c-opmerking").value.trim(),
+    bevestigdBetaald: row.classList.contains("betaald"),
+  };
+}
+
+function upsertLocalCost(cost) {
+  const project = state.projects.find((p) => p.id === cost.projectId);
+  if (!project) return;
+  project.kosten = project.kosten || [];
+  const idx = project.kosten.findIndex((k) => k.id === cost.id);
+  if (idx === -1) project.kosten.push(cost);
+  else project.kosten[idx] = cost;
+}
+
+function removeLocalCost(projectId, costId) {
+  const project = state.projects.find((p) => p.id === projectId);
+  if (!project) return;
+  project.kosten = (project.kosten || []).filter((k) => k.id !== costId);
+}
+
+function refreshCostTotals(tool) {
+  const rows = [...tool.querySelectorAll(".rekentool-rij")].map(readCostRow);
+  const totals = costTotals(rows);
+  const el = tool.querySelector(".rekentool-totaal");
+  if (el) {
+    el.textContent = rows.length
+      ? `Inkoop ${euro(totals.inkoop)} · Verkoop ${euro(totals.verkoop)} · Marge ${euro(totals.marge)}`
+      : "Nog geen regels. Voeg een leverancier toe.";
+  }
+  const panel = tool.closest(".project-kaart");
+  const samenvatting = panel?.querySelector(".project-samenvatting");
+  const project = state.projects.find((p) => p.id === panel?.dataset.project);
+  if (samenvatting && project) {
+    project.kosten = rows;
+    samenvatting.innerHTML = projectSamenvatting(project);
+  }
+}
+
+function applyCostToRow(row, cost) {
+  row.classList.toggle("betaald", Boolean(cost.bevestigdBetaald));
+  const btn = row.querySelector(".btn-betaald");
+  if (btn) btn.setAttribute("aria-pressed", cost.bevestigdBetaald ? "true" : "false");
+  btn?.classList.toggle("actief", Boolean(cost.bevestigdBetaald));
+  const verkoop = row.querySelector(".c-verkoop");
+  if (verkoop) verkoop.value = cost.verkoopprijs ?? calcVerkoopprijs(cost.prijs, cost.margePct);
+}
+
+async function saveCostRow(row, extra = {}) {
+  const payload = { ...readCostRow(row), ...extra };
+  row.querySelector(".c-verkoop").value = payload.verkoopprijs;
+  const { res, json } = await api("/api/project-costs", {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const tool = row.closest(".rekentool");
+    const melding = tool?.querySelector(".rekentool-melding");
+    if (melding) {
+      melding.hidden = false;
+      melding.textContent = json.error || "Regel opslaan mislukt.";
+    }
+    return null;
+  }
+  upsertLocalCost(json.cost);
+  applyCostToRow(row, json.cost);
+  refreshCostTotals(row.closest(".rekentool"));
+  return json.cost;
+}
+
+function scheduleCostSave(row) {
+  const id = row.dataset.id;
+  clearTimeout(costSaveTimers.get(id));
+  costSaveTimers.set(id, setTimeout(() => {
+    saveCostRow(row);
+  }, 400));
+}
+
+function bindCostRow(row) {
+  row.querySelectorAll(".c-prijs, .c-marge").forEach((inp) => {
+    inp.oninput = () => {
+      const prijs = Number(row.querySelector(".c-prijs").value) || 0;
+      const margePct = Number(row.querySelector(".c-marge").value) || 0;
+      row.querySelector(".c-verkoop").value = calcVerkoopprijs(prijs, margePct);
+      refreshCostTotals(row.closest(".rekentool"));
+      scheduleCostSave(row);
+    };
+  });
+  row.querySelectorAll(".c-leverancier, .c-wat, .c-opmerking").forEach((inp) => {
+    inp.oninput = () => {
+      refreshCostTotals(row.closest(".rekentool"));
+      scheduleCostSave(row);
+    };
+  });
+  row.querySelector(".btn-betaald").onclick = async () => {
+    const next = !row.classList.contains("betaald");
+    row.classList.toggle("betaald", next);
+    row.querySelector(".btn-betaald").classList.toggle("actief", next);
+    row.querySelector(".btn-betaald").setAttribute("aria-pressed", next ? "true" : "false");
+    const saved = await saveCostRow(row, { bevestigdBetaald: next });
+    if (!saved) {
+      row.classList.toggle("betaald", !next);
+      row.querySelector(".btn-betaald").classList.toggle("actief", !next);
+      row.querySelector(".btn-betaald").setAttribute("aria-pressed", !next ? "true" : "false");
+    }
+  };
+  row.querySelector(".c-del").onclick = async () => {
+    const id = row.dataset.id;
+    const projectId = row.dataset.project;
+    const { res, json } = await api("/api/project-costs", {
+      method: "DELETE",
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) {
+      const melding = row.closest(".rekentool")?.querySelector(".rekentool-melding");
+      if (melding) {
+        melding.hidden = false;
+        melding.textContent = json.error || "Verwijderen mislukt.";
+      }
+      return;
+    }
+    clearTimeout(costSaveTimers.get(id));
+    costSaveTimers.delete(id);
+    const tool = row.closest(".rekentool");
+    row.remove();
+    removeLocalCost(projectId, id);
+    refreshCostTotals(tool);
+  };
+}
+
+async function addCostRow(projectId, tool) {
+  const melding = tool.querySelector(".rekentool-melding");
+  const { res, json } = await api("/api/project-costs", {
+    method: "POST",
+    body: JSON.stringify({ projectId }),
+  });
+  if (!res.ok) {
+    melding.hidden = false;
+    melding.textContent = json.error || "Regel toevoegen mislukt.";
+    return;
+  }
+  melding.hidden = true;
+  upsertLocalCost(json.cost);
+  const lijst = tool.querySelector(".rekentool-lijst");
+  lijst.insertAdjacentHTML("beforeend", renderCostRow(json.cost, projectId));
+  bindCostRow(lijst.lastElementChild);
+  lijst.lastElementChild.querySelector(".c-leverancier")?.focus();
+  refreshCostTotals(tool);
+}
+
+function bindProjectCard(panel) {
+  const id = panel.dataset.project;
+  const toggle = panel.querySelector(".project-toggle");
+  const body = panel.querySelector(".project-body");
+  toggle.onclick = () => {
+    const open = !panel.classList.contains("open");
+    panel.classList.toggle("open", open);
+    body.hidden = !open;
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    setProjectOpen(id, open);
+  };
+
+  panel.querySelector(".save-project").onclick = async () => {
+    const melding = panel.querySelector(".p-melding");
+    const gastenRaw = panel.querySelector(".p-gasten").value;
+    const budgetRaw = panel.querySelector(".p-budget").value;
+    const { res, json } = await api("/api/projects", {
+      method: "PATCH",
+      body: JSON.stringify({
+        id,
+        eventDatum: panel.querySelector(".p-datum").value || null,
+        locatie: panel.querySelector(".p-locatie").value.trim() || null,
+        aantalGasten: gastenRaw === "" ? null : Number(gastenRaw),
+        budget: budgetRaw === "" ? null : Number(budgetRaw),
+        status: panel.querySelector(".p-status").value,
+        draaiboek: panel.querySelector(".draaiboek").value,
+        moodboardUrls: panel.querySelector(".mood").value.split("\n").map((s) => s.trim()).filter(Boolean),
+      }),
+    });
+    if (!res.ok) {
+      melding.hidden = false;
+      melding.textContent = json.error || "Opslaan mislukt.";
+      return;
+    }
+    setProjectOpen(id, true);
+    await refresh();
+    renderView();
+  };
+
+  const tool = panel.querySelector(".rekentool");
+  tool.querySelectorAll(".rekentool-rij").forEach(bindCostRow);
+  tool.querySelector(".add-cost").onclick = () => addCostRow(id, tool);
+  refreshCostTotals(tool);
+}
+
 function renderProjects() {
   main.innerHTML += `
     <div class="page-acties">
       <button type="button" class="btn btn-primair" id="btn-nieuw-project">+ Nieuw project</button>
     </div>
-    ${state.projects.map((p) => `
-    <div class="panel" data-project="${p.id}">
-      <h2>${esc(p.naam)} <span class="tag">${esc(p.status)}</span></h2>
-      <p style="color:var(--mauve);margin-bottom:1rem">${esc(p.klantNaam)}</p>
-      <div class="form-grid" style="max-width:640px">
-        <label>Eventdatum</label>
-        <input class="p-datum" type="date" value="${esc(p.eventDatum || "")}">
-        <label>Locatie</label>
-        <input class="p-locatie" value="${esc(p.locatie || "")}" placeholder="Locatie">
-        <label>Aantal gasten</label>
-        <input class="p-gasten" type="number" min="0" value="${p.aantalGasten ?? ""}" placeholder="0">
-        <label>Budget (€)</label>
-        <input class="p-budget" type="number" min="0" step="0.01" value="${p.budget ?? ""}" placeholder="0">
-        <label>Status</label>
-        <select class="p-status">
-          ${PROJECT_STATUSES.map((s) => `<option value="${s.id}" ${p.status === s.id ? "selected" : ""}>${s.label}</option>`).join("")}
-        </select>
-        <label>Draaiboek</label>
-        <textarea class="draaiboek" rows="4">${esc(p.draaiboek || "")}</textarea>
-        <label>Moodboard URL (één per regel)</label>
-        <textarea class="mood" rows="3">${(p.moodboardUrls || []).join("\n")}</textarea>
-        <button class="btn btn-primair save-project" data-id="${p.id}">Opslaan</button>
-        <p class="melding p-melding" hidden></p>
+    ${state.projects.map((p) => {
+      const open = openProjects.has(p.id);
+      return `
+    <div class="panel project-kaart${open ? " open" : ""}" data-project="${p.id}">
+      <button type="button" class="project-toggle" aria-expanded="${open ? "true" : "false"}" aria-controls="project-body-${p.id}">
+        <span class="project-chevron" aria-hidden="true"></span>
+        <span class="project-koptekst">
+          <h2>${esc(p.naam)} <span class="tag">${esc(projectStatusLabel(p.status))}</span></h2>
+          <p class="project-samenvatting">${projectSamenvatting(p)}</p>
+        </span>
+      </button>
+      <div class="project-body" id="project-body-${p.id}" ${open ? "" : "hidden"}>
+        <div class="form-grid" style="max-width:640px">
+          <label>Eventdatum</label>
+          <input class="p-datum" type="date" value="${esc(p.eventDatum || "")}">
+          <label>Locatie</label>
+          <input class="p-locatie" value="${esc(p.locatie || "")}" placeholder="Locatie">
+          <label>Aantal gasten</label>
+          <input class="p-gasten" type="number" min="0" value="${p.aantalGasten ?? ""}" placeholder="0">
+          <label>Budget (€)</label>
+          <input class="p-budget" type="number" min="0" step="0.01" value="${p.budget ?? ""}" placeholder="0">
+          <label>Status</label>
+          <select class="p-status">
+            ${PROJECT_STATUSES.map((s) => `<option value="${s.id}" ${p.status === s.id ? "selected" : ""}>${s.label}</option>`).join("")}
+          </select>
+          <label>Draaiboek</label>
+          <textarea class="draaiboek" rows="4">${esc(p.draaiboek || "")}</textarea>
+          <label>Moodboard URL (één per regel)</label>
+          <textarea class="mood" rows="3">${(p.moodboardUrls || []).join("\n")}</textarea>
+          <button type="button" class="btn btn-primair save-project" data-id="${p.id}">Opslaan</button>
+          <p class="melding p-melding" hidden></p>
+        </div>
+        <div class="rekentool">
+          <h3>Rekentool</h3>
+          <p class="rekentool-hint">Voeg leveranciers toe. Verkoopprijs = prijs × (1 + marge%).</p>
+          <div class="rekentool-wrap">
+            <div class="rekentool-kop" aria-hidden="true">
+              <span>Leverancier</span>
+              <span>Wat</span>
+              <span>Prijs</span>
+              <span>Marge %</span>
+              <span>Verkoopprijs</span>
+              <span>Opmerking</span>
+              <span></span>
+              <span></span>
+            </div>
+            <div class="rekentool-lijst">
+              ${(p.kosten || []).map((c) => renderCostRow(c, p.id)).join("")}
+            </div>
+          </div>
+          <div class="btn-groep">
+            <button type="button" class="btn add-cost">+ Regel toevoegen</button>
+          </div>
+          <p class="rekentool-totaal"></p>
+          <p class="melding rekentool-melding" hidden></p>
+        </div>
       </div>
-    </div>`).join("") || "<p class='leeg'>Nog geen projecten. Maak er een via + of zet een aanvraag op Gewonnen.</p>"}`;
+    </div>`;
+    }).join("") || "<p class='leeg'>Nog geen projecten. Maak er een via + of zet een aanvraag op Gewonnen.</p>"}`;
 
   $("#btn-nieuw-project")?.addEventListener("click", () => openCreateModal("project"));
-  main.querySelectorAll(".save-project").forEach((b) => {
-    b.onclick = async () => {
-      const id = b.dataset.id;
-      const panel = b.closest(".panel");
-      const melding = panel.querySelector(".p-melding");
-      const gastenRaw = panel.querySelector(".p-gasten").value;
-      const budgetRaw = panel.querySelector(".p-budget").value;
-      const { res, json } = await api("/api/projects", {
-        method: "PATCH",
-        body: JSON.stringify({
-          id,
-          eventDatum: panel.querySelector(".p-datum").value || null,
-          locatie: panel.querySelector(".p-locatie").value.trim() || null,
-          aantalGasten: gastenRaw === "" ? null : Number(gastenRaw),
-          budget: budgetRaw === "" ? null : Number(budgetRaw),
-          status: panel.querySelector(".p-status").value,
-          draaiboek: panel.querySelector(".draaiboek").value,
-          moodboardUrls: panel.querySelector(".mood").value.split("\n").map((s) => s.trim()).filter(Boolean),
-        }),
-      });
-      if (!res.ok) {
-        melding.hidden = false;
-        melding.textContent = json.error || "Opslaan mislukt.";
-        return;
-      }
-      await refresh();
-      renderView();
-    };
-  });
+  main.querySelectorAll(".project-kaart").forEach(bindProjectCard);
 }
 
 function renderCampaigns() {
@@ -1290,6 +1572,7 @@ function openCreateModal(type) {
         return;
       }
       closeCreateModal();
+      if (json.project?.id) setProjectOpen(json.project.id, true);
       await refresh();
       go("projects");
     }
