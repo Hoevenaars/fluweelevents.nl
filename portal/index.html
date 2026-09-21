@@ -6,6 +6,8 @@
   <meta name="robots" content="noindex, nofollow" />
   <title>Fluweel · Je offerte</title>
   <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" href="/logo/fluweel-icon-32.png" type="image/png" sizes="32x32" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -24,8 +26,8 @@
     }
     .balk { height:8px; background:var(--aubergine); }
     .binnen { padding:2rem 1.8rem 2.2rem; }
-    .merk { font-family:var(--serif); font-weight:500; font-size:1.7rem; }
-    .merk em { color:var(--fuchsia); font-style:normal; }
+    .merk { display:flex; align-items:center; }
+    .merk img { display:block; height:1.7rem; width:auto; }
     .label {
       font-size:.78rem; letter-spacing:.17em; text-transform:uppercase;
       color:var(--fuchsia); font-weight:500; margin:1.1rem 0 .45rem;
@@ -54,7 +56,7 @@
   <div class="wrap" id="app">
     <div class="balk"></div>
     <div class="binnen">
-      <p class="merk">Fluweel<em>.</em></p>
+      <p class="merk"><img src="/logo/fluweel-woordmerk-zwart.png" alt="Fluweel."></p>
       <p class="label">Offerte</p>
       <div id="content">Laden...</div>
     </div>
