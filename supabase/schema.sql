@@ -335,7 +335,7 @@ on conflict (slug) do update set
 
 -- Standaard website-secties
 insert into public.website_sections (sleutel, waarde) values
-  ('hero_titel', 'Meer dan een evenement. Een herinnering.'),
-  ('hero_intro', 'Wij ontwerpen zakelijke belevenissen die gasten raken en merken versterken.'),
-  ('contact_titel', 'Klaar voor een avond die blijft hangen?')
+  ('hero_titel', 'Van visie naar vibe.'),
+  ('hero_intro', E'We vertalen jouw merk, ambitie of idee naar een eventconcept met een eigen doel, energie en identiteit.\n\nVan creatieve richting tot volledige realisatie. Eén sterk concept, persoonlijk geregisseerd en tot leven gebracht in elk onderdeel.'),
+  ('contact_titel', 'Een idee, ambitie of moment in gedachten?')
 on conflict (sleutel) do nothing;
