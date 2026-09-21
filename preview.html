@@ -162,23 +162,123 @@
       pointer-events:none;
     }
 
-    /* Werkwijze met beeld */
-    .werk-flow { display:grid; grid-template-columns:.92fr 1.08fr; gap:3.4rem; align-items:start; }
-    .flow-beeld {
-      position:sticky; top:6.2rem; aspect-ratio:4/5; overflow:hidden; border-radius:2px;
+    /* Werkwijze */
+    .fluweel-process {
+      background:var(--ivoor);
+      color:var(--inkt);
+      width:100%;
     }
-    .flow-beeld img { width:100%; height:100%; object-fit:cover; }
-    .fases { border-top:1px solid var(--lijn); }
-    .fase { border-bottom:1px solid var(--lijn); cursor:pointer; }
-    .fase-kop { display:grid; grid-template-columns:56px 1fr 28px; gap:1.3rem; align-items:baseline; padding:1.55rem 0; }
-    .fase-nr { font-family:var(--sans); font-size:.82rem; color:var(--mauve); letter-spacing:.06em; }
-    .fase h3 { font-family:var(--serif); font-weight:500; font-size:1.5rem; color:var(--aubergine); }
-    .fase h3::after { content:"."; color:var(--fuchsia); opacity:0; transition:opacity .3s; }
-    .fase.open h3::after { opacity:1; }
-    .fase .plus { justify-self:end; color:var(--aubergine); font-size:1.35rem; line-height:1; transition:transform .35s; font-weight:300; }
-    .fase.open .plus { transform:rotate(45deg); }
-    .fase-tekst { max-height:0; overflow:hidden; transition:max-height .4s ease; }
-    .fase-tekst p { color:var(--mauve); padding:0 0 1.6rem calc(56px + 1.3rem); max-width:58ch; }
+    .fluweel-process__intro {
+      max-width:1120px;
+      margin:0 auto;
+      padding:72px 32px 60px;
+      text-align:center;
+    }
+    .fluweel-process__eyebrow {
+      font-family:var(--sans);
+      font-size:12px;
+      font-weight:500;
+      letter-spacing:0.28em;
+      text-transform:uppercase;
+      color:var(--fuchsia);
+    }
+    .fluweel-process__accent {
+      width:42px;
+      height:1px;
+      margin:20px auto 18px;
+      background:var(--fuchsia);
+    }
+    .fluweel-process__title {
+      max-width:1000px;
+      margin:0 auto;
+      font-family:var(--serif);
+      font-size:clamp(42px,5vw,72px);
+      line-height:0.98;
+      font-weight:400;
+      letter-spacing:-0.035em;
+      color:var(--inkt);
+    }
+    .fluweel-process__title span { color:var(--fuchsia); }
+    .fluweel-process__lead {
+      margin:24px auto 0;
+      font-family:var(--sans);
+      font-size:17px;
+      line-height:1.65;
+      letter-spacing:0.04em;
+      color:var(--mauve);
+    }
+    .fluweel-process__grid {
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      max-width:1440px;
+      margin:0 auto;
+      border-top:1px solid var(--lijn);
+    }
+    .fluweel-process__item {
+      min-height:390px;
+      padding:48px 8vw 54px;
+      background:var(--vlak);
+    }
+    .fluweel-process__item:nth-child(odd) { border-right:1px solid var(--lijn); }
+    .fluweel-process__item:nth-child(-n+2) { border-bottom:1px solid var(--lijn); }
+    .fluweel-process__item:nth-child(2),
+    .fluweel-process__item:nth-child(3) { background:var(--ivoor); }
+    .fluweel-process__item-accent {
+      width:54px;
+      height:1px;
+      margin-bottom:20px;
+      background:var(--fuchsia);
+    }
+    .fluweel-process__item h3 {
+      margin:0;
+      font-family:var(--serif);
+      font-size:clamp(42px,4vw,60px);
+      line-height:1;
+      font-weight:400;
+      letter-spacing:-0.025em;
+      color:var(--inkt);
+    }
+    .fluweel-process__promise {
+      margin:16px 0 30px;
+      font-family:var(--sans);
+      font-size:12px;
+      font-weight:500;
+      line-height:1.5;
+      letter-spacing:0.23em;
+      text-transform:uppercase;
+      color:var(--aubergine);
+    }
+    .fluweel-process__body {
+      max-width:590px;
+      font-family:var(--sans);
+      font-size:17px;
+      line-height:1.58;
+      color:var(--inkt);
+    }
+    .fluweel-process__body p { margin:0 0 12px; }
+    .fluweel-process__body p:last-child { margin-bottom:0; }
+    @media (max-width:960px) {
+      .fluweel-process__intro { padding:64px 28px 50px; }
+      .fluweel-process__item { padding:44px 48px 48px; }
+    }
+    @media (max-width:720px) {
+      .fluweel-process__intro { padding:56px 22px 42px; }
+      .fluweel-process__title { font-size:44px; line-height:1.02; }
+      .fluweel-process__lead { font-size:16px; }
+      .fluweel-process__grid { grid-template-columns:1fr; }
+      .fluweel-process__item {
+        min-height:auto;
+        padding:42px 24px 46px;
+        border-right:0 !important;
+        border-bottom:1px solid var(--lijn);
+      }
+      .fluweel-process__item:last-child { border-bottom:0; }
+      .fluweel-process__item:nth-child(odd),
+      .fluweel-process__item:nth-child(even) { background:var(--ivoor); }
+      .fluweel-process__item:nth-child(even) { background:var(--vlak); }
+      .fluweel-process__item h3 { font-size:46px; }
+      .fluweel-process__body { font-size:16px; line-height:1.6; }
+    }
 
     /* Events: redactioneel met foto */
     .event-lijst { display:flex; flex-direction:column; gap:0; border-top:1px solid var(--lijn); }
@@ -315,8 +415,8 @@
     :focus-visible { outline:2px solid var(--fuchsia); outline-offset:3px; }
 
     @media (max-width:900px) {
-      .verhaal-grid, .werk-flow, .contact-grid, .persoonlijk { grid-template-columns:1fr; gap:2.2rem; }
-      .flow-beeld, .contact-beeld { position:relative; top:auto; aspect-ratio:16/11; }
+      .verhaal-grid, .contact-grid, .persoonlijk { grid-template-columns:1fr; gap:2.2rem; }
+      .contact-beeld { position:relative; top:auto; aspect-ratio:16/11; }
       .event-rij, .event-rij:nth-child(even) { grid-template-columns:1fr; gap:1.2rem; direction:ltr; }
       .werk-grid { grid-template-columns:1fr; }
       .project.groot { grid-row:auto; }
@@ -324,7 +424,6 @@
       nav.groot { display:none; }
       .burger { display:inline-flex; }
       .sectie { padding:4.2rem 0; }
-      .fase-tekst p { padding-left:0; }
       .hero-inhoud { padding:6.5rem 0 3.4rem; }
     }
     @media (prefers-reduced-motion:reduce) {
@@ -413,36 +512,56 @@
   </section>
 
   <!-- ====== WERKWIJZE ====== -->
-  <section class="sectie zacht" id="werkwijze">
-    <div class="wrap">
-      <div class="werk-flow">
-        <div class="flow-beeld reveal">
-          <img src="foto/fluweel-kaarsen-druiven.jpg" alt="Gedekte tafel met basilicum, tomaten en een menukaart voor een pizza night" loading="lazy">
+  <section class="fluweel-process" id="werkwijze">
+    <div class="fluweel-process__intro">
+      <div class="fluweel-process__eyebrow">Werkwijze</div>
+      <div class="fluweel-process__accent"></div>
+      <h2 class="fluweel-process__title">Van eerste gedachte naar volledige beleving<span>.</span></h2>
+      <p class="fluweel-process__lead">Vier fases waarin strategie, creativiteit en uitvoering samenkomen.</p>
+    </div>
+    <div class="fluweel-process__grid">
+      <article class="fluweel-process__item">
+        <div class="fluweel-process__item-accent"></div>
+        <h3>Focus</h3>
+        <p class="fluweel-process__promise">We maken scherp waar het om draait.</p>
+        <div class="fluweel-process__body">
+          <p>We duiken in jouw merk, verhaal, ambitie, gasten en doel.</p>
+          <p>Wat wil je bereiken?<br>Wat wil je dat mensen voelen, onthouden of meenemen?<br>En welke rol moet het event daarin spelen?</p>
+          <p>Hier ontstaat de richting voor alles wat daarna volgt.</p>
         </div>
-        <div>
-          <p class="label reveal">Werkwijze</p>
-          <h2 class="reveal">Van eerste gedachte naar volledige beleving.</h2>
-          <p class="inleiding reveal">Vier fases waarin strategie, creativiteit en uitvoering samenkomen.</p>
-          <div class="fases reveal" id="fases">
-            <div class="fase open">
-              <div class="fase-kop"><span class="fase-nr">01</span><h3>Focus</h3><span class="plus">+</span></div>
-              <div class="fase-tekst"><p>We maken scherp waar het om draait.<br><br>We duiken in jouw merk, verhaal, ambitie, gasten en doel.<br><br>Wat wil je bereiken?<br><br>Wat wil je dat mensen voelen, onthouden of meenemen?<br><br>En welke rol moet het event daarin spelen?<br><br>Hier ontstaat de richting voor alles wat daarna volgt.</p></div>
-            </div>
-            <div class="fase">
-              <div class="fase-kop"><span class="fase-nr">02</span><h3>Formule</h3><span class="plus">+</span></div>
-              <div class="fase-tekst"><p>We bouwen het creatieve concept.<br><br>Vanuit de gekozen richting ontwikkelen we één sterk idee met een eigen verhaal, sfeer en identiteit.<br><br>We bepalen hoe het event moet voelen en hoe gasten daarin worden meegenomen.<br><br>Van inhoud en programma tot ruimte, uitstraling en beleving.<br><br>Alles vanuit één creatieve lijn.</p></div>
-            </div>
-            <div class="fase">
-              <div class="fase-kop"><span class="fase-nr">03</span><h3>Fijnslijpen</h3><span class="plus">+</span></div>
-              <div class="fase-tekst"><p>We brengen alle onderdelen samen.<br><br>Het concept wordt vertaald naar een concreet totaalplan.<br><br>Planning, locatie, productie, techniek, hospitality, entertainment, styling en communicatie worden op elkaar afgestemd.<br><br>Niet als losse onderdelen.<br><br>Als één geheel.<br><br>Daarbij bewaken we continu de kwaliteit, het concept en de investering.</p></div>
-            </div>
-            <div class="fase">
-              <div class="fase-kop"><span class="fase-nr">04</span><h3>Feilloos</h3><span class="plus">+</span></div>
-              <div class="fase-tekst"><p>Alles komt samen.<br><br>Op de dag zelf voeren we de regie en bewaken we het volledige concept.<br><br>Alles staat op zijn plek.<br><br>Iedereen weet wat er moet gebeuren.<br><br>En jij hoeft niet bezig te zijn met de operatie.<br><br>Je kunt zelf onderdeel zijn van het moment.<br><br>Zoals het hoort.</p></div>
-            </div>
-          </div>
+      </article>
+      <article class="fluweel-process__item">
+        <div class="fluweel-process__item-accent"></div>
+        <h3>Formule</h3>
+        <p class="fluweel-process__promise">We bouwen het creatieve concept.</p>
+        <div class="fluweel-process__body">
+          <p>Vanuit de gekozen richting ontwikkelen we één sterk idee met een eigen verhaal, sfeer en identiteit.</p>
+          <p>We bepalen hoe het event moet voelen en hoe gasten daarin worden meegenomen.</p>
+          <p>Van inhoud en programma tot ruimte, uitstraling en beleving. Alles vanuit één creatieve lijn.</p>
         </div>
-      </div>
+      </article>
+      <article class="fluweel-process__item">
+        <div class="fluweel-process__item-accent"></div>
+        <h3>Fijnslijpen</h3>
+        <p class="fluweel-process__promise">We brengen alle onderdelen samen.</p>
+        <div class="fluweel-process__body">
+          <p>Het concept wordt vertaald naar een concreet totaalplan.</p>
+          <p>Planning, locatie, productie, techniek, hospitality, entertainment, styling en communicatie worden op elkaar afgestemd.</p>
+          <p>Niet als losse onderdelen.<br>Als één geheel.</p>
+          <p>Daarbij bewaken we continu de kwaliteit, het concept en de investering.</p>
+        </div>
+      </article>
+      <article class="fluweel-process__item">
+        <div class="fluweel-process__item-accent"></div>
+        <h3>Feilloos</h3>
+        <p class="fluweel-process__promise">Alles komt samen.</p>
+        <div class="fluweel-process__body">
+          <p>Op de dag zelf voeren we de regie en bewaken we het volledige concept.</p>
+          <p>Alles staat op zijn plek.<br>Iedereen weet wat er moet gebeuren.</p>
+          <p>En jij hoeft niet bezig te zijn met de operatie.</p>
+          <p>Je kunt zelf onderdeel zijn van het moment.<br>Zoals het hoort.</p>
+        </div>
+      </article>
     </div>
   </section>
 
