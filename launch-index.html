@@ -85,6 +85,7 @@
   }
   </script>
   <link rel="icon" href="favicon.ico" sizes="any" />
+  <link rel="icon" href="logo/fluweel-icon-32.png" type="image/png" sizes="32x32" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -120,8 +121,8 @@
     }
     .kop.scrolled { background:rgba(250,245,239,.92); border-bottom-color:var(--lijn); }
     .kop .wrap { display:flex; align-items:center; justify-content:space-between; }
-    .merk { font-family:var(--serif); font-weight:500; font-size:1.4rem; text-decoration:none; }
-    .merk em { color:var(--fuchsia); font-style:normal; }
+    .merk { display:inline-flex; align-items:center; text-decoration:none; }
+    .merk img { display:block; height:1.45rem; width:auto; }
     nav.groot { display:flex; gap:1.8rem; align-items:center; font-size:.9rem; color:var(--mauve); }
     nav.groot a { text-decoration:none; transition:color .3s; }
     nav.groot a:hover { color:var(--inkt); }
@@ -184,12 +185,8 @@
       position:relative; z-index:2; width:100%;
       padding:7.5rem 0 4.8rem;
     }
-    .hero-merk {
-      font-family:var(--serif); font-weight:500;
-      font-size:clamp(3.4rem,9vw,6.4rem); line-height:.92; letter-spacing:-.02em;
-      margin-bottom:1.1rem;
-    }
-    .hero-merk em { color:var(--fuchsia); font-style:normal; }
+    .hero-merk { margin-bottom:1.1rem; }
+    .hero-merk img { display:block; height:clamp(2.8rem,8vw,5.2rem); width:auto; }
     .hero h1 {
       font-family:var(--serif); font-weight:400;
       font-size:clamp(1.55rem,3.2vw,2.15rem); line-height:1.25;
@@ -415,7 +412,7 @@
 
   <header class="kop" id="kop">
     <div class="wrap">
-      <a class="merk" href="#boven">Fluweel<em>.</em></a>
+      <a class="merk" href="#boven"><img src="logo/fluweel-woordmerk-zwart.png" alt="Fluweel."></a>
       <nav class="groot">
         <a href="#verhaal">Het verhaal</a>
         <a href="#werkwijze">Werkwijze</a>
@@ -449,7 +446,7 @@
     <div class="hero-sluier"></div>
     <div class="hero-inhoud">
       <div class="wrap">
-        <p class="hero-merk">Fluweel<em>.</em></p>
+        <p class="hero-merk"><img src="logo/fluweel-woordmerk-wit.png" alt="Fluweel."></p>
         <h1>Van visie naar <span class="accent">vibe</span>.</h1>
         <p class="intro">We vertalen jouw merk, ambitie of idee naar een eventconcept met een eigen doel, energie en identiteit.<br><br>Van creatieve richting tot volledige realisatie. Eén sterk concept, persoonlijk geregisseerd en tot leven gebracht in elk onderdeel.</p>
         <div class="hero-acties">

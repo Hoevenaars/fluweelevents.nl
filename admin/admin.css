@@ -46,19 +46,23 @@ body {
 }
 
 .merk {
-  font-family:var(--serif);
-  font-weight:500;
-  font-size:1.35rem;
-  letter-spacing:-.01em;
+  display:flex;
+  align-items:center;
+}
+
+.merk img {
+  display:block;
+  height:1.4rem;
+  width:auto;
 }
 
 .merk-groot {
-  font-size:clamp(2.4rem,5vw,3.4rem);
-  line-height:1;
   margin:.5rem 0 1rem;
 }
 
-.merk em { color:var(--fuchsia); font-style:normal; }
+.merk-groot img {
+  height:clamp(2.2rem,4.5vw,3.1rem);
+}
 
 :focus-visible {
   outline:2px solid var(--fuchsia);

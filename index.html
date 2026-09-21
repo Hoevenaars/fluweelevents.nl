@@ -8,6 +8,10 @@
   <title>Fluweel Events &middot; Binnenkort</title>
   <meta name="description" content="Fluweel Events. Meer dan een evenement. Een herinnering. Binnenkort meer." />
   <meta name="robots" content="noindex" />
+  <link rel="icon" href="favicon.ico" sizes="any" />
+  <link rel="icon" href="logo/fluweel-icon-32.png" type="image/png" sizes="32x32" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -39,8 +43,8 @@
     }
 
     header { position:relative; z-index:2; padding:1.6rem 1.8rem; }
-    .brand { font-family:var(--font-display); font-weight:500; font-size:1.35rem; text-decoration:none; }
-    .brand em { color:var(--accent); font-style:normal; }
+    .brand { display:inline-flex; align-items:center; text-decoration:none; }
+    .brand img { display:block; height:1.45rem; width:auto; }
 
     main { position:relative; z-index:2; flex:1; display:flex; align-items:flex-end; padding:2rem 1.8rem 4rem; }
     .card { max-width:560px; width:100%; }
@@ -90,7 +94,7 @@
   </div>
   <div class="sluier"></div>
 
-  <header><a class="brand" href="#">Fluweel<em>.</em></a></header>
+  <header><a class="brand" href="#"><img src="logo/fluweel-woordmerk-wit.png" alt="Fluweel."></a></header>
 
   <main>
     <div class="card">
