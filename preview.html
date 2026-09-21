@@ -89,42 +89,298 @@
     .stil.licht { color:rgba(250,245,239,.92); border-bottom-color:rgba(250,245,239,.35); }
     .stil.licht:hover { color:#fff; border-bottom-color:#fff; }
 
-    /* ====== HERO: full-bleed ====== */
-    .hero {
-      position:relative; min-height:100svh; display:flex; align-items:flex-end;
-      color:#FAF5EF; overflow:hidden;
+    /* ====== HERO ====== */
+    .fe-hero {
+      --maxw:1440px;
+      background:var(--ivoor);
+      color:var(--inkt);
+      overflow:hidden;
     }
-    .hero-beelden { position:absolute; inset:0; }
-    .hero-foto {
-      position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
-      opacity:0; transform:scale(1.04); transition:opacity 1.4s ease, transform 7s ease;
+    .fe-hero__grid {
+      max-width:var(--maxw);
+      margin:0 auto;
+      display:grid;
+      grid-template-columns:minmax(390px,.82fr) minmax(0,1.18fr);
+      align-items:stretch;
+      min-height:clamp(650px,76vh,820px);
     }
-    .hero-foto.actief { opacity:1; transform:scale(1); }
-    .hero-sluier {
-      position:absolute; inset:0;
-      background:
-        linear-gradient(180deg, rgba(42,19,34,.28) 0%, rgba(42,19,34,.18) 35%, rgba(42,19,34,.72) 100%),
-        linear-gradient(90deg, rgba(42,19,34,.55) 0%, rgba(42,19,34,.15) 55%, transparent 100%);
-      z-index:1;
+    .fe-hero__content {
+      padding:max(6.8rem,clamp(72px,8vw,128px)) clamp(40px,5vw,80px) clamp(56px,6vw,90px);
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
     }
-    .hero-inhoud {
-      position:relative; z-index:2; width:100%;
-      padding:7.5rem 0 4.8rem;
+    .fe-hero__eyebrow {
+      display:flex;
+      align-items:center;
+      gap:18px;
+      margin:0 0 30px;
+      font-family:var(--sans);
+      font-size:11px;
+      font-weight:500;
+      letter-spacing:0.24em;
+      text-transform:uppercase;
+      color:var(--aubergine);
     }
-    .hero-merk { margin-bottom:1.1rem; }
-    .hero-merk img { display:block; height:clamp(6.4rem,18vw,11rem); width:auto; }
-    .hero h1 {
-      font-family:var(--serif); font-weight:400;
-      font-size:clamp(1.55rem,3.2vw,2.15rem); line-height:1.25;
-      max-width:22ch; margin-bottom:1.15rem; color:rgba(250,245,239,.96);
+    .fe-hero__eyebrow::before {
+      content:"";
+      width:52px;
+      height:1px;
+      background:var(--lijn);
+      flex:0 0 auto;
     }
-    .hero h1 .accent { color:#fff; font-style:italic; }
-    .hero p.intro {
-      font-size:1.05rem; color:rgba(250,245,239,.78); max-width:42ch;
-      margin-bottom:2.2rem; font-weight:300;
+    .fe-hero__title {
+      max-width:580px;
+      margin:0;
+      font-family:var(--serif);
+      font-weight:400;
+      font-size:clamp(64px,6vw,102px);
+      line-height:0.92;
+      letter-spacing:-0.045em;
+      color:var(--inkt);
     }
-    .hero-acties { display:flex; gap:1.3rem; align-items:center; flex-wrap:wrap; }
-    .hero .cta { box-shadow:0 18px 40px -18px rgba(200,30,99,.55); }
+    .fe-hero__title-accent { color:var(--fuchsia); }
+    .fe-hero__intro {
+      max-width:490px;
+      margin:34px 0 0;
+      font-family:var(--sans);
+      font-size:clamp(16px,1.25vw,19px);
+      font-weight:400;
+      line-height:1.75;
+      color:color-mix(in srgb,var(--inkt) 75%,transparent);
+    }
+    .fe-hero__actions {
+      display:flex;
+      flex-wrap:wrap;
+      gap:14px;
+      margin-top:34px;
+    }
+    .fe-btn {
+      min-height:56px;
+      padding:0 28px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:18px;
+      border-radius:4px;
+      font-family:var(--sans);
+      font-size:14px;
+      font-weight:500;
+      text-decoration:none;
+      transition:background-color 180ms ease,color 180ms ease,border-color 180ms ease,transform 180ms ease;
+    }
+    .fe-btn:hover { transform:translateY(-1px); }
+    .fe-btn--primary {
+      background:var(--fuchsia);
+      color:#fff;
+      border:1px solid var(--fuchsia);
+    }
+    .fe-btn--primary:hover {
+      background:var(--aubergine);
+      border-color:var(--aubergine);
+    }
+    .fe-btn--secondary {
+      background:transparent;
+      color:var(--inkt);
+      border:1px solid color-mix(in srgb,var(--fuchsia) 70%,transparent);
+    }
+    .fe-btn--secondary:hover {
+      background:#fff;
+      border-color:var(--fuchsia);
+    }
+    .fe-btn__arrow {
+      font-size:19px;
+      line-height:1;
+      transform:translateY(-1px);
+    }
+    .fe-hero__qualities {
+      display:flex;
+      flex-wrap:wrap;
+      align-items:stretch;
+      margin:46px 0 0;
+      padding:0;
+      list-style:none;
+    }
+    .fe-hero__quality {
+      padding:0 26px;
+      font-family:var(--sans);
+      font-size:11px;
+      font-weight:500;
+      line-height:1.55;
+      letter-spacing:0.06em;
+      text-transform:uppercase;
+      color:var(--mauve);
+      border-right:1px solid var(--lijn);
+    }
+    .fe-hero__quality:first-child { padding-left:0; }
+    .fe-hero__quality:last-child { border-right:0; }
+    .fe-hero__visual {
+      position:relative;
+      min-height:650px;
+      overflow:hidden;
+      background:#d9cec3;
+    }
+    .fe-hero__image {
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      object-position:52% center;
+      display:block;
+      opacity:0;
+      transition:opacity 1.4s ease;
+    }
+    .fe-hero__image.actief { opacity:1; }
+    .fe-hero__visual::after {
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(90deg,rgba(42,19,34,.04) 0%,rgba(42,19,34,0) 35%,rgba(42,19,34,.10) 100%);
+      pointer-events:none;
+    }
+    .fe-hero__image-caption {
+      position:absolute;
+      z-index:2;
+      top:72px;
+      right:clamp(28px,4vw,62px);
+      display:grid;
+      grid-template-columns:1px auto;
+      column-gap:20px;
+      color:#fff;
+    }
+    .fe-hero__image-caption-line {
+      width:1px;
+      height:118px;
+      background:rgba(255,255,255,.62);
+    }
+    .fe-hero__image-caption-text {
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      font-family:var(--sans);
+      font-size:10px;
+      font-weight:500;
+      letter-spacing:0.25em;
+      line-height:1.45;
+      text-transform:uppercase;
+    }
+    .fe-hero__image-caption-dash {
+      display:block;
+      width:18px;
+      height:1px;
+      margin:2px 0;
+      background:rgba(255,255,255,.7);
+    }
+    .fe-trust {
+      --maxw:1440px;
+      background:var(--ivoor);
+      border-top:1px solid rgba(227,213,201,.65);
+      border-bottom:1px solid rgba(227,213,201,.65);
+    }
+    .fe-trust__inner {
+      max-width:var(--maxw);
+      min-height:104px;
+      margin:0 auto;
+      padding:20px clamp(30px,4vw,64px);
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      align-items:center;
+      gap:clamp(34px,5vw,72px);
+    }
+    .fe-trust__inner:not(:has(.fe-trust__logo)) { grid-template-columns:auto auto; }
+    .fe-trust__label {
+      display:flex;
+      align-items:center;
+      gap:20px;
+      white-space:nowrap;
+      font-family:var(--sans);
+      font-size:10px;
+      font-weight:500;
+      letter-spacing:0.24em;
+      text-transform:uppercase;
+      color:var(--mauve);
+    }
+    .fe-trust__label::after {
+      content:"";
+      display:block;
+      width:45px;
+      height:1px;
+      background:var(--lijn);
+    }
+    .fe-trust__logos {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:clamp(30px,4vw,64px);
+      margin:0;
+      padding:0;
+      list-style:none;
+    }
+    .fe-trust__logos:empty { display:none; }
+    .fe-trust__logo {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-width:80px;
+    }
+    .fe-trust__logo img {
+      display:block;
+      width:auto;
+      max-width:135px;
+      height:28px;
+      filter:grayscale(1) sepia(.1) opacity(.58);
+      transition:filter 180ms ease,opacity 180ms ease;
+    }
+    .fe-trust__logo:hover img { filter:grayscale(1) opacity(.82); }
+    .fe-trust__more {
+      white-space:nowrap;
+      font-family:var(--sans);
+      font-size:9px;
+      font-weight:500;
+      letter-spacing:0.20em;
+      text-transform:uppercase;
+      color:var(--mauve);
+    }
+    @media (max-width:1050px) {
+      .fe-hero__grid { grid-template-columns:1fr 1.05fr; }
+      .fe-hero__content { padding-left:32px; padding-right:32px; }
+      .fe-hero__title { font-size:clamp(58px,7vw,78px); }
+      .fe-trust__inner { grid-template-columns:1fr; gap:22px; }
+      .fe-trust__logos { justify-content:flex-start; flex-wrap:wrap; }
+      .fe-trust__more { display:none; }
+    }
+    @media (max-width:760px) {
+      .fe-hero__grid {
+        display:flex;
+        flex-direction:column;
+        min-height:auto;
+      }
+      .fe-hero__content { padding:7.2rem 22px 48px; }
+      .fe-hero__eyebrow { margin-bottom:24px; }
+      .fe-hero__title {
+        max-width:100%;
+        font-size:clamp(54px,16vw,72px);
+        line-height:.95;
+      }
+      .fe-hero__intro { margin-top:26px; font-size:16px; }
+      .fe-hero__actions { flex-direction:column; align-items:stretch; }
+      .fe-btn { width:100%; }
+      .fe-hero__qualities { margin-top:36px; display:grid; gap:10px; }
+      .fe-hero__quality,
+      .fe-hero__quality:first-child { padding:0; border:0; }
+      .fe-hero__visual { min-height:62vh; }
+      .fe-hero__image-caption { top:30px; right:24px; }
+      .fe-trust__inner { padding:28px 22px; }
+      .fe-trust__logos {
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        column-gap:32px;
+        row-gap:28px;
+      }
+      .fe-trust__logo { justify-content:flex-start; }
+      .fe-trust__logo img { max-width:115px; max-height:26px; }
+    }
 
     /* ====== SECTIES ====== */
     .sectie { padding:5.8rem 0; }
@@ -425,12 +681,11 @@
       nav.groot { display:none; }
       .burger { display:inline-flex; }
       .sectie { padding:4.2rem 0; }
-      .hero-inhoud { padding:6.5rem 0 3.4rem; }
     }
     @media (prefers-reduced-motion:reduce) {
       * { animation:none !important; transition:none !important; }
       .reveal { opacity:1; transform:none; }
-      .hero-foto { transform:none; }
+      .fe-hero__image { transform:none; }
     }
   </style>
 </head>
@@ -464,25 +719,45 @@
   </div>
 
   <!-- ====== HERO ====== -->
-  <main id="boven" class="hero">
-    <div class="hero-beelden" id="heromedia" aria-hidden="true">
-          <img class="hero-foto actief" src="foto/fluweel-wijn-inschenken.jpg" alt="">
-          <img class="hero-foto" src="foto/fluweel-proost-moment.jpg" alt="">
-    </div>
-    <div class="hero-sluier"></div>
-    <div class="hero-inhoud">
-      <div class="wrap">
-        <p class="hero-merk"><img src="logo/fluweel-woordmerk-wit.png" alt="Fluweel."></p>
-        <h1>Van visie naar <span class="accent">vibe</span>.</h1>
-        <p class="intro">We vertalen jouw merk, ambitie of idee naar een eventconcept met een eigen doel, energie en identiteit.<br><br>Van creatieve richting tot volledige realisatie. Eén sterk concept, persoonlijk geregisseerd en tot leven gebracht in elk onderdeel.</p>
-        <div class="hero-acties">
-          <a class="cta" href="#contact">Breng jouw idee tot leven
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-          </a>
-          <a class="stil licht" href="#werk">Bekijk het werk</a>
+  <main id="boven">
+    <section class="fe-hero">
+      <div class="fe-hero__grid">
+        <div class="fe-hero__content">
+          <p class="fe-hero__eyebrow">Bijzondere momenten, perfect geregeld</p>
+          <h1 class="fe-hero__title">Events die<br>voelen als<br>Fluweel<span class="fe-hero__title-accent">.</span></h1>
+          <p class="fe-hero__intro">Wij creëren onvergetelijke events met oog voor detail, stijl en beleving. Van intieme vieringen tot grootschalige bedrijfsevents.</p>
+          <div class="fe-hero__actions">
+            <a href="#contact" class="fe-btn fe-btn--primary">Plan een kennismaking<span class="fe-btn__arrow" aria-hidden="true">→</span></a>
+            <a href="#events" class="fe-btn fe-btn--secondary">Bekijk onze events<span class="fe-btn__arrow" aria-hidden="true">→</span></a>
+          </div>
+          <ul class="fe-hero__qualities">
+            <li class="fe-hero__quality">Persoonlijk<br>en betrokken</li>
+            <li class="fe-hero__quality">Creatief<br>en uniek</li>
+            <li class="fe-hero__quality">Tot in de<br>puntjes geregeld</li>
+          </ul>
+        </div>
+        <div class="fe-hero__visual" id="heromedia">
+          <img class="fe-hero__image actief" src="foto/fluweel-wijn-inschenken.jpg" alt="Wijn inschenken tijdens een evenement van Fluweel Events">
+          <img class="fe-hero__image" src="foto/fluweel-proost-moment.jpg" alt="">
+          <div class="fe-hero__image-caption" aria-hidden="true">
+            <span class="fe-hero__image-caption-line"></span>
+            <div class="fe-hero__image-caption-text">
+              <span>Meer dan</span>
+              <span>een event</span>
+              <span class="fe-hero__image-caption-dash"></span>
+              <span>Een beleving</span>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
+    <section class="fe-trust" aria-label="Bedrijven waarmee Fluweel heeft gewerkt">
+      <div class="fe-trust__inner">
+        <div class="fe-trust__label">Vertrouwd door</div>
+        <ul class="fe-trust__logos"></ul>
+        <div class="fe-trust__more">En nog vele anderen</div>
+      </div>
+    </section>
   </main>
 
   <!-- ====== STATEMENT ====== -->
@@ -874,7 +1149,7 @@
       });
     }
 
-    const heroFotos = $$('#heromedia .hero-foto');
+    const heroFotos = $$('#heromedia .fe-hero__image');
     if (heroFotos.length > 1 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       let heroIdx = 0;
       setInterval(() => {
