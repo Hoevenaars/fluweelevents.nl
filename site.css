@@ -416,7 +416,7 @@ nav.groot a:hover { color: var(--color-text); }
 .reveal.in { opacity: 1; transform: none; }
 
 /* Statement */
-.citaat { max-width: 44rem; }
+.wrap.citaat { width: min(100%, var(--container-width)); max-width: none; }
 .citaat > p {
   font-family: var(--font-display);
   font-style: italic;
