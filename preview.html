@@ -16,695 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      color-scheme: only light;
-      --ivoor:#FAF5EF; --vlak:#F3EAE0; --inkt:#2A1322; --aubergine:#5B2A4E;
-      --fuchsia:#C81E63; --champagne:#B8975A; --mauve:#7A5E6E; --lijn:#E3D5C9;
-      --roze:#F3B9D2; --lila:#D9C2E8;
-      --serif:'Newsreader',Georgia,serif; --sans:'Inter',system-ui,sans-serif;
-      --maxw:1120px; --radius:4px;
-    }
-    *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
-    html { scroll-behavior:smooth; }
-    body {
-      background:var(--ivoor); color:var(--inkt);
-      font-family:var(--sans); font-weight:400; font-size:1.0625rem; line-height:1.65;
-      -webkit-font-smoothing:antialiased; overflow-x:hidden;
-    }
-    a { color:inherit; }
-    img { display:block; max-width:100%; }
-    .wrap { width:100%; max-width:var(--maxw); margin:0 auto; padding:0 1.7rem; }
-
-    .reveal { opacity:0; transform:translateY(18px); transition:opacity .8s ease, transform .8s ease; }
-    .reveal.in { opacity:1; transform:none; }
-
-    /* ====== HEADER ====== */
-    .kop {
-      position:fixed; top:0; left:0; right:0; z-index:80; padding:0.95rem 0;
-      background:rgba(250,245,239,.72); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
-      border-bottom:1px solid transparent; transition:background .35s, border-color .35s;
-    }
-    .kop.scrolled { background:rgba(250,245,239,.92); border-bottom-color:var(--lijn); }
-    .kop .wrap { display:flex; align-items:center; justify-content:space-between; }
-    .merk { display:inline-flex; align-items:center; text-decoration:none; }
-    .merk img { display:block; height:3.75rem; width:auto; }
-    nav.groot { display:flex; gap:2rem; align-items:center; font-size:1.08rem; color:var(--mauve); }
-    nav.groot a { text-decoration:none; transition:color .3s; }
-    nav.groot a:hover { color:var(--inkt); }
-    .nav-cta {
-      color:var(--inkt) !important; border:1px solid var(--inkt);
-      padding:.5rem 1.05rem; border-radius:var(--radius);
-      transition:color .3s, border-color .3s, background .3s;
-    }
-    .nav-cta:hover { color:#fff !important; border-color:var(--fuchsia); background:var(--fuchsia); }
-    .burger { display:none; background:none; border:0; cursor:pointer; color:var(--inkt); padding:6px; }
-    .mobiel {
-      position:fixed; inset:0; z-index:90; background:var(--ivoor);
-      display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:1.5rem;
-      padding:0 2.2rem; font-family:var(--serif); font-size:1.9rem;
-      transform:translateY(-100%); transition:transform .45s ease;
-    }
-    .mobiel.open { transform:none; }
-    .mobiel a { text-decoration:none; }
-    .mobiel .sluit { position:absolute; top:1.3rem; right:1.6rem; background:none; border:0; font-size:2rem; color:var(--inkt); cursor:pointer; }
-
-    .cta {
-      display:inline-flex; align-items:center; gap:.65rem;
-      background:var(--fuchsia); color:#fff;
-      font-family:var(--sans); font-weight:500; font-size:.95rem;
-      text-decoration:none; padding:.95rem 1.6rem; border-radius:var(--radius);
-      transition:background .3s;
-    }
-    .cta:hover { background:var(--aubergine); }
-    .cta svg { transition:transform .3s; }
-    .cta:hover svg { transform:translateX(4px); }
-    .stil {
-      display:inline-flex; align-items:center; gap:.5rem;
-      color:var(--inkt); text-decoration:none; font-size:.95rem;
-      border-bottom:1px solid var(--lijn); padding-bottom:2px;
-      transition:border-color .3s, color .3s;
-    }
-    .stil:hover { color:var(--aubergine); border-color:var(--aubergine); }
-    .stil.licht { color:rgba(250,245,239,.92); border-bottom-color:rgba(250,245,239,.35); }
-    .stil.licht:hover { color:#fff; border-bottom-color:#fff; }
-
-    /* ====== HERO ====== */
-    .fe-hero {
-      --maxw:1440px;
-      background:var(--ivoor);
-      color:var(--inkt);
-      overflow:hidden;
-    }
-    .fe-hero__grid {
-      max-width:var(--maxw);
-      margin:0 auto;
-      display:grid;
-      grid-template-columns:minmax(390px,.82fr) minmax(0,1.18fr);
-      align-items:stretch;
-      min-height:clamp(650px,76vh,820px);
-    }
-    .fe-hero__content {
-      padding:max(7.4rem,clamp(72px,8vw,128px)) clamp(40px,5vw,80px) clamp(56px,6vw,90px);
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-    }
-    .fe-hero__eyebrow {
-      display:flex;
-      align-items:center;
-      gap:18px;
-      margin:0 0 30px;
-      font-family:var(--sans);
-      font-size:11px;
-      font-weight:500;
-      letter-spacing:0.24em;
-      text-transform:uppercase;
-      color:var(--aubergine);
-    }
-    .fe-hero__eyebrow::before {
-      content:"";
-      width:52px;
-      height:1px;
-      background:var(--lijn);
-      flex:0 0 auto;
-    }
-    .fe-hero__title {
-      max-width:580px;
-      margin:0;
-      font-family:var(--serif);
-      font-weight:400;
-      font-size:clamp(64px,6vw,102px);
-      line-height:0.92;
-      letter-spacing:-0.045em;
-      color:var(--inkt);
-    }
-    .fe-hero__title-accent { color:var(--fuchsia); }
-    .fe-hero__intro {
-      max-width:490px;
-      margin:34px 0 0;
-      font-family:var(--sans);
-      font-size:clamp(16px,1.25vw,19px);
-      font-weight:400;
-      line-height:1.75;
-      color:color-mix(in srgb,var(--inkt) 75%,transparent);
-    }
-    .fe-hero__actions {
-      display:flex;
-      flex-wrap:wrap;
-      gap:14px;
-      margin-top:34px;
-    }
-    .fe-btn {
-      min-height:56px;
-      padding:0 28px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:18px;
-      border-radius:4px;
-      font-family:var(--sans);
-      font-size:14px;
-      font-weight:500;
-      text-decoration:none;
-      transition:background-color 180ms ease,color 180ms ease,border-color 180ms ease,transform 180ms ease;
-    }
-    .fe-btn:hover { transform:translateY(-1px); }
-    .fe-btn--primary {
-      background:var(--fuchsia);
-      color:#fff;
-      border:1px solid var(--fuchsia);
-    }
-    .fe-btn--primary:hover {
-      background:var(--aubergine);
-      border-color:var(--aubergine);
-    }
-    .fe-btn--secondary {
-      background:transparent;
-      color:var(--inkt);
-      border:1px solid color-mix(in srgb,var(--fuchsia) 70%,transparent);
-    }
-    .fe-btn--secondary:hover {
-      background:#fff;
-      border-color:var(--fuchsia);
-    }
-    .fe-btn__arrow {
-      font-size:19px;
-      line-height:1;
-      transform:translateY(-1px);
-    }
-    .fe-hero__qualities {
-      display:flex;
-      flex-wrap:wrap;
-      align-items:stretch;
-      margin:46px 0 0;
-      padding:0;
-      list-style:none;
-    }
-    .fe-hero__quality {
-      padding:0 26px;
-      font-family:var(--sans);
-      font-size:11px;
-      font-weight:500;
-      line-height:1.55;
-      letter-spacing:0.06em;
-      text-transform:uppercase;
-      color:var(--mauve);
-      border-right:1px solid var(--lijn);
-    }
-    .fe-hero__quality:first-child { padding-left:0; }
-    .fe-hero__quality:last-child { border-right:0; }
-    .fe-hero__visual {
-      position:relative;
-      min-height:650px;
-      overflow:hidden;
-      background:#d9cec3;
-    }
-    .fe-hero__image {
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      object-position:52% center;
-      display:block;
-      opacity:0;
-      transition:opacity 1.4s ease;
-    }
-    .fe-hero__image.actief { opacity:1; }
-    .fe-hero__visual::after {
-      content:"";
-      position:absolute;
-      inset:0;
-      background:linear-gradient(90deg,rgba(42,19,34,.04) 0%,rgba(42,19,34,0) 35%,rgba(42,19,34,.10) 100%);
-      pointer-events:none;
-    }
-    .fe-hero__image-caption {
-      position:absolute;
-      z-index:2;
-      top:max(72px,7.2rem);
-      right:clamp(28px,4vw,62px);
-      display:grid;
-      grid-template-columns:1px auto;
-      column-gap:20px;
-      color:#fff;
-    }
-    .fe-hero__image-caption-line {
-      width:1px;
-      height:118px;
-      background:rgba(255,255,255,.62);
-    }
-    .fe-hero__image-caption-text {
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      font-family:var(--sans);
-      font-size:10px;
-      font-weight:500;
-      letter-spacing:0.25em;
-      line-height:1.45;
-      text-transform:uppercase;
-    }
-    .fe-hero__image-caption-dash {
-      display:block;
-      width:18px;
-      height:1px;
-      margin:2px 0;
-      background:rgba(255,255,255,.7);
-    }
-    .fe-trust {
-      --maxw:1440px;
-      background:var(--vlak);
-      border-top:1px solid var(--lijn);
-      border-bottom:1px solid var(--lijn);
-    }
-    .fe-trust__inner {
-      max-width:var(--maxw);
-      min-height:132px;
-      margin:0 auto;
-      padding:28px clamp(30px,4vw,64px);
-      display:grid;
-      grid-template-columns:auto minmax(0,1fr) auto;
-      align-items:center;
-      gap:clamp(28px,4vw,56px);
-    }
-    .fe-trust__inner:not(:has(.fe-trust__logo)) { grid-template-columns:auto auto; }
-    .fe-trust__label {
-      display:flex;
-      align-items:center;
-      gap:20px;
-      white-space:nowrap;
-      font-family:var(--sans);
-      font-size:11px;
-      font-weight:500;
-      letter-spacing:0.24em;
-      text-transform:uppercase;
-      color:var(--aubergine);
-    }
-    .fe-trust__label::after {
-      content:"";
-      display:block;
-      width:45px;
-      height:1px;
-      background:var(--lijn);
-    }
-    .fe-trust__track-wrap {
-      min-width:0;
-      overflow:hidden;
-    }
-    .fe-trust__track {
-      display:flex;
-      align-items:center;
-      width:max-content;
-      gap:4.4rem;
-      animation:fe-trust-scroll 26s linear infinite;
-    }
-    .fe-trust__logos {
-      display:flex;
-      align-items:center;
-      gap:4.4rem;
-      margin:0;
-      padding:0;
-      list-style:none;
-    }
-    .fe-trust__logos:empty { display:none; }
-    .fe-trust__logo {
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      flex:0 0 auto;
-    }
-    .fe-trust__logo img {
-      display:block;
-      width:auto;
-      height:auto;
-      object-fit:contain;
-    }
-    .fe-trust__logo--kracht img { max-height:48px; max-width:180px; }
-    .fe-trust__logo--buitengast img { max-height:50px; max-width:180px; }
-    .fe-trust__logo--kopvast img { max-height:28px; max-width:168px; }
-    @keyframes fe-trust-scroll {
-      from { transform:translateX(0); }
-      to { transform:translateX(calc(-50% - 2.2rem)); }
-    }
-    .fe-trust__track-wrap:hover .fe-trust__track { animation-play-state:paused; }
-    .fe-trust__more {
-      white-space:nowrap;
-      font-family:var(--sans);
-      font-size:9px;
-      font-weight:500;
-      letter-spacing:0.20em;
-      text-transform:uppercase;
-      color:var(--mauve);
-    }
-    @media (max-width:1050px) {
-      .fe-hero__grid { grid-template-columns:1fr 1.05fr; }
-      .fe-hero__content { padding-left:32px; padding-right:32px; }
-      .fe-hero__title { font-size:clamp(58px,7vw,78px); }
-      .fe-trust__inner { grid-template-columns:1fr; gap:18px; }
-      .fe-trust__more { display:none; }
-    }
-    @media (max-width:760px) {
-      .fe-hero__grid {
-        display:flex;
-        flex-direction:column;
-        min-height:auto;
-      }
-      .fe-hero__content { padding:7.8rem 22px 48px; }
-      .fe-hero__eyebrow { margin-bottom:24px; }
-      .fe-hero__title {
-        max-width:100%;
-        font-size:clamp(54px,16vw,72px);
-        line-height:.95;
-      }
-      .fe-hero__intro { margin-top:26px; font-size:16px; }
-      .fe-hero__actions { flex-direction:column; align-items:stretch; }
-      .fe-btn { width:100%; }
-      .fe-hero__qualities { margin-top:36px; display:grid; gap:10px; }
-      .fe-hero__quality,
-      .fe-hero__quality:first-child { padding:0; border:0; }
-      .fe-hero__visual { min-height:62vh; }
-      .fe-hero__image-caption { top:30px; right:24px; }
-      .fe-trust__inner { padding:26px 22px; }
-      .fe-trust__track { gap:2.8rem; animation-duration:22s; }
-      .fe-trust__logos { gap:2.8rem; }
-      .fe-trust__logo--kracht img { max-height:40px; max-width:150px; }
-      .fe-trust__logo--buitengast img { max-height:42px; max-width:150px; }
-      .fe-trust__logo--kopvast img { max-height:24px; max-width:140px; }
-    }
-
-    /* ====== SECTIES ====== */
-    .sectie { padding:5.8rem 0; }
-    .sectie.zacht { background:var(--vlak); }
-    .label {
-      font-family:var(--sans); font-weight:500; font-size:.78rem;
-      letter-spacing:.17em; text-transform:uppercase; color:var(--fuchsia);
-      margin-bottom:1rem;
-    }
-    h2 {
-      font-family:var(--serif); font-weight:500;
-      font-size:clamp(2rem,4.2vw,2.7rem); line-height:1.14; letter-spacing:-.01em;
-      margin-bottom:1rem; color:var(--inkt);
-    }
-    .inleiding { color:var(--mauve); max-width:52ch; margin-bottom:3rem; }
-
-    .citaat { max-width:860px; }
-    .citaat p {
-      font-family:var(--serif); font-style:italic; font-weight:400;
-      font-size:clamp(1.55rem,3.4vw,2.05rem); line-height:1.35; color:var(--aubergine);
-      border-left:3px solid var(--fuchsia); padding-left:1.6rem;
-    }
-    .citaat .naschrift { margin-top:1.4rem; padding-left:1.75rem; font-size:.95rem; color:var(--mauve); }
-
-    /* Verhaal */
-    .verhaal-grid { display:grid; grid-template-columns:1.05fr .95fr; gap:3.6rem; align-items:center; }
-    .verhaal-tekst p { color:var(--inkt); max-width:52ch; margin-bottom:1.05rem; }
-    .verhaal-tekst p.gedempt { color:var(--mauve); }
-    .verhaal-foto {
-      position:relative; aspect-ratio:4/5; overflow:hidden; border-radius:2px;
-    }
-    .verhaal-foto img { width:100%; height:100%; object-fit:cover; }
-    .verhaal-foto::after {
-      content:""; position:absolute; inset:14px; border:1px solid rgba(184,151,90,.5);
-      pointer-events:none;
-    }
-
-    /* Werkwijze */
-    .fluweel-process {
-      background:var(--ivoor);
-      color:var(--inkt);
-      width:100%;
-      scroll-margin-top:7.2rem;
-    }
-    .fluweel-process__intro {
-      max-width:1120px;
-      margin:0 auto;
-      padding:72px 32px 60px;
-      text-align:center;
-    }
-    .fluweel-process__eyebrow {
-      font-family:var(--sans);
-      font-size:12px;
-      font-weight:500;
-      letter-spacing:0.28em;
-      text-transform:uppercase;
-      color:var(--fuchsia);
-    }
-    .fluweel-process__accent {
-      width:42px;
-      height:1px;
-      margin:20px auto 18px;
-      background:var(--fuchsia);
-    }
-    .fluweel-process__title {
-      max-width:1000px;
-      margin:0 auto;
-      font-family:var(--serif);
-      font-size:clamp(42px,5vw,72px);
-      line-height:0.98;
-      font-weight:400;
-      letter-spacing:-0.035em;
-      color:var(--inkt);
-    }
-    .fluweel-process__title span { color:var(--fuchsia); }
-    .fluweel-process__lead {
-      margin:24px auto 0;
-      font-family:var(--sans);
-      font-size:17px;
-      line-height:1.65;
-      letter-spacing:0.04em;
-      color:var(--mauve);
-    }
-    .fluweel-process__grid {
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-      max-width:1440px;
-      margin:0 auto;
-      border-top:1px solid var(--lijn);
-    }
-    .fluweel-process__item {
-      min-height:390px;
-      padding:48px 8vw 54px;
-      background:var(--vlak);
-      transition:transform 320ms ease;
-    }
-    .fluweel-process__item:hover { transform:translateY(-6px); }
-    .fluweel-process__item:nth-child(odd) { border-right:1px solid var(--lijn); }
-    .fluweel-process__item:nth-child(-n+2) { border-bottom:1px solid var(--lijn); }
-    .fluweel-process__item:nth-child(2),
-    .fluweel-process__item:nth-child(3) { background:var(--ivoor); }
-    .fluweel-process__item-accent {
-      width:54px;
-      height:1px;
-      margin-bottom:20px;
-      background:var(--fuchsia);
-      transition:width 320ms ease;
-    }
-    .fluweel-process__item:hover .fluweel-process__item-accent { width:86px; }
-    .fluweel-process__item h3 {
-      margin:0;
-      font-family:var(--serif);
-      font-size:clamp(42px,4vw,60px);
-      line-height:1;
-      font-weight:400;
-      letter-spacing:-0.025em;
-      color:var(--inkt);
-    }
-    .fluweel-process__promise {
-      margin:16px 0 30px;
-      font-family:var(--sans);
-      font-size:12px;
-      font-weight:500;
-      line-height:1.5;
-      letter-spacing:0.23em;
-      text-transform:uppercase;
-      color:var(--aubergine);
-    }
-    .fluweel-process__body {
-      max-width:590px;
-      font-family:var(--sans);
-      font-size:17px;
-      line-height:1.58;
-      color:var(--inkt);
-    }
-    .fluweel-process__body p { margin:0 0 12px; }
-    .fluweel-process__body p:last-child { margin-bottom:0; }
-    @media (max-width:960px) {
-      .fluweel-process__intro { padding:64px 28px 50px; }
-      .fluweel-process__item { padding:44px 48px 48px; }
-    }
-    @media (max-width:720px) {
-      .fluweel-process__intro { padding:56px 22px 42px; }
-      .fluweel-process__title { font-size:44px; line-height:1.02; }
-      .fluweel-process__lead { font-size:16px; }
-      .fluweel-process__grid { grid-template-columns:1fr; }
-      .fluweel-process__item {
-        min-height:auto;
-        padding:42px 24px 46px;
-        border-right:0 !important;
-        border-bottom:1px solid var(--lijn);
-      }
-      .fluweel-process__item:last-child { border-bottom:0; }
-      .fluweel-process__item:nth-child(odd),
-      .fluweel-process__item:nth-child(even) { background:var(--ivoor); }
-      .fluweel-process__item:nth-child(even) { background:var(--vlak); }
-      .fluweel-process__item h3 { font-size:46px; }
-      .fluweel-process__body { font-size:16px; line-height:1.6; }
-    }
-
-    /* Events: redactioneel met foto */
-    .event-lijst { display:flex; flex-direction:column; gap:0; border-top:1px solid var(--lijn); }
-    .event-rij {
-      display:grid; grid-template-columns:minmax(180px,.85fr) 1.15fr; gap:2.4rem;
-      align-items:center; padding:2rem 0; border-bottom:1px solid var(--lijn);
-    }
-    .event-rij:nth-child(even) { direction:rtl; }
-    .event-rij:nth-child(even) > * { direction:ltr; }
-    .event-beeld {
-      aspect-ratio:5/4; overflow:hidden; border-radius:2px;
-    }
-    .event-beeld img {
-      width:100%; height:100%; object-fit:cover;
-      transition:transform 1.1s ease;
-    }
-    .event-rij:hover .event-beeld img { transform:scale(1.04); }
-    .event-copy .nr {
-      display:block; font-size:.78rem; letter-spacing:.14em; color:var(--mauve);
-      margin-bottom:.55rem; text-transform:uppercase;
-    }
-    .event-copy h3 {
-      font-family:var(--serif); font-weight:500; font-size:clamp(1.35rem,2.4vw,1.7rem);
-      margin-bottom:.55rem; color:var(--inkt);
-    }
-    .event-copy p { color:var(--mauve); max-width:42ch; }
-    .persoonlijk {
-      margin-top:2.8rem; display:grid; grid-template-columns:1fr 1.1fr; gap:2rem; align-items:center;
-    }
-    .persoonlijk-beeld { aspect-ratio:16/11; overflow:hidden; border-radius:2px; }
-    .persoonlijk-beeld img { width:100%; height:100%; object-fit:cover; }
-    .persoonlijk-tekst p { max-width:40ch; color:var(--inkt); margin-bottom:1.2rem; }
-    .persoonlijk-tekst p em { font-family:var(--serif); color:var(--aubergine); font-style:italic; }
-
-    /* Werk: galerij */
-    .werk-grid {
-      display:grid;
-      grid-template-columns:1.25fr 1fr 1fr;
-      gap:1.15rem;
-    }
-    .project { display:flex; flex-direction:column; gap:.85rem; }
-    .project.groot { grid-row:span 2; }
-    .project .beeld {
-      position:relative; overflow:hidden; border-radius:2px;
-      aspect-ratio:4/5; background:var(--aubergine);
-    }
-    .project.groot .beeld { aspect-ratio:auto; height:100%; min-height:420px; }
-    .project:not(.groot) .beeld { aspect-ratio:5/4; }
-    .project .beeld img {
-      width:100%; height:100%; object-fit:cover;
-      transition:transform 1.2s ease;
-    }
-    .project:hover .beeld img { transform:scale(1.035); }
-    .project .beeld::after {
-      content:""; position:absolute; inset:12px; z-index:1;
-      border:1px solid rgba(184,151,90,.42); pointer-events:none;
-    }
-    .project h3 { font-family:var(--serif); font-weight:500; font-size:1.25rem; margin-bottom:.2rem; }
-    .project p { color:var(--mauve); font-size:.94rem; max-width:36ch; }
-
-    /* Stemmen */
-    .stemmen { position:relative; overflow:hidden; max-width:860px; margin:0 auto; }
-    .baan { display:flex; transition:transform .65s cubic-bezier(.4,0,.2,1); }
-    .stem { min-width:100%; padding:0 .3rem; }
-    .stem blockquote {
-      font-family:var(--serif); font-style:italic; font-weight:400;
-      font-size:clamp(1.35rem,3vw,1.7rem); line-height:1.45; color:var(--aubergine);
-      border-left:3px solid var(--fuchsia); padding-left:1.6rem; margin-bottom:1.2rem;
-    }
-    .stem .wie { padding-left:1.75rem; font-size:.9rem; color:var(--mauve); }
-    .bolletjes { display:flex; gap:.6rem; margin-top:2.2rem; padding-left:1.75rem; }
-    .bol { width:22px; height:3px; border-radius:2px; border:0; background:var(--lijn); cursor:pointer; padding:0; transition:background .3s; }
-    .bol.actief { background:var(--fuchsia); }
-
-    /* Vragen */
-    .vragen { max-width:780px; border-top:1px solid var(--lijn); }
-    .vraag { border-bottom:1px solid var(--lijn); }
-    .vraag button {
-      width:100%; text-align:left; background:none; border:0; cursor:pointer;
-      padding:1.4rem 2.2rem 1.4rem 0; font-family:var(--serif); font-weight:500;
-      font-size:1.2rem; color:var(--inkt); position:relative;
-    }
-    .vraag button::after {
-      content:"+"; position:absolute; right:.2rem; top:50%; transform:translateY(-50%);
-      color:var(--fuchsia); font-size:1.4rem; font-weight:300; transition:transform .35s;
-    }
-    .vraag.open button::after { transform:translateY(-50%) rotate(45deg); }
-    .antwoord { max-height:0; overflow:hidden; transition:max-height .35s ease; }
-    .antwoord p { color:var(--mauve); padding-bottom:1.4rem; max-width:62ch; }
-
-    /* Contact met foto */
-    .contact-grid { display:grid; grid-template-columns:1fr 1.05fr; gap:3.4rem; align-items:start; }
-    .contact-beeld {
-      position:sticky; top:6.2rem; aspect-ratio:4/5; overflow:hidden; border-radius:2px;
-    }
-    .contact-beeld img { width:100%; height:100%; object-fit:cover; }
-    .slot h2 { font-size:clamp(2.1rem,4.4vw,2.9rem); max-width:14ch; }
-    .slot .uitnodiging { color:var(--mauve); max-width:42ch; margin-bottom:1.8rem; }
-    .telefoon {
-      font-family:var(--serif); font-weight:500; font-size:clamp(1.55rem,3.8vw,2.2rem);
-      color:var(--aubergine); text-decoration:none; display:inline-block; margin-bottom:.55rem;
-      transition:color .3s;
-    }
-    .telefoon:hover { color:var(--fuchsia); }
-    .slot .of { color:var(--mauve); font-size:.95rem; margin-bottom:.4rem; }
-    .slot .of a { color:var(--inkt); text-decoration-color:var(--lijn); }
-    .slot .of a:hover { text-decoration-color:var(--fuchsia); }
-
-    .voet { border-top:1px solid var(--lijn); padding:2.2rem 0; font-size:.85rem; color:var(--mauve); }
-    .voet .wrap { display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:.7rem; }
-    .voet .tagline { font-family:var(--serif); font-style:italic; color:var(--aubergine); }
-    .voet a { color:var(--mauve); text-decoration:none; }
-    .voet a:hover { color:var(--inkt); }
-
-    .contactform { margin-top:2.2rem; max-width:460px; display:flex; flex-direction:column; gap:1.1rem; }
-    .veldgroep { display:flex; flex-direction:column; gap:.4rem; }
-    .veldgroep label { font-size:.85rem; color:var(--mauve); }
-    .veldgroep .optioneel { font-style:italic; opacity:.75; }
-    .veldgroep input, .veldgroep textarea {
-      font-family:var(--sans); font-size:1rem; color:var(--inkt);
-      background:#fff; border:1px solid var(--lijn); border-radius:var(--radius);
-      padding:.75rem 1rem; outline:none; resize:vertical;
-      transition:border-color .3s, box-shadow .3s;
-    }
-    .veldgroep input:focus, .veldgroep textarea:focus {
-      border-color:var(--fuchsia); box-shadow:0 0 0 3px rgba(200,30,99,.12);
-    }
-    .honeypot { position:absolute; left:-9999px; width:1px; height:1px; opacity:0; }
-    .contactform .cta { align-self:flex-start; border:0; cursor:pointer; }
-    .form-melding { font-size:.9rem; color:var(--mauve); min-height:1.2rem; }
-    .form-melding.ok { color:var(--aubergine); }
-    .form-melding.fout { color:var(--fuchsia); }
-
-    :focus-visible { outline:2px solid var(--fuchsia); outline-offset:3px; }
-
-    @media (max-width:900px) {
-      .verhaal-grid, .contact-grid, .persoonlijk { grid-template-columns:1fr; gap:2.2rem; }
-      .contact-beeld { position:relative; top:auto; aspect-ratio:16/11; }
-      .event-rij, .event-rij:nth-child(even) { grid-template-columns:1fr; gap:1.2rem; direction:ltr; }
-      .werk-grid { grid-template-columns:1fr; }
-      .project.groot { grid-row:auto; }
-      .project.groot .beeld { min-height:280px; aspect-ratio:4/5; }
-      nav.groot { display:none; }
-      .burger { display:inline-flex; }
-      .sectie { padding:4.2rem 0; }
-    }
-    @media (prefers-reduced-motion:reduce) {
-      * { animation:none !important; transition:none !important; }
-      .reveal { opacity:1; transform:none; }
-      .fe-hero__image { transform:none; }
-      .fe-trust__track { animation:none; }
-      .fluweel-process__item:hover { transform:none; }
-    }
-  </style>
+  <link rel="stylesheet" href="site.css" />
 </head>
 <body>
 
@@ -717,7 +29,7 @@
         <a href="#events">Events</a>
         <a href="#werk">Portfolio</a>
         <a href="#vragen">Vragen</a>
-        <a class="nav-cta" href="#contact">Breng jouw idee tot leven</a>
+        <a class="btn btn--secondary btn--nav" href="#contact">Breng jouw idee tot leven</a>
       </nav>
       <button class="burger" aria-label="Menu openen" id="burger">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
@@ -732,7 +44,7 @@
     <a href="#events">Events</a>
     <a href="#werk">Portfolio</a>
     <a href="#vragen">Vragen</a>
-    <a href="#contact" style="color:var(--fuchsia)">Breng jouw idee tot leven</a>
+    <a class="mobiel-cta" href="#contact">Breng jouw idee tot leven</a>
   </div>
 
   <!-- ====== HERO ====== -->
@@ -744,8 +56,8 @@
           <h1 class="fe-hero__title">Events die<br>voelen als<br>Fluweel<span class="fe-hero__title-accent">.</span></h1>
           <p class="fe-hero__intro">Wij creëren onvergetelijke events met oog voor detail, stijl en beleving. Van intieme vieringen tot grootschalige bedrijfsevents.</p>
           <div class="fe-hero__actions">
-            <a href="#contact" class="fe-btn fe-btn--primary">Plan een kennismaking<span class="fe-btn__arrow" aria-hidden="true">→</span></a>
-            <a href="#events" class="fe-btn fe-btn--secondary">Bekijk onze events<span class="fe-btn__arrow" aria-hidden="true">→</span></a>
+            <a href="#contact" class="btn btn--primary">Plan een kennismaking<span class="btn__arrow" aria-hidden="true">→</span></a>
+            <a href="#events" class="btn btn--secondary">Bekijk onze events<span class="btn__arrow" aria-hidden="true">→</span></a>
           </div>
           <ul class="fe-hero__qualities">
             <li class="fe-hero__quality">Persoonlijk<br>en betrokken</li>
@@ -769,41 +81,25 @@
       </div>
     </section>
     <section class="fe-trust" aria-label="Bedrijven waarmee Fluweel heeft gewerkt">
-      <div class="fe-trust__inner">
-        <div class="fe-trust__label">Vertrouwd door</div>
-        <div class="fe-trust__track-wrap">
-          <div class="fe-trust__track">
-            <ul class="fe-trust__logos">
-              <li class="fe-trust__logo fe-trust__logo--kracht">
-                <img src="logos/kracht-recruitment.png" alt="Kracht Recruitment">
-              </li>
-              <li class="fe-trust__logo fe-trust__logo--buitengast">
-                <img src="logos/buitengast.png" alt="Buitengast">
-              </li>
-              <li class="fe-trust__logo fe-trust__logo--kopvast">
-                <img src="logos/kopvast.png" alt="Kopvast">
-              </li>
-            </ul>
-            <ul class="fe-trust__logos" aria-hidden="true">
-              <li class="fe-trust__logo fe-trust__logo--kracht">
-                <img src="logos/kracht-recruitment.png" alt="">
-              </li>
-              <li class="fe-trust__logo fe-trust__logo--buitengast">
-                <img src="logos/buitengast.png" alt="">
-              </li>
-              <li class="fe-trust__logo fe-trust__logo--kopvast">
-                <img src="logos/kopvast.png" alt="">
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div class="fe-trust__more">En nog vele anderen</div>
+      <div class="wrap fe-trust__inner">
+        <p class="fe-trust__label">Vertrouwd door</p>
+        <ul class="fe-trust__logos">
+          <li class="fe-trust__logo">
+            <img src="logos/kracht-recruitment.png" alt="Kracht Recruitment">
+          </li>
+          <li class="fe-trust__logo">
+            <img src="logos/buitengast.png" alt="Buitengast">
+          </li>
+          <li class="fe-trust__logo">
+            <img src="logos/kopvast.png" alt="Kopvast">
+          </li>
+        </ul>
+        <p class="fe-trust__more">En nog vele anderen</p>
       </div>
     </section>
-  </main>
 
   <!-- ====== STATEMENT ====== -->
-  <section class="sectie zacht">
+  <section class="sectie">
     <div class="wrap citaat reveal">
       <p>Waar doel en sfeer samenkomen.</p>
       <div class="naschrift">Fluweel vertaalt ambitie naar een totaalconcept waarin merk, sfeer en beleving samenkomen.<br><br>We zoeken naar de juiste energie, de juiste vorm en de juiste manier om mensen mee te nemen in jouw verhaal.<br><br>Van eerste richting tot volledige realisatie ontstaat zo één geheel dat klopt, past en blijft hangen.<br><br>Niet bedacht om mooi te zijn. Ontworpen om iets in beweging te zetten.</div>
@@ -830,68 +126,75 @@
   </section>
 
   <!-- ====== WERKWIJZE ====== -->
-  <section class="fluweel-process" id="werkwijze">
-    <div class="fluweel-process__intro">
-      <div class="fluweel-process__eyebrow">Werkwijze</div>
-      <div class="fluweel-process__accent"></div>
-      <h2 class="fluweel-process__title">Van eerste gedachte naar volledige beleving<span>.</span></h2>
-      <p class="fluweel-process__lead">Vier fases waarin strategie, creativiteit en uitvoering samenkomen.</p>
-    </div>
-    <div class="fluweel-process__grid">
-      <article class="fluweel-process__item">
-        <div class="fluweel-process__item-accent"></div>
-        <h3>Focus</h3>
-        <p class="fluweel-process__promise">We maken scherp waar het om draait.</p>
-        <div class="fluweel-process__body">
-          <p>We duiken in jouw merk, verhaal, ambitie, gasten en doel.</p>
-          <p>Wat wil je bereiken?<br>Wat wil je dat mensen voelen, onthouden of meenemen?<br>En welke rol moet het event daarin spelen?</p>
-          <p>Hier ontstaat de richting voor alles wat daarna volgt.</p>
-        </div>
-      </article>
-      <article class="fluweel-process__item">
-        <div class="fluweel-process__item-accent"></div>
-        <h3>Formule</h3>
-        <p class="fluweel-process__promise">We bouwen het creatieve concept.</p>
-        <div class="fluweel-process__body">
-          <p>Vanuit de gekozen richting ontwikkelen we één sterk idee met een eigen verhaal, sfeer en identiteit.</p>
-          <p>We bepalen hoe het event moet voelen en hoe gasten daarin worden meegenomen.</p>
-          <p>Van inhoud en programma tot ruimte, uitstraling en beleving. Alles vanuit één creatieve lijn.</p>
-        </div>
-      </article>
-      <article class="fluweel-process__item">
-        <div class="fluweel-process__item-accent"></div>
-        <h3>Fijnslijpen</h3>
-        <p class="fluweel-process__promise">We brengen alle onderdelen samen.</p>
-        <div class="fluweel-process__body">
-          <p>Het concept wordt vertaald naar een concreet totaalplan.</p>
-          <p>Planning, locatie, productie, techniek, hospitality, entertainment, styling en communicatie worden op elkaar afgestemd.</p>
-          <p>Niet als losse onderdelen.<br>Als één geheel.</p>
-          <p>Daarbij bewaken we continu de kwaliteit, het concept en de investering.</p>
-        </div>
-      </article>
-      <article class="fluweel-process__item">
-        <div class="fluweel-process__item-accent"></div>
-        <h3>Feilloos</h3>
-        <p class="fluweel-process__promise">Alles komt samen.</p>
-        <div class="fluweel-process__body">
-          <p>Op de dag zelf voeren we de regie en bewaken we het volledige concept.</p>
-          <p>Alles staat op zijn plek.<br>Iedereen weet wat er moet gebeuren.</p>
-          <p>En jij hoeft niet bezig te zijn met de operatie.</p>
-          <p>Je kunt zelf onderdeel zijn van het moment.<br>Zoals het hoort.</p>
-        </div>
-      </article>
+  <section class="proces" id="werkwijze">
+    <div class="wrap">
+      <div class="blok-kop">
+        <p class="label">Werkwijze</p>
+        <h2>Van eerste gedachte naar volledige beleving<span class="accent">.</span></h2>
+        <p class="inleiding">Vier fases waarin strategie, creativiteit en uitvoering samenkomen.</p>
+      </div>
+      <div class="fases">
+        <article class="fase">
+          <div class="fase-kop">
+            <h3>Focus</h3>
+            <p class="fase-belofte">We maken scherp waar het om draait.</p>
+          </div>
+          <div class="fase-body">
+            <p>We duiken in jouw merk, verhaal, ambitie, gasten en doel.</p>
+            <p>Wat wil je bereiken?<br>Wat wil je dat mensen voelen, onthouden of meenemen?<br>En welke rol moet het event daarin spelen?</p>
+            <p>Hier ontstaat de richting voor alles wat daarna volgt.</p>
+          </div>
+        </article>
+        <article class="fase">
+          <div class="fase-kop">
+            <h3>Formule</h3>
+            <p class="fase-belofte">We bouwen het creatieve concept.</p>
+          </div>
+          <div class="fase-body">
+            <p>Vanuit de gekozen richting ontwikkelen we één sterk idee met een eigen verhaal, sfeer en identiteit.</p>
+            <p>We bepalen hoe het event moet voelen en hoe gasten daarin worden meegenomen.</p>
+            <p>Van inhoud en programma tot ruimte, uitstraling en beleving. Alles vanuit één creatieve lijn.</p>
+          </div>
+        </article>
+        <article class="fase">
+          <div class="fase-kop">
+            <h3>Fijnslijpen</h3>
+            <p class="fase-belofte">We brengen alle onderdelen samen.</p>
+          </div>
+          <div class="fase-body">
+            <p>Het concept wordt vertaald naar een concreet totaalplan.</p>
+            <p>Planning, locatie, productie, techniek, hospitality, entertainment, styling en communicatie worden op elkaar afgestemd.</p>
+            <p>Niet als losse onderdelen.<br>Als één geheel.</p>
+            <p>Daarbij bewaken we continu de kwaliteit, het concept en de investering.</p>
+          </div>
+        </article>
+        <article class="fase">
+          <div class="fase-kop">
+            <h3>Feilloos</h3>
+            <p class="fase-belofte">Alles komt samen.</p>
+          </div>
+          <div class="fase-body">
+            <p>Op de dag zelf voeren we de regie en bewaken we het volledige concept.</p>
+            <p>Alles staat op zijn plek.<br>Iedereen weet wat er moet gebeuren.</p>
+            <p>En jij hoeft niet bezig te zijn met de operatie.</p>
+            <p>Je kunt zelf onderdeel zijn van het moment.<br>Zoals het hoort.</p>
+          </div>
+        </article>
+      </div>
     </div>
   </section>
 
   <!-- ====== EVENTS ====== -->
   <section class="sectie" id="events">
     <div class="wrap">
-      <p class="label reveal">Events</p>
-      <h2 class="reveal">Voor momenten die iets in beweging mogen zetten.</h2>
-      <p class="inleiding reveal">Van merken en teams tot families en vrienden. Zakelijk of persoonlijk: ieder event begint met een verhaal dat het waard is om goed vertaald te worden.</p>
+      <div class="blok-kop reveal">
+        <p class="label">Events</p>
+        <h2>Voor momenten die iets in beweging mogen zetten.</h2>
+        <p class="inleiding">Van merken en teams tot families en vrienden. Zakelijk of persoonlijk: ieder event begint met een verhaal dat het waard is om goed vertaald te worden.</p>
+      </div>
 
-      <div class="event-lijst reveal">
-        <article class="event-rij">
+      <div class="events">
+        <article class="event event--lead">
           <div class="event-beeld">
             <img src="foto/fluweel-tafel-sfeer.jpg" alt="Feestelijk gedekte tafel voor een merkbeleving van Fluweel" loading="lazy">
           </div>
@@ -901,7 +204,8 @@
             <p>Laat mensen jouw merk niet alleen zien.<br>Laat ze ervaren waar het voor staat.<br><br>Van productlanceringen en brand activations tot openingen, campagnes en andere merkgedreven events.</p>
           </div>
         </article>
-        <article class="event-rij">
+        <div class="events-band">
+        <article class="event">
           <div class="event-beeld">
             <img src="foto/fluweel-diner-bord.jpg" alt="Hoofdgerecht aan een lange tafel met kaarslicht en gasten" loading="lazy">
           </div>
@@ -911,7 +215,7 @@
             <p>Van kick offs en jubilea tot bedrijfsmomenten, openingen en bijeenkomsten.<br><br>Events die koers, cultuur of ambitie voelbaar maken.</p>
           </div>
         </article>
-        <article class="event-rij">
+        <article class="event">
           <div class="event-beeld">
             <img src="foto/fluweel-proost-moment.jpg" alt="Gasten proosten tijdens een relatiebijeenkomst van Fluweel" loading="lazy">
           </div>
@@ -921,7 +225,7 @@
             <p>Verbinding ontstaat niet vanzelf.<br><br>We ontwikkelen concepten rond cultuur, trots, employer branding, ontwikkeling en betrokkenheid.</p>
           </div>
         </article>
-        <article class="event-rij">
+        <article class="event">
           <div class="event-beeld">
             <img src="foto/fluweel-saxofoniste.jpg" alt="Live entertainment tijdens een kick-off of jubileum" loading="lazy">
           </div>
@@ -931,7 +235,8 @@
             <p>Sterke relaties bouw je door aandacht, inhoud en ervaring samen te brengen.<br><br>Van exclusieve diners tot klantendagen en bijzondere relatie events.</p>
           </div>
         </article>
-        <article class="event-rij">
+        </div>
+        <article class="event event--wide">
           <div class="event-beeld">
             <img src="foto/fluweel-kaarslicht-gasten.jpg" alt="Gedekte tafel met rood servet, gouden bord en menukaart voor een Tropical Christmas Dinner" loading="lazy">
           </div>
@@ -946,11 +251,13 @@
   </section>
 
   <!-- ====== PORTFOLIO ====== -->
-  <section class="sectie zacht" id="werk">
+  <section class="sectie" id="werk">
     <div class="wrap">
-      <p class="label reveal">Portfolio</p>
-      <h2 class="reveal">Van concept naar werkelijkheid.</h2>
-      <p class="inleiding reveal">Ieder event begint met een ander doel, een andere opdrachtgever en een andere groep mensen.<br><br>In ons portfolio zie je hoe we die verschillende uitgangspunten vertalen naar een sterk totaalconcept en een uitvoering die klopt.<br><br>Van zakelijke events en merkbelevingen tot bijzondere vieringen.<br><br>Bekijk hoe ideeën werkelijkheid worden.</p>
+      <div class="blok-kop reveal">
+        <p class="label">Portfolio</p>
+        <h2>Van concept naar werkelijkheid.</h2>
+        <p class="inleiding">Ieder event begint met een ander doel, een andere opdrachtgever en een andere groep mensen.<br><br>In ons portfolio zie je hoe we die verschillende uitgangspunten vertalen naar een sterk totaalconcept en een uitvoering die klopt.<br><br>Van zakelijke events en merkbelevingen tot bijzondere vieringen.<br><br>Bekijk hoe ideeën werkelijkheid worden.</p>
+      </div>
       <div class="werk-grid reveal">
         <article class="project groot">
           <div class="beeld">
@@ -1022,8 +329,10 @@
   <!-- ====== STEMMEN ====== -->
   <section class="sectie">
     <div class="wrap">
-      <p class="label reveal">Wat opdrachtgevers zeggen</p>
-      <h2 class="reveal" style="margin-bottom:2.8rem">Het gevoel blijft hangen</h2>
+      <div class="blok-kop reveal">
+        <p class="label">Wat opdrachtgevers zeggen</p>
+        <h2>Het gevoel blijft hangen</h2>
+      </div>
       <div class="stemmen reveal" id="stemmen">
         <div class="baan" id="baan">
           <div class="stem"><blockquote>Onze gasten praten er weken later nog over. Precies het gevoel waar we op hoopten, en meer.</blockquote><div class="wie">Opdrachtgever &middot; productlancering</div></div>
@@ -1039,23 +348,25 @@
   </section>
 
   <!-- ====== VRAGEN ====== -->
-  <section class="sectie zacht" id="vragen">
+  <section class="sectie" id="vragen">
     <div class="wrap">
-      <p class="label reveal">Veelgestelde vragen</p>
-      <h2 class="reveal" style="margin-bottom:2.4rem">Goed om te weten</h2>
+      <div class="blok-kop reveal">
+        <p class="label">Veelgestelde vragen</p>
+        <h2>Goed om te weten</h2>
+      </div>
       <div class="vragen reveal" id="faq">
-        <div class="vraag open"><button>Kunnen jullie het volledige event organiseren?</button><div class="antwoord"><p>Ja.</p><p>Fluweel kan het volledige traject begeleiden: van eerste idee en conceptontwikkeling tot planning, productie en regie op locatie.</p><p>Je hebt gedurende het hele traject één vast aanspreekpunt.</p></div></div>
-        <div class="vraag"><button>Kunnen jullie alleen het creatieve concept ontwikkelen?</button><div class="antwoord"><p>Ja.</p><p>Heb je zelf de mensen of mogelijkheden om delen van de uitvoering op te pakken, dan kan Fluweel ook instappen voor de creatieve richting en conceptontwikkeling.</p></div></div>
-        <div class="vraag"><button>We hebben al ideeën. Kunnen jullie daarop voortbouwen?</button><div class="antwoord"><p>Zeker.</p><p>We hoeven niet altijd vanaf nul te beginnen.</p><p>Een locatie, een eerste idee, een specifieke sfeer of een ambitie kan juist de perfecte basis zijn om verder op te bouwen.</p></div></div>
-        <div class="vraag"><button>Werken jullie voor bedrijven én particulieren?</button><div class="antwoord"><p>Ja.</p><p>Fluweel creëert zakelijke én persoonlijke events.</p><p>De aanleiding verschilt, maar onze manier van werken niet: we zoeken naar het verhaal achter het moment en vertalen dat naar een concept dat echt bij de opdrachtgever past.</p></div></div>
-        <div class="vraag"><button>Werken jullie met vaste pakketten?</button><div class="antwoord"><p>Nee.</p><p>Ieder event is maatwerk.</p><p>We kijken naar ambitie, omvang, locatie, productie en het gewenste niveau en bouwen daar een passend voorstel omheen.</p></div></div>
-        <div class="vraag"><button>Wat kost een event?</button><div class="antwoord"><p>Dat hangt af van wat we samen willen neerzetten.</p><p>Daarom beginnen we met jouw idee, ambitie en verwachtingen.</p><p>Vanuit daar adviseren we over een passende investering en maken we duidelijke keuzes over waar het budget de meeste impact maakt.</p></div></div>
+        <div class="vraag open"><button aria-expanded="true">Kunnen jullie het volledige event organiseren?</button><div class="antwoord"><p>Ja.</p><p>Fluweel kan het volledige traject begeleiden: van eerste idee en conceptontwikkeling tot planning, productie en regie op locatie.</p><p>Je hebt gedurende het hele traject één vast aanspreekpunt.</p></div></div>
+        <div class="vraag"><button aria-expanded="false">Kunnen jullie alleen het creatieve concept ontwikkelen?</button><div class="antwoord"><p>Ja.</p><p>Heb je zelf de mensen of mogelijkheden om delen van de uitvoering op te pakken, dan kan Fluweel ook instappen voor de creatieve richting en conceptontwikkeling.</p></div></div>
+        <div class="vraag"><button aria-expanded="false">We hebben al ideeën. Kunnen jullie daarop voortbouwen?</button><div class="antwoord"><p>Zeker.</p><p>We hoeven niet altijd vanaf nul te beginnen.</p><p>Een locatie, een eerste idee, een specifieke sfeer of een ambitie kan juist de perfecte basis zijn om verder op te bouwen.</p></div></div>
+        <div class="vraag"><button aria-expanded="false">Werken jullie voor bedrijven én particulieren?</button><div class="antwoord"><p>Ja.</p><p>Fluweel creëert zakelijke én persoonlijke events.</p><p>De aanleiding verschilt, maar onze manier van werken niet: we zoeken naar het verhaal achter het moment en vertalen dat naar een concept dat echt bij de opdrachtgever past.</p></div></div>
+        <div class="vraag"><button aria-expanded="false">Werken jullie met vaste pakketten?</button><div class="antwoord"><p>Nee.</p><p>Ieder event is maatwerk.</p><p>We kijken naar ambitie, omvang, locatie, productie en het gewenste niveau en bouwen daar een passend voorstel omheen.</p></div></div>
+        <div class="vraag"><button aria-expanded="false">Wat kost een event?</button><div class="antwoord"><p>Dat hangt af van wat we samen willen neerzetten.</p><p>Daarom beginnen we met jouw idee, ambitie en verwachtingen.</p><p>Vanuit daar adviseren we over een passende investering en maken we duidelijke keuzes over waar het budget de meeste impact maakt.</p></div></div>
       </div>
     </div>
   </section>
 
   <!-- ====== CONTACT ====== -->
-  <section class="sectie" id="contact">
+  <section class="afsluiting" id="contact">
     <div class="wrap contact-grid">
       <div class="contact-beeld reveal">
         <img src="foto/fluweel-gerecht.jpg" alt="Een gerecht dat klaarstaat, tot in het detail verzorgd" loading="lazy">
@@ -1085,14 +396,14 @@
             <textarea id="bericht" name="bericht" rows="4" required placeholder="Bijvoorbeeld: productlancering in het najaar, 80 gasten, allure met een verrassing..."></textarea>
           </div>
           <input type="text" name="website" class="honeypot" tabindex="-1" autocomplete="off">
-          <button class="cta" type="submit">Breng jouw idee tot leven
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-          </button>
+          <button class="btn btn--primary" type="submit">Breng jouw idee tot leven<span class="btn__arrow" aria-hidden="true">→</span></button>
           <p class="form-melding" id="formmelding" role="status"></p>
         </form>
       </div>
     </div>
   </section>
+
+  </main>
 
   <footer class="voet">
     <div class="wrap">
@@ -1111,30 +422,36 @@
     onScroll();
     window.addEventListener('scroll', onScroll, { passive:true });
 
-    $('#burger').addEventListener('click',()=>$('#mobiel').classList.add('open'));
-    $('#sluit').addEventListener('click',()=>$('#mobiel').classList.remove('open'));
-    $$('#mobiel a').forEach(a=>a.addEventListener('click',()=>$('#mobiel').classList.remove('open')));
+    const menu = $('#mobiel');
+    const openMenu = () => { menu.classList.add('open'); document.body.classList.add('menu-open'); };
+    const closeMenu = () => { menu.classList.remove('open'); document.body.classList.remove('menu-open'); };
+    $('#burger').addEventListener('click', openMenu);
+    $('#sluit').addEventListener('click', closeMenu);
+    $$('#mobiel a').forEach(a => a.addEventListener('click', closeMenu));
 
     const io = new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.14});
     $$('.reveal').forEach(el=>io.observe(el));
 
-    $$('#fases .fase').forEach(f=>{
-      f.addEventListener('click',()=>{
-        const open=f.classList.contains('open');
-        $$('#fases .fase').forEach(x=>{x.classList.remove('open');x.querySelector('.fase-tekst').style.maxHeight=null;});
-        if(!open){f.classList.add('open');const t=f.querySelector('.fase-tekst');t.style.maxHeight=t.scrollHeight+'px';}
-      });
-    });
-    const f0=$('#fases .fase.open .fase-tekst'); if(f0) f0.style.maxHeight=f0.scrollHeight+'px';
-
     $$('#faq .vraag').forEach(v=>{
-      v.querySelector('button').addEventListener('click',()=>{
-        const open=v.classList.contains('open');
-        $$('#faq .vraag').forEach(x=>{x.classList.remove('open');x.querySelector('.antwoord').style.maxHeight=null;});
-        if(!open){v.classList.add('open');const a=v.querySelector('.antwoord');a.style.maxHeight=a.scrollHeight+'px';}
+      const btn = v.querySelector('button');
+      btn.setAttribute('aria-expanded', v.classList.contains('open') ? 'true' : 'false');
+      btn.addEventListener('click',()=>{
+        const open = v.classList.contains('open');
+        $$('#faq .vraag').forEach(x=>{
+          x.classList.remove('open');
+          x.querySelector('button').setAttribute('aria-expanded','false');
+          x.querySelector('.antwoord').style.maxHeight = null;
+        });
+        if(!open){
+          v.classList.add('open');
+          btn.setAttribute('aria-expanded','true');
+          const a = v.querySelector('.antwoord');
+          a.style.maxHeight = a.scrollHeight + 'px';
+        }
       });
     });
-    const v0=$('#faq .vraag.open .antwoord'); if(v0) v0.style.maxHeight=v0.scrollHeight+'px';
+    const v0 = $('#faq .vraag.open .antwoord');
+    if (v0) v0.style.maxHeight = v0.scrollHeight + 'px';
 
     const baan=$('#baan'), stemmen=$$('#baan .stem'), bWrap=$('#bolletjes');
     let idx=0, timer;
@@ -1147,7 +464,8 @@
     const bollen=$$('#bolletjes .bol');
     function ga(i){idx=(i+stemmen.length)%stemmen.length;baan.style.transform='translateX('+(-idx*100)+'%)';bollen.forEach((b,j)=>b.classList.toggle('actief',j===idx));}
     function verder(){ga(idx+1);}
-    function start(){timer=setInterval(verder,5200);}
+    const rustig = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    function start(){ if (rustig) return; timer=setInterval(verder,5200); }
     function herstart(){clearInterval(timer);start();}
     const sw=$('#stemmen');
     sw.addEventListener('mouseenter',()=>clearInterval(timer));
